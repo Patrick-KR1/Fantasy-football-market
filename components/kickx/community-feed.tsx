@@ -81,7 +81,7 @@ export function CommunityComposer(props: { scope: CommunityScope; target?: strin
 }
 
 /** Compact bulletin board. Mutations remain on the post detail page. */
-export function CommunityFeed({ scope, target, targetName, title = "게시글", compose = true }: { scope: CommunityScope; target?: string; targetName?: string; title?: string; compose?: boolean }) {
+export function CommunityFeed({ scope, target, targetName, title = "게시글", compose = true, filter }: { scope: CommunityScope; target?: string; targetName?: string; title?: string; compose?: boolean; filter?: React.ReactNode }) {
   const { data, mock, status, reload: reloadPlatform, getTeam, getPlayer } = usePlatform();
   const [query,setQuery]=useState(''),[search,setSearch]=useState(''),[sort,setSort]=useState('new'),[page,setPage]=useState(1);
   useEffect(()=>{const timer=setTimeout(()=>setSearch(query.trim()),250);return()=>clearTimeout(timer);},[query]);
@@ -95,7 +95,7 @@ export function CommunityFeed({ scope, target, targetName, title = "게시글", 
     {compose&&<CommunityComposer key={`${scope}:${target??'hub'}`} scope={scope} target={target} targetName={targetName} onSaved={()=>{setPage(1);remote.reload();}}/>}
     <section className="panel flush community-board" aria-label={`${scope==='club'?'구단':'선수'} 게시글 목록`}>
       <div className="post-browser-title"><h2>{title}{feedStatus==='ready'&&<span className="num">{money(total)}건</span>}</h2></div>
-      <div className="toolbar post-tools"><label className="input-search"><Search size={16}/><input aria-label="게시글 검색" maxLength={100} value={query} placeholder="제목·내용 검색" onChange={e=>{setQuery(e.target.value);setPage(1);}}/></label><Select label="게시글 정렬" value={sort} onChange={v=>{setSort(v);setPage(1);}} options={[{value:'new',label:'최신순'},{value:'popular',label:'추천순'}]} variant="compact"/></div>
+      <div className="toolbar post-tools">{filter}<label className="input-search"><Search size={16}/><input aria-label="게시글 검색" maxLength={100} value={query} placeholder="제목·내용 검색" onChange={e=>{setQuery(e.target.value);setPage(1);}}/></label><Select label="게시글 정렬" value={sort} onChange={v=>{setSort(v);setPage(1);}} options={[{value:'new',label:'최신순'},{value:'popular',label:'추천순'}]} variant="compact"/></div>
       {feedStatus!=='ready'?<DataEmpty entity="게시글" status={feedStatus} retry={status==='ready'?remote.reload:reloadPlatform}/>:items.length?<div className="board-list-scroll"><table className="community-board-table"><thead><tr><th className="board-number">번호</th><th className="board-subject">제목</th><th>작성자</th><th>작성일</th><th className="board-views">조회</th><th className="board-likes">추천</th></tr></thead><tbody>
         {items.map((post,index)=>{
           const name=post.targetName||(scope==='club'?getTeam(post.target)?.name:getPlayer(post.target)?.name)||'—';

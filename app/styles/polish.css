@@ -73,12 +73,14 @@
 .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -18px rgba(17, 17, 16, 0.5); }
 
 @media (max-width: 900px) {
-  .stat-grid > .stat-card:nth-child(odd) { padding-left: 0; }
+  .stat-grid > .stat-card:nth-child(odd) { padding-left: var(--s-5); }
   .stat-grid > .stat-card:nth-child(n + 3) { border-top: 1px solid var(--line); }
 }
 @media (max-width: 640px) {
+  .page-heading { align-items: stretch; gap: var(--s-3); }
+  .page-heading-action { justify-content: flex-start; }
   .page-heading h1 { font-size: 24px; }
-  .stat-card { padding: var(--s-3) var(--s-3) var(--s-3) 0; }
+  .stat-card { padding: var(--s-3) var(--s-5); }
   .stat-value { font-size: 22px; }
   .market-hero { padding: var(--s-6) var(--s-5); }
   .market-hero-copy h2 { font-size: 26px; }

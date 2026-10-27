@@ -1,13 +1,13 @@
 /* Monthly fixtures and compact boards. Loaded after the established polish. */
 .schedule-calendar { overflow: visible; }
-.schedule-controls { display:flex; align-items:center; justify-content:center; gap:20px; padding:18px 24px; background:var(--surface); position:sticky; top:56px; z-index:22; border-bottom:1px solid var(--line); border-radius:12px 12px 0 0; }
+.schedule-controls { display:flex; align-items:center; justify-content:center; gap:16px; height:58px; padding:0 24px; background:var(--surface); position:sticky; top:56px; z-index:22; border-bottom:1px solid var(--line); border-radius:12px 12px 0 0; }
 .schedule-year { display:flex; align-items:center; gap:8px; }
 .schedule-year>.kx-select { width:150px; }
 .schedule-year>button,.schedule-month-heading>button { display:grid; place-items:center; min-width:34px; min-height:34px; border-radius:6px; }
 .schedule-year>button:hover,.schedule-month-heading>button:hover { background:var(--yellow); }
 .schedule-year>button:disabled,.schedule-month-heading>button:disabled { opacity:.3; }
-.schedule-months { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); background:var(--surface); position:sticky; top:130px; z-index:21; border-bottom:1px solid var(--line-2); }
-.schedule-months button { min-height:48px; font-weight:800; color:var(--text-2); border-bottom:3px solid transparent; }
+.schedule-months { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); background:var(--surface); position:sticky; top:114px; z-index:21; border-bottom:1px solid var(--line-2); }
+.schedule-months button { min-height:42px; font-weight:800; color:var(--text-2); border-bottom:3px solid transparent; }
 .schedule-months button.active { background:var(--yellow); color:var(--ink); border-bottom-color:var(--ink); }
 .schedule-months button:hover { background:#fff8c9; }
 .schedule-filter-bar { display:flex; flex-wrap:wrap; gap:12px; padding:20px 24px 0; }
@@ -15,7 +15,7 @@
 .schedule-month-heading { display:flex; align-items:center; justify-content:center; gap:20px; padding:18px 12px; border-bottom:2px solid var(--ink); }
 .schedule-month-heading h2 { font-size:19px; }
 .schedule-month-heading h2 span { margin-left:12px; font-size:12px; font-weight:500; }
-.schedule-calendar .match-day { padding:0; margin:0; scroll-margin-top:210px; }
+.schedule-calendar .match-day { padding:0; margin:0; scroll-margin-top:172px; }
 .schedule-calendar .match-day>h2 { display:flex; align-items:center; padding:14px 24px; gap:8px; margin:0; background:#f7f7f3; border-bottom:1px solid var(--line); border-radius:0; }
 .schedule-calendar .match-day.today>h2 { background:#fff6b2; }
 .schedule-calendar .match-day-date { font-size:16px; }
@@ -24,29 +24,37 @@
 .schedule-calendar .match-day .match-row { border-radius:0; box-shadow:none; }
 .schedule-calendar .match-day .match-row::before,.schedule-calendar .match-day .match-row::after { display:none; }
 .schedule-no-match { padding:24px; text-align:center; color:var(--text-2); font-size:14px; }
-.supported-board-clubs { border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:18px; }
-.supported-board-clubs>div { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
-.supported-board-clubs>div a { display:flex; align-items:center; gap:6px; color:var(--text-2); font-size:12px; }
-.supported-board-clubs nav { display:flex; flex-wrap:wrap; gap:8px; }
-.supported-board-clubs nav button { display:flex; align-items:center; gap:7px; min-height:40px; padding:7px 12px; border:1px solid var(--line-2); border-radius:6px; font-weight:700; font-size:13px; }
-.supported-board-clubs nav button.active { border-color:var(--ink); background:var(--yellow); }
-.community-board-filter { display:flex; justify-content:flex-end; margin-bottom:12px; }
-.community-board { border-top:2px solid var(--ink); border-radius:0; }
-.community-board .post-browser-title { padding:18px 20px 10px; }
-.community-board .post-tools { padding:10px 20px 18px; }
+.supported-board-clubs { display:flex; align-items:center; gap:14px; padding:10px 14px 10px 18px; margin-bottom:14px; background:var(--surface); border:1px solid var(--line); border-radius:12px; }
+.supported-board-clubs>strong { flex-shrink:0; font-size:13px; }
+.supported-board-clubs nav { display:flex; gap:6px; flex:1; min-width:0; overflow-x:auto; scrollbar-width:none; }
+.supported-board-clubs nav::-webkit-scrollbar { display:none; }
+.supported-board-clubs nav button { display:flex; align-items:center; flex-shrink:0; gap:6px; min-height:34px; padding:5px 12px; border:1px solid var(--line-2); border-radius:999px; font-weight:700; font-size:13px; background:var(--surface); white-space:nowrap; }
+.supported-board-clubs nav button:hover { border-color:var(--ink); }
+.supported-board-clubs nav button.active { border-color:var(--ink); background:var(--ink); color:var(--yellow); }
+.supported-board-clubs>a { flex-shrink:0; display:flex; align-items:center; gap:5px; color:var(--text-2); font-size:12px; font-weight:700; }
+.supported-board-clubs>a:hover { color:var(--ink); }
+.community-board-filter { flex-shrink:0; width:190px; }
+.community-board-filter .kx-select { width:100%; }
+.community-board { border:1px solid var(--line); border-radius:12px; overflow:visible; }
+.community-board .post-browser-title { padding:16px 20px 4px; }
+.community-board .post-browser-title h2 { font-size:18px; }
+.community-board .post-browser-title h2 .num { margin-left:8px; font-size:13px; font-weight:600; color:var(--text-3); }
+.community-board .post-tools { display:flex; align-items:center; gap:8px; padding:10px 20px 14px; }
 .community-board .post-tools .input-search { flex:1; }
 .board-list-scroll { width:100%; overflow-x:auto; }
 .community-board-table { width:100%; table-layout:fixed; border-collapse:collapse; font-size:13px; }
-.community-board-table th { height:43px; font-size:12px; font-weight:700; background:#f7f7f3; border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); text-align:center; }
-.community-board-table td { padding:13px 12px; border-bottom:1px solid var(--line); text-align:center; color:var(--text-2); }
+.community-board-table th { height:38px; font-size:12px; font-weight:700; color:var(--text-3); background:#f7f7f3; border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); text-align:center; }
+.community-board-table td { padding:11px 12px; border-bottom:1px solid var(--line); text-align:center; color:var(--text-2); }
 .community-board-table tr:hover td { background:#fdfcf6; }
 .community-board-table th.board-number { width:64px; }
 .community-board-table th:nth-child(3) { width:120px; }
 .community-board-table th:nth-child(4) { width:130px; }
 .community-board-table th.board-views,.community-board-table th.board-likes { width:65px; }
 .community-board-table td.board-subject { text-align:left; color:var(--ink); overflow:hidden; }
-.board-target { display:inline-block; font-size:11px; color:var(--text-2); margin-right:10px; }
-.board-post-link { font-size:14px; font-weight:600; overflow-wrap:anywhere; }
+.board-target { display:inline-block; max-width:9em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle; padding:2px 7px; margin-right:8px; font-size:11px; font-weight:700; color:var(--text-2); background:var(--surface-2); border-radius:4px; }
+.board-target:hover { color:var(--ink); background:var(--yellow); }
+.board-post-link { font-size:14px; font-weight:600; overflow-wrap:anywhere; vertical-align:middle; }
+.board-post-link:visited { color:#5b5b55; }
 .board-post-link:hover { text-decoration:underline; }
 .board-post-link svg { display:inline; vertical-align:middle; margin-left:5px; }
 .board-comment-count { color:#a77900; margin-left:6px; font-size:12px; }
@@ -57,46 +65,61 @@
 .numbered-pagination button { min-width:32px; min-height:32px; padding:4px; border:1px solid var(--line); border-radius:4px; font-size:12px; }
 .numbered-pagination button.active { background:var(--ink); color:var(--yellow); border-color:var(--ink); font-weight:800; }
 .numbered-pagination button:disabled { opacity:.3; }
-.supported-club-fields { border:0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; min-width:0; }
-.supported-club-fields legend { font-size:16px; font-weight:800; padding-bottom:10px; }
-.supported-club-fields legend small { font-size:12px; margin-left:10px; color:var(--text-2); }
-.supported-club-fields>p { grid-column:1/-1; font-size:12px; color:var(--text-2); margin:0 0 4px; }
-.supported-club-field { min-width:0; display:grid; gap:8px; }
-.supported-club-field>label { font-size:13px; font-weight:700; }
+.supported-club-fields { border:0; padding:0; display:grid; gap:8px; min-width:0; }
+.supported-club-fields legend { font-size:16px; font-weight:800; padding-bottom:6px; }
+.supported-club-fields legend small { font-size:12px; margin-left:8px; color:var(--text-2); }
+.supported-club-fields>p { font-size:12px; color:var(--text-2); margin:0 0 6px; }
+.supported-club-field { min-width:0; display:grid; grid-template-columns:200px minmax(0,1fr); align-items:center; gap:12px; padding:8px 8px 8px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.supported-club-field.picked { border-color:var(--ink); }
+.supported-club-field>label { display:flex; align-items:center; gap:8px; min-width:0; font-size:13px; font-weight:800; }
+.supported-club-field>label>span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.supported-club-field>label>small { margin-left:auto; flex-shrink:0; font-size:11px; font-weight:700; color:var(--text-3); }
+.supported-club-field.picked>label>small { color:var(--ink); background:var(--yellow); padding:1px 6px; border-radius:4px; }
 .supported-club-fields .kx-select { width:100%; max-width:100%; }
+.supported-club-fields .kx-select-trigger span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .profile-supported-clubs { display:grid; gap:8px; }
 .profile-supported-clubs .profile-club { margin:0; padding:10px; font-size:13px; }
-.report-explanation { display:grid; gap:10px; margin:14px 0; }
-.report-explanation p { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.8; }
+.report-explanation { display:grid; gap:8px; margin:0; padding-left:14px; border-left:3px solid var(--yellow-strong); }
+.report-explanation p { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.75; font-size:14.5px; color:var(--ink-2); }
 @media(max-width:800px) {
   .community-board-table th:nth-child(4) { width:112px; }
   .community-board-table th:nth-child(3) { width:100px; }
   .community-board-table th.board-views,.community-board-table th.board-likes { width:50px; }
 }
+/* The site subnav stops sticking at 860px, so the calendar bars stick to the viewport top. */
+@media(max-width:860px) {
+  .schedule-controls { top:0; }
+  .schedule-months { top:58px; }
+  .schedule-calendar .match-day { scroll-margin-top:116px; }
+}
 @media(max-width:640px) {
-  .schedule-controls { top:0; padding:12px; gap:12px; }
-  .schedule-months { top:64px; grid-template-columns:repeat(6,minmax(0,1fr)); }
+  .schedule-controls { padding:0 12px; gap:12px; }
+  .schedule-months { grid-template-columns:repeat(6,minmax(0,1fr)); }
   .schedule-months button { min-height:38px; font-size:12px; }
-  .schedule-calendar .match-day { scroll-margin-top:160px; }
+  .schedule-calendar .match-day { scroll-margin-top:146px; }
   .schedule-calendar .match-day>h2 { padding:12px 14px; }
   .schedule-filter-bar { padding:14px 14px 0; gap:8px; }
   .schedule-filter-bar>.kx-select { width:100%; }
   .schedule-month-heading { gap:10px; }
   .schedule-month-heading h2 { font-size:16px; }
   .schedule-month-heading h2 span { margin-left:6px; }
-  .supported-board-clubs { padding:14px; }
-  .supported-board-clubs nav button { max-width:100%; font-size:12px; padding:6px 9px; }
+  .supported-board-clubs { flex-wrap:wrap; gap:8px 10px; padding:10px 12px; }
+  .supported-board-clubs>a { margin-left:auto; }
+  .supported-board-clubs nav { order:3; flex-basis:100%; }
+  .supported-board-clubs nav button { font-size:12px; padding:5px 10px; }
+  .community-board-filter { flex-basis:100%; width:100%; }
   .community-board .post-browser-title { padding:14px 12px 6px; }
   .community-board .post-tools { padding:8px 12px 12px; flex-wrap:wrap; }
-  .community-board .post-tools .input-search { flex-basis:100%; }
+  .community-board .post-tools .input-search { flex:1 1 0; min-width:0; }
+  .community-board .post-tools>.kx-select { width:auto; flex-shrink:0; }
   .community-board-table th:not(.board-subject),.community-board-table td:not(.board-subject) { display:none; }
   .community-board-table th.board-subject { text-align:left; padding-left:14px; }
   .community-board-table td.board-subject { padding:13px 14px; }
-  .board-target { display:block; margin-bottom:4px; }
+  .board-target { margin-bottom:5px; }
   .board-post-link { display:block; font-size:14px; }
   .board-mobile-meta { display:block; font-size:11px; color:var(--text-3); margin-top:7px; }
   .numbered-pagination { padding:14px 10px; justify-content:center; }
   .numbered-pagination>span { flex-basis:100%; text-align:center; font-size:12px; }
   .numbered-pagination button { min-width:29px; }
-  .supported-club-fields { grid-template-columns:1fr; }
+  .supported-club-field { grid-template-columns:1fr; gap:8px; padding:10px; }
 }

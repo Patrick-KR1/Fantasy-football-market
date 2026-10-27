@@ -323,17 +323,24 @@ a.movers-player:hover strong { text-decoration: underline; text-decoration-color
 .report-button { white-space: nowrap; }
 .match-report { display: grid; gap: var(--s-4); min-width: 0; }
 .report-numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
-.report-numbers > div { display: grid; align-content: start; gap: var(--s-2); padding: var(--s-4); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
-.report-numbers > div > span, .report-numbers small { color: var(--ink-2); font-size: 12px; }
+.report-numbers > div { display: grid; align-content: start; gap: 6px; padding: var(--s-4); border: 1px solid var(--line); border-radius: 12px; min-width: 0; background: var(--surface-2); }
+.report-numbers > div:first-child { background: var(--ink); border-color: var(--ink); color: #fff; }
+.report-numbers > div:first-child > span, .report-numbers > div:first-child small { color: rgba(255, 255, 255, 0.7); }
+.report-numbers > div:first-child strong { color: var(--yellow); }
+.report-numbers > div > span { color: var(--text-2); font-size: 12px; font-weight: 800; }
+.report-numbers small { color: var(--text-2); font-size: 12px; }
 .report-numbers strong { font-size: 25px; overflow-wrap: anywhere; }
 .report-numbers strong small { margin-left: 5px; }
-.report-section { display: grid; gap: var(--s-3); }
-.report-section h3 { display: flex; align-items: center; gap: 7px; font-size: 17px; }
+.report-section { display: grid; gap: var(--s-3); padding-top: var(--s-4); border-top: 1px solid var(--line); }
+.report-section h3 { display: flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 900; }
+.report-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+.report-section-head small { font-size: 11.5px; font-weight: 600; color: var(--text-3); }
 .report-section p { line-height: 1.75; overflow-wrap: anywhere; }
-.report-contributions { display: grid; gap: var(--s-2); font-size: 13px; }
-.report-contributions > div { display: flex; justify-content: space-between; gap: var(--s-3); }
+.report-contributions { display: grid; gap: 0; margin: 0; font-size: 13px; }
+.report-contributions > div { display: flex; justify-content: space-between; gap: var(--s-3); padding: 9px 0; border-bottom: 1px solid var(--line); }
+.report-contributions > div:last-child { border-bottom: 0; }
 .report-contributions dt { color: var(--ink-2); }
-.report-contributions dd { text-align: right; flex-shrink: 0; }
+.report-contributions dd { margin: 0; text-align: right; flex-shrink: 0; font-weight: 800; }
 .report-notice { display: flex; align-items: flex-start; flex-wrap: wrap; gap: var(--s-2); padding: var(--s-3); background: var(--surface-2); border-radius: 10px; font-size: 13px; line-height: 1.7; }
 .report-notice p { margin: 0; flex-basis: 100%; }
 @media (max-width: 480px) { .report-numbers { grid-template-columns: 1fr; } }

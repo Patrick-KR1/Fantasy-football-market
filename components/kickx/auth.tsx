@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, Check, LoaderCircle, LogOut, Mail, Save, ShieldC
 import { usePlatform } from "./provider";
 import { Logo } from "./shell";
 import { PlaybookArt } from "./playbook-art";
-import { DataNotice, MemberNotice, MockBadge, PageHeading, SectionTitle, StatCard, TeamBadge } from "./ui";
+import { DataNotice, LeagueMark, MemberNotice, MockBadge, PageHeading, SectionTitle, StatCard, TeamBadge } from "./ui";
 import { apiRequest } from "@/lib/kickx/client";
 import { dateText, money } from "@/lib/kickx/data";
 import { parseProfile, PROFILE_LIMITS, safeReturnPath } from "@/lib/kickx/validation";
@@ -129,14 +129,15 @@ function ProfileForm({ onboarding = false }: { onboarding?: boolean }) {
       </label>
       <fieldset className="supported-club-fields" disabled={busy}><legend>응원 구단 <small>{teams.length} / 5</small></legend>
         <p id="team-help">리그별 1개씩 최대 5개를 선택할 수 있습니다. 선택한 구단 게시판에서 글과 댓글을 작성할 수 있습니다.</p>
-        {leagues.map(league=><div className="supported-club-field" key={league.id}><label htmlFor={`profile-team-${league.id}`}>{league.name}</label>
-          <Select id={`profile-team-${league.id}`} label={`${league.name} 응원 구단`} describedBy="team-help" value={teams.find(id=>data.teams.find(t=>t.id===id)?.leagueId===league.id)??''} disabled={busy || !data.teams.length}
+        {leagues.map(league=>{const picked=teams.find(id=>data.teams.find(t=>t.id===id)?.leagueId===league.id)??'';return <div className={`supported-club-field${picked?' picked':''}`} key={league.id}><label htmlFor={`profile-team-${league.id}`}><LeagueMark league={league} size="sm"/><span>{league.name}</span><small>{picked?'선택됨':'미선택'}</small></label>
+          <Select id={`profile-team-${league.id}`} label={`${league.name} 응원 구단`} describedBy="team-help" value={picked} disabled={busy || !data.teams.length}
             onChange={id=>setDraftTeams([...teams.filter(team=>data.teams.find(t=>t.id===team)?.leagueId!==league.id),...(id?[id]:[])])}
             options={[{value:'',label:'선택 안 함'},...teamOptions.filter(o=>data.teams.some(t=>t.id===o.value&&t.leagueId===league.id))]} placeholder="선택 안 함"/>
-        </div>)}
+        </div>;})}
       </fieldset>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="form-actions">
+        {canSave && dirty && !busy && <p className="fine-print">저장하지 않은 변경 사항이 있습니다.</p>}
         {!canSave && <p className="fine-print">{data.session ? "서비스 연결 후 저장할 수 있습니다." : "로그인 후 프로필을 저장할 수 있습니다."}</p>}
         <button type="submit" className="button primary" disabled={!canSave || !dirty || busy}>
           {busy ? <LoaderCircle size={16} className="kx-spin" /> : <Save size={16} />} {busy ? "저장 중…" : onboarding ? "프로필 등록" : "변경사항 저장"}

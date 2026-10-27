@@ -28,11 +28,11 @@ export function CommunityHub({ kind }: { kind: "club" | "player" }) {
   return <>
     <PageHeading eyebrow="COMMUNITY" title="구단 커뮤니티" description="응원 구단의 경기와 이야기를 나누세요." action={<Link className="button primary" href={`/community/write?scope=club${target?`&target=${target}`:''}`}><Pencil size={16}/>글쓰기</Link>}/>
     <section className="supported-board-clubs" aria-label="나의 응원 구단">
-      <div><strong>나의 응원 구단</strong><Link href={data.session?'/mypage':'/login'}>설정 {teams.length} / 5 <ArrowRight size={13}/></Link></div>
+      <strong>나의 응원 구단</strong>
       <nav aria-label="응원 구단 게시글"><button className={!target?'active':''} onClick={()=>setTarget('')}>전체 구단</button>{teams.map(id=><button key={id} className={target===id?'active':''} onClick={()=>setTarget(id)}><ClubCrest id={id} size="small"/>{getTeam(id)?.name||'구단 정보 없음'}</button>)}</nav>
+      <Link href={data.session?'/mypage':'/login'}>{teams.length?`설정 ${teams.length} / 5`:data.session?'응원 구단 설정':'로그인하고 응원 구단 설정'} <ArrowRight size={13}/></Link>
     </section>
-    <div className="community-board-filter"><Select label="게시판 구단" value={target} onChange={setTarget} options={clubOptions}/></div>
-    <CommunityFeed key={target||'all'} scope="club" target={target||undefined} title={target?`${getTeam(target)?.name??'구단'} 게시판`:'전체 게시글'} compose={false}/>
+    <CommunityFeed key={target||'all'} scope="club" target={target||undefined} title={target?`${getTeam(target)?.name??'구단'} 게시판`:'전체 게시글'} compose={false} filter={<div className="community-board-filter"><Select label="게시판 구단" value={target} onChange={setTarget} options={clubOptions}/></div>}/>
   </>;
 }
 export function CommunityScreen({ scope }: { scope: "club" | "player" }) {

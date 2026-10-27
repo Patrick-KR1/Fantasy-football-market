@@ -159,7 +159,7 @@ export function SquadScreen() {
       <PageHeading
         eyebrow="BUILD YOUR STARTING XI"
         title="내 스쿼드"
-        description="4-3-3으로 라인업을 구성하세요. GK 1명 · DF 4명 · MF 3명 · FW 3명까지 보유할 수 있습니다."
+        description="4-3-3으로 선발 11명을 편성하세요. 보유 인원에는 제한이 없습니다."
         action={
           <>
             <button className="button secondary" disabled={!changed} onClick={discardDraft}>

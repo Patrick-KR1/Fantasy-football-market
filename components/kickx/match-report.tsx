@@ -72,13 +72,16 @@ export function MatchReportDialog({ playerId, record, onClose }: { playerId: str
           <div><span>Performance</span><strong className="num">{score(facts.score)}<small>점</small></strong><small>{facts.minutes}분 출전 · {facts.scoreStatus === "provisional" ? "잠정 산정" : "산정 완료"}</small></div>
           <div><span>이번 경기 가치 변동</span><strong><Change value={facts.changePercent} /></strong><small>{money(facts.priceBefore)} P → {money(facts.priceAfter)} P</small></div>
         </div>
-        <section className="report-section">
-          <h3>{text ? <><Sparkles size={16} />AI 경기력 설명</> : "경기력 산정 요약"}</h3>
-          {text && <div className="report-explanation">{reportSentences(text.performance).map((sentence,i)=><p key={i}>{sentence}</p>)}</div>}
+        {text && <section className="report-section">
+          <h3><Sparkles size={16} />AI 경기력 설명</h3>
+          <div className="report-explanation">{reportSentences(text.performance).map((sentence,i)=><p key={i}>{sentence}</p>)}</div>
+        </section>}
+        {(facts.contributions.length > 0 || !text) && <section className="report-section">
+          <div className="report-section-head"><h3>{text ? "점수 기여 항목" : "경기력 산정 요약"}</h3>{facts.contributions.length > 0 && <small>영향이 큰 순</small>}</div>
           {facts.contributions.length > 0 && <dl className="report-contributions">
-            {[...facts.contributions].sort((a, b) => Math.abs(b.points) - Math.abs(a.points)).slice(0, 5).map(c => <div key={c.metric}><dt>{METRIC_LABELS[c.metric] || c.metric}</dt><dd className={`num ${c.points < 0 ? "down" : "up"}`}>{signed(c.points)}점</dd></div>)}
+            {[...facts.contributions].sort((a, b) => Math.abs(b.points) - Math.abs(a.points)).slice(0, 5).map(c => <div key={c.metric}><dt>{METRIC_LABELS[c.metric] || c.metric}</dt><dd className={`num ${c.points < 0 ? "down" : c.points > 0 ? "up" : ""}`}>{signed(c.points)}점</dd></div>)}
           </dl>}
-        </section>
+        </section>}
         {!loading && !text && !error && <div className="report-notice">
           {!report.canGenerate ? <p>AI 설명을 준비하고 있습니다. 저장된 산정 요약은 위에서 확인할 수 있습니다.</p>
             : report.status === "pending" ? <p>AI 설명을 작성 중입니다. 잠시 후 다시 확인해 주세요.</p>
