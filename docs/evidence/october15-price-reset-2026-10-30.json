@@ -1,0 +1,133 @@
+{
+  "asOf": "2026-10-30T13:00:46.107854+00:00",
+  "launchKST": "2026-10-15T00:00:00+09:00",
+  "validation": {
+    "queue": [
+      {
+        "n": 346,
+        "error_code": "CALCULATION_WITHHELD"
+      }
+    ],
+    "market": [
+      {
+        "n": 346,
+        "max": 149204,
+        "min": 50340,
+        "pricing_status": "pending"
+      },
+      {
+        "n": 2555,
+        "max": 155521,
+        "min": 48575,
+        "pricing_status": "ready"
+      }
+    ],
+    "prices": 4658,
+    "eligible": 2901,
+    "checkedAt": "2026-10-30T13:00:03.590097+00:00",
+    "dnpMismatch": 0,
+    "initialHistory": 2901,
+    "prelaunchHistory": 0,
+    "snapshotMismatch": 0,
+    "nonRegularResults": 0,
+    "matchLimitMismatch": 0,
+    "initialRangeMismatch": 0,
+    "prelaunchPriceResults": 0
+  },
+  "initialRange": {
+    "max": 149948,
+    "min": 50066,
+    "count": 2901,
+    "positionPrior": 1374
+  },
+  "parameters": {
+    "s": 1,
+    "beta": 0.3,
+    "kappa": 4,
+    "maxUp": 0.02,
+    "lambda": 5,
+    "maxDown": 0.02,
+    "maxPrice": 1000000,
+    "minPrice": 10000,
+    "initialMax": 150000,
+    "initialMin": 50000,
+    "lowerQuantile": 0.05,
+    "upperQuantile": 0.95,
+    "deviationLimit": 1,
+    "valuationStartMs": 1791990000000,
+    "nonParticipationRate": 0.015
+  },
+  "referenceHash": "3a413ef0db8073be9b8fbbe09ed4c2948bd75aae516d02c293530a62b83fe90a",
+  "examples": [
+    {
+      "price": 149993,
+      "name_ko": "킬리안 음바페",
+      "past_games": 5,
+      "performance": 12,
+      "initial_price": 144169,
+      "pricing_status": "ready"
+    },
+    {
+      "price": 155145,
+      "name_ko": "엘링 홀란드",
+      "past_games": 4,
+      "performance": 8,
+      "initial_price": 149121,
+      "pricing_status": "ready"
+    },
+    {
+      "price": 86375,
+      "name_ko": "에단 음바페",
+      "past_games": 5,
+      "performance": 7,
+      "initial_price": 83022,
+      "pricing_status": "ready"
+    },
+    {
+      "price": 48575,
+      "name_ko": "다니엘 발라드",
+      "past_games": 3,
+      "performance": 0,
+      "initial_price": 50066,
+      "pricing_status": "ready"
+    }
+  ],
+  "financialIntegrity": {
+    "trades": "5894bd4faa304c017d6a8b1869bcf666",
+    "wallets": "1169c7f66829fecdac89c88dfc632550",
+    "holdings": "53efd34dfa38c8ec147c41135a98fb69"
+  },
+  "financialIntegrityUnchanged": true,
+  "backup": {
+    "hash": "346d32d9af7664b69b864bfb041f23d53d673865004b92e45bae74b71ca27733",
+    "path": "valuation-rebuild/20261015/before-346d32d9af7664b69b864bfb041f23d53d673865004b92e45bae74b71ca27733.json.gz",
+    "bytes": 978709,
+    "integrity": {
+      "trades": "5894bd4faa304c017d6a8b1869bcf666",
+      "wallets": "1169c7f66829fecdac89c88dfc632550",
+      "holdings": "53efd34dfa38c8ec147c41135a98fb69"
+    },
+    "sha256Verified": true
+  },
+  "assetSnapshotsRebuilt": 12,
+  "providerRequests": 0,
+  "workflow": {
+    "run": 41059180164,
+    "job": 124074284591,
+    "processedInThisWorkflow": 1855,
+    "note": "Final database counts include the existing automatic calculator and a verification batch, not just this workflow."
+  },
+  "verification": {
+    "unitTests": 242,
+    "unitFailed": 0,
+    "fullCI": 41059180178,
+    "postgres17": true,
+    "desktopMobile": true
+  },
+  "dataLimitations": {
+    "priorSeasonFixtures": 1751,
+    "priorSeasonFixturesWithScorableAppearances": 278,
+    "positionPriorPlayers": 1374,
+    "withheldPlayers": 346
+  }
+}

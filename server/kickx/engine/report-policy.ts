@@ -9,6 +9,6 @@ export const SCORING = {
 } as const;
 export const REPORT_PARAMETERS = {
  lambda:5,kappa:4,beta:.3,s:1,deviationLimit:1,
- initialMin:10000,initialMax:1000000,minPrice:10000,maxPrice:1000000,
+ initialMin:50000,initialMax:150000,minPrice:10000,maxPrice:1000000,
  maxUp:.02,maxDown:.02,nonParticipationRate:.015,lowerQuantile:.05,upperQuantile:.95,
 } as const;

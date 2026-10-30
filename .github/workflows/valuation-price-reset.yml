@@ -1,0 +1,35 @@
+name: Apply approved October 15 price reset
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/valuation-price-reset.yml', 'scripts/reset-report-prices.mjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: football-automatic-production
+  cancel-in-progress: false
+jobs:
+  reset:
+    if: github.repository == 'hyun1290/kick-x-test'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Back up, reset initial prices and replay validated match performance
+        run: node --conditions=react-server --import tsx scripts/reset-report-prices.mjs --apply
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: approved-october15-price-reset
+          path: test-artifacts/approved-price-reset.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -68,6 +68,16 @@ test('report pricing reproduces its 104040-P example with every season appearanc
  const games=Array.from({length:8},(_,i)=>game(i+1,6));const changed=games.map((g,i)=>i===0?{...g,score:30}:g);
  assert.notEqual(price(games,baseline,p).steps.at(-1).targetPrice,price(changed,baseline,p).steps.at(-1).targetPrice);
 });
+test('October 15 launch includes a game ending at midnight and carries earlier form without earlier prices',()=>{
+ const launch=Date.parse('2026-10-14T15:00:00Z');
+ const rows=[{...game(1,8),startedAt:'2026-10-14T12:00:00Z',endedAt:'2026-10-14T14:59:59.999Z'},
+ {...game(2,10),startedAt:'2026-10-14T14:00:00Z',endedAt:'2026-10-14T15:00:00Z'}];
+ const plan=price(rows,baseline,{...p,valuationStartMs:launch});
+ assert.equal(plan.steps.length,1);assert.equal(plan.steps[0].fixtureId,'bsd-2');
+ assert.equal(plan.steps[0].priceBefore,100000);assert.equal(plan.price,102000);
+ assert.equal(plan.steps[0].formScore,7);assert.equal(plan.steps[0].evidence.n,2);
+ assert.equal(price(rows.slice(0,1),baseline,{...p,valuationStartMs:launch}).price,100000);
+});
 test('raw score clipping, DNP, negative baselines and seasonal rollover obey report limits',()=>{
  const plan=price([game(1,10000),{...game(2,null),status:'not-played',minutes:0},game(3,-5,2027)],{...baseline,seedScore:0},p);
  assert.equal(plan.steps.length,3);assert.equal(plan.steps[0].evidence.boundedScore,100);assert.equal(plan.steps[1].evidence.n,1);assert.equal(plan.steps[2].evidence.n,1);assert.equal(plan.steps[2].priceBefore,plan.steps[1].priceAfter);
@@ -76,7 +86,7 @@ test('raw score clipping, DNP, negative baselines and seasonal rollover obey rep
 });
 test('frozen positional midranks and prior fallback do not ingest current-season games',()=>{
  const reference={status:'ready',season:2025,hash:'frozen',groups:{DF:{mean:6,lower:0,upper:10,baselines:[4,6,6,8]}},players:{a:{DF:{n:2,sum:12,fixtures:['old-1','old-2']}}}};
- const b=reportBaseline(reference,'a','DF',p);assert.equal(b.percentile,.5);assert.equal(b.price,505000);assert.equal(reportBaseline(reference,'new','DF',p).source,'position-prior');assert.equal(reportBaseline(reference,'new','GK',p),null);
+ const b=reportBaseline(reference,'a','DF',p);assert.equal(b.percentile,.5);assert.equal(b.price,100000);assert.equal(reportBaseline(reference,'new','DF',p).source,'position-prior');assert.equal(reportBaseline(reference,'new','GK',p),null);
  assert.equal(reportBaseline({...reference,status:'collecting'},'a','DF',p),null);
 });
 test('independent PostgreSQL and TypeScript agree for cumulative seasons and integer percentage caps',async()=>{
