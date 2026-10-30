@@ -103,9 +103,9 @@ async function calculatePending(db,calculate,deadline,summary) {
 /** Each request is bounded and resumes match phases from DB. Independent of slow catalog imports.
  * @param {import('@supabase/supabase-js').SupabaseClient} db
  * @param {string} key
- * @param {{calculate:(id:string)=>Promise<any>,claim?:{token?:string,now?:string,busy?:boolean},emit?:(value:any)=>void,durationMs?:number,now?:string,api?:any}} options
+ * @param {{calculate:(id:string)=>Promise<any>,seedNonParticipation?:()=>Promise<void>,claim?:{token?:string,now?:string,busy?:boolean},emit?:(value:any)=>void,durationMs?:number,now?:string,api?:any}} options
  */
-export async function runRealtimeFootball(db,key,{calculate,claim,emit=()=>{},durationMs=43000,now=claim?.now??new Date().toISOString(),api:injectedApi}={}) {
+export async function runRealtimeFootball(db,key,{calculate,seedNonParticipation,claim,emit=()=>{},durationMs=43000,now=claim?.now??new Date().toISOString(),api:injectedApi}={}) {
   const lease=claim??checked(await db.rpc('kickx_realtime_claim'));
   if(lease.busy)return {busy:true,error:null};
   const started=Date.now(),deadline=started+durationMs;
@@ -130,6 +130,7 @@ export async function runRealtimeFootball(db,key,{calculate,claim,emit=()=>{},du
     if(!['RUN_BUDGET_REACHED','TICK_TIME_BUDGET'].includes(code))failure=code;
   }
   try {
+    if(summary.imported>0&&seedNonParticipation)await seedNonParticipation();
     await calculatePending(db,calculate,deadline-2000,summary);
     if(summary.calculated && Date.now()<deadline-1000)checked(await db.rpc('kickx_auto_refresh_rankings'));
   } catch(e){failure??=errorCode(e);}

@@ -7,7 +7,7 @@ const policy=loadTs('../server/kickx/engine/report-policy.ts');
 const performance=loadTs('../server/kickx/engine/report-performance.ts',{'./report-policy':policy});
 const pricing=loadTs('../server/kickx/engine/report-pricing.ts',{'./report-policy':policy});
 function setup({missingSeason=false,remaining=7000}={}) {
- const calls=[],objects=new Map();let current={version:'form-v2',report_parameters:{...policy.REPORT_PARAMETERS},report_reference:null};
+ const calls=[],objects=new Map();let current={version:'form-v2',valuation_rebuild:{status:'validated'},report_parameters:{...policy.REPORT_PARAMETERS},report_reference:null};
  const externalId=id=>`bsd-${id}`;
  const api={requests:0,remaining,async get(path){calls.push(path);this.requests++;
   if(path.includes('/leagues/')&&path.endsWith('/season/'))return {season:{year:2026}};
@@ -21,7 +21,7 @@ function setup({missingSeason=false,remaining=7000}={}) {
  },async page(_path,p){this.requests++;return {results:[{id:p.league_id*100+1}],next:null};}};
  const db={from(){const q={select(){return q;},eq(){return q;},single:async()=>({data:structuredClone(current),error:null}),maybeSingle:async()=>({data:{requests:0},error:null})};return q;},async rpc(name,args){
   if(name==='kickx_save_report_reference'){assert.equal(args.p_revision,current.report_reference?.revision??0);const revision=args.p_revision+1;current.report_reference={...structuredClone(args.p_reference),revision};return {data:revision,error:null};}
-  if(name==='kickx_activate_report_policy'){assert.equal(current.report_reference.status,'ready');current.version='report-v3';return {data:20,error:null};}
+  if(name==='kickx_activate_report_policy'){assert.equal(current.report_reference.status,'ready');current.version='report-v3';current.valuation_rebuild.status='active';return {data:20,error:null};}
   throw Error(name);
  },storage:{getBucket:async()=>({data:{public:false},error:null}),from(){return {upload:async(path,bytes)=>{objects.set(path,bytes);return {error:null};},download:async path=>({data:new Blob([objects.get(path)]),error:null}),remove:async paths=>{for(const path of paths)objects.delete(path);return {error:null};}};}}};
  const mod=loadTs('../scripts/lib/report-reference.ts',{'node:crypto':{createHash},'node:zlib':{gzipSync,gunzipSync},'./football.mjs':{externalId,normalizeStatus:()=> 'FT',createFootballClient:()=>api},'../../server/kickx/engine/report-performance':performance,'../../server/kickx/engine/report-pricing':pricing});

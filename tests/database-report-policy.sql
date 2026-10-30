@@ -3,9 +3,9 @@ create function pg_temp.report_error(command text,expected text) returns void la
  begin execute command;exception when others then if sqlerrm=expected or sqlstate=expected then return;else raise;end if;end;
  raise exception 'Expected %',expected;
 end $$;
-select pg_temp.report_error('select public.kickx_activate_report_policy()','REFERENCE_NOT_READY');
+select pg_temp.report_error('select public.kickx_activate_report_policy()','VALUATION_AUDIT_REQUIRED');
 update public.kickx_policy set version='report-v3',club_competitions_enabled=false,
- report_parameters=jsonb_set(jsonb_set(report_parameters,'{initialMin}','100000'),'{initialMax}','100000'),
+ report_parameters=jsonb_set(jsonb_set(jsonb_set(report_parameters,'{initialMin}','100000'),'{initialMax}','100000'),'{valuationStartMs}','0'),
  report_reference='{"status":"ready","season":2025,"hash":"fixed-report-reference","groups":{"FW":{"mean":6,"lower":0,"upper":30,"baselines":[6]}},"players":{"report-policy-player":{"FW":{"n":20,"sum":120,"fixtures":[]}}}}';
 insert into public.leagues(id,name) values('bsd-1','Report league'),('report-cup','Report cup') on conflict do nothing;
 insert into public.teams(id,name,league_id) values('report-policy-home','Report home','bsd-1'),('report-policy-away','Report away','bsd-1');

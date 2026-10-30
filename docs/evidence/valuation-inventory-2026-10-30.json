@@ -1,0 +1,132 @@
+{
+  "stage": "inventory-complete",
+  "asOf": "2026-10-29T23:42:41.673Z",
+  "totals": {
+    "teams": 96,
+    "players": 2903,
+    "fixtures": 1752,
+    "finished": 404,
+    "missingMatchStatistics": 0,
+    "missingStarterStatistics": 0,
+    "missingSource": 0,
+    "unconfirmedLineups": 0,
+    "missingIncidents": 0,
+    "goalTimelineMismatch": 1,
+    "missingMinutes": 0
+  },
+  "leagues": [
+    {
+      "league": 1,
+      "season": 2026,
+      "teams": 20,
+      "players": 605,
+      "fixtures": 380,
+      "missingTeams": [],
+      "missingPlayers": [],
+      "wrongMembership": [],
+      "missingFixtures": [
+        "bsd-642951"
+      ],
+      "statusDifferences": []
+    },
+    {
+      "league": 3,
+      "season": 2026,
+      "teams": 20,
+      "players": 605,
+      "fixtures": 380,
+      "missingTeams": [],
+      "missingPlayers": [],
+      "wrongMembership": [
+        "bsd-86458",
+        "bsd-31396",
+        "bsd-31618",
+        "bsd-89080",
+        "bsd-79580",
+        "bsd-114411",
+        "bsd-224062",
+        "bsd-78115",
+        "bsd-224087",
+        "bsd-31736",
+        "bsd-63716",
+        "bsd-73820",
+        "bsd-90354",
+        "bsd-33438",
+        "bsd-73818",
+        "bsd-30567",
+        "bsd-59574",
+        "bsd-5223"
+      ],
+      "missingFixtures": [],
+      "statusDifferences": []
+    },
+    {
+      "league": 4,
+      "season": 2026,
+      "teams": 20,
+      "players": 635,
+      "fixtures": 380,
+      "missingTeams": [],
+      "missingPlayers": [],
+      "wrongMembership": [
+        "bsd-70190"
+      ],
+      "missingFixtures": [],
+      "statusDifferences": []
+    },
+    {
+      "league": 5,
+      "season": 2026,
+      "teams": 18,
+      "players": 539,
+      "fixtures": 306,
+      "missingTeams": [],
+      "missingPlayers": [],
+      "wrongMembership": [],
+      "missingFixtures": [],
+      "statusDifferences": []
+    },
+    {
+      "league": 6,
+      "season": 2026,
+      "teams": 18,
+      "players": 519,
+      "fixtures": 306,
+      "missingTeams": [],
+      "missingPlayers": [],
+      "wrongMembership": [],
+      "missingFixtures": [],
+      "statusDifferences": []
+    }
+  ],
+  "referenceDiagnostic": {
+    "status": "collecting",
+    "completed": 1100,
+    "total": 1757,
+    "leagueIndex": 2,
+    "fixtureIndex": 340,
+    "league": 4,
+    "fixture": 1419,
+    "providerStatus": "finished",
+    "resourceIds": [
+      1419,
+      1419,
+      1419,
+      1419
+    ],
+    "expectedSeasonId": 358,
+    "actualSeasonId": 358,
+    "playerStats": 45,
+    "resultStatuses": {
+      "provisional": 27,
+      "not-played": 16,
+      "blocked": 2
+    }
+  },
+  "requests": 120,
+  "evidence": {
+    "workflow": "https://github.com/hyun1290/kick-x-test/actions/runs/40974748975",
+    "dbChanges": false,
+    "pricingPolicyApplied": false
+  }
+}

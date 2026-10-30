@@ -41,12 +41,12 @@ export function finalizeReference(ref:Reference,p:ReportParameters) {
 /** Full previous season, four resources per fixture; no player-profile calls or raw DB copies.
  * Uses the existing private archive bucket and shared provider budget; resumes between runs.
  */
-export async function prepareReportReference(db:SupabaseClient,key:string,{budget=600,deadline=Date.now()+240000,emit=(v:unknown)=>{void v;},runtimeReady=async()=>{const r=await fetch('https://kick-x-test.vercel.app/api/kickx',{method:'HEAD',signal:AbortSignal.timeout(5000),cache:'no-store'});return r.ok && r.headers.get('x-kickx-policy-support')==='report-v3';}}={}) {
- const policyReply=await db.from('kickx_policy').select('version,report_parameters').single();
+export async function prepareReportReference(db:SupabaseClient,key:string,{budget=600,deadline=Date.now()+240000,emit=(v:unknown)=>{void v;},runtimeReady=async()=>{const r=await fetch('https://kick-x-test.vercel.app/api/kickx',{method:'HEAD',signal:AbortSignal.timeout(5000),cache:'no-store'});return r.ok && r.headers.get('x-kickx-policy-support')==='report-v3' && r.headers.get('x-kickx-pricing-revision')==='launch-dnp-20261030';}}={}) {
+ const policyReply=await db.from('kickx_policy').select('version,report_parameters,valuation_rebuild').single();
  if(policyReply.error && ['42703','PGRST204'].includes(policyReply.error.code))return {pending:'MIGRATION_REQUIRED'};
  const policy=checked(policyReply);
  if(!policy)throw new Error("REFERENCE_POLICY_UNAVAILABLE");
- if(policy.version==='report-v3')return {active:true};
+ if(policy.version==='report-v3'&&policy.valuation_rebuild?.status==='active')return {active:true};
  const parameters=policy.report_parameters as ReportParameters;validateReportParameters(parameters);
  const referenceRow=checked(await db.from('kickx_policy').select('report_reference').single());
  if(!referenceRow)throw new Error('REFERENCE_POLICY_UNAVAILABLE');
@@ -96,6 +96,8 @@ export async function prepareReportReference(db:SupabaseClient,key:string,{budge
  }});
  const activate=async()=>{
   if(!await runtimeReady())return {pending:'WAITING_FOR_DEPLOYMENT',completed:ref.completed,total:ref.fixtureCount};
+  const gate=checked(await db.from('kickx_policy').select('valuation_rebuild').single());
+  if(gate?.valuation_rebuild?.status!=='validated'&&gate?.valuation_rebuild?.status!=='active')return {pending:'WAITING_FOR_DATA_AUDIT',completed:ref.completed,total:ref.fixtureCount};
   const queued=checked(await db.rpc('kickx_activate_report_policy'));return {active:true,queued,completed:ref.completed};
  };
  try {

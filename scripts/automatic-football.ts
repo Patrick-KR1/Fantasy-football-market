@@ -1,4 +1,5 @@
 import { prepareReportReference } from './lib/report-reference';
+import { ensureValuationRebuild } from './lib/valuation-rebuild';
 import { loadEnvConfig } from '@next/env';
 import { createClient } from '@supabase/supabase-js';
 import { calculatePlayer } from '../server/kickx/engine/service';
@@ -17,6 +18,8 @@ async function main() {
   if (!url || new URL(url).protocol !== 'https:' || !key || (!bsd && !archivesOnly)) throw new Error('AUTOMATION_CONFIG_REQUIRED');
   const db = createClient(url, key, { global: { fetch: nameImportFetch(key) }, auth: { persistSession: false, autoRefreshToken: false } });
   if (!archivesOnly && (process.argv.includes('--maintenance') || process.argv.includes('--report-reference'))) {
+    const audit=await ensureValuationRebuild(db,bsd!,{emit:v=>console.log(JSON.stringify(v))});
+    console.log(JSON.stringify({stage:'valuation-rebuild',...audit}));
     const reference = await prepareReportReference(db, bsd!, {budget:process.argv.includes('--report-reference')?1500:600,deadline:Date.now()+240000,emit:v=>console.log(JSON.stringify(v))});
     console.log(JSON.stringify({stage:'report-reference-result',...reference}));
     if(process.argv.includes('--report-reference'))return;
@@ -44,6 +47,11 @@ async function main() {
       console.error(JSON.stringify({ stage: 'verified-archives', error: 'ARCHIVE_RETRY' }));
       process.exitCode = 1;
     }
+  }
+  if(!archivesOnly){
+    const finalized=await db.rpc('kickx_finish_valuation_rebuild');
+    if(finalized.error)throw new Error('VALUATION_FINISH_RETRY');
+    console.log(JSON.stringify({stage:'valuation-finish',...finalized.data}));
   }
   if (footballFailure) throw footballFailure;
 }

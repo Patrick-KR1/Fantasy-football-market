@@ -8,7 +8,7 @@ export async function GET() {
   return timedRead(async()=>{
   try {
     return Response.json(await readPlatform(getKickxRepository()), {
-      headers: { "Cache-Control": "private, no-store", "X-Kickx-Policy-Support": "report-v3" },
+      headers: { "Cache-Control": "private, no-store", "X-Kickx-Policy-Support": "report-v3", "X-Kickx-Pricing-Revision": "launch-dnp-20261030" },
     });
   } catch (error) { return failure(error); }
   });

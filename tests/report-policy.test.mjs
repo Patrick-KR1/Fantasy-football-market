@@ -43,7 +43,7 @@ test('report pricing reproduces its 104040-P example with every season appearanc
 });
 test('raw score clipping, DNP, negative baselines and seasonal rollover obey report limits',()=>{
  const plan=price([game(1,10000),{...game(2,null),status:'not-played',minutes:0},game(3,-5,2027)],{...baseline,seedScore:0},p);
- assert.equal(plan.steps.length,2);assert.equal(plan.steps[0].evidence.boundedScore,100);assert.equal(plan.steps[1].evidence.n,1);assert.equal(plan.steps[1].priceBefore,plan.steps[0].priceAfter);
+ assert.equal(plan.steps.length,3);assert.equal(plan.steps[0].evidence.boundedScore,100);assert.equal(plan.steps[1].evidence.n,1);assert.equal(plan.steps[2].evidence.n,1);assert.equal(plan.steps[2].priceBefore,plan.steps[1].priceAfter);
  for(const s of plan.steps)assert.ok(s.priceAfter>=Math.ceil(s.priceBefore*.98)&&s.priceAfter<=Math.floor(s.priceBefore*1.02));
  assert.throws(()=>price([],baseline,{...p,kappa:0}),/INVALID_REPORT_PARAMETERS/);
 });
@@ -54,8 +54,8 @@ test('frozen positional midranks and prior fallback do not ingest current-season
 });
 test('independent PostgreSQL and TypeScript agree for cumulative seasons and integer percentage caps',async()=>{
  const db=new PGlite();try{
-  const sql=readFileSync(new URL('../supabase/migrations/20261026074540_report_season_policy.sql',import.meta.url),'utf8');
-  await db.exec(sql.match(/create function public\.kickx_report_plan\([\s\S]*?end \$\$;/)[0]);
+  const sql=readFileSync(new URL('../supabase/migrations/20261029183641_valuation_launch_dnp.sql',import.meta.url),'utf8');
+  await db.exec(sql.match(/create or replace function public\.kickx_report_plan\([\s\S]*?end \$\$;/)[0]);
   let seed=7654;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
   for(let c=0;c<40;c++){
    const rows=Array.from({length:1+Math.floor(rand()*24)},(_,i)=>game(i+1,Math.round((rand()*60-15)*2)/2));
@@ -65,4 +65,29 @@ test('independent PostgreSQL and TypeScript agree for cumulative seasons and int
    for(let i=0;i<ts.steps.length;i++)for(const key of ['priceBefore','priceAfter','targetPrice','formScore','changePercent','window'])assert.deepEqual(pg.steps[i][key],ts.steps[i][key],`${c}/${i}/${key}`);
   }
  }finally{await db.close();}
+});
+test('verified non-participation compounds 1.5 percent without diluting seasonal performance',async()=>{
+ const dnp=id=>({...game(id,null),status:'not-played',minutes:0});
+ const rows=[game(1,8),dnp(2),dnp(3),{...game(4,null),status:'blocked',minutes:null}];
+ const plan=price(rows,baseline,p);assert.equal(plan.steps.length,3);assert.equal(plan.steps[1].priceAfter,100470);assert.equal(plan.price,98963);
+ assert.equal(plan.steps[2].evidence.n,1);assert.equal(plan.steps[2].formScore,plan.steps[0].formScore);assert.equal(plan.steps[1].evidence.reason,'NON_PARTICIPATION');
+ const db=new PGlite();try{
+  const sql=readFileSync(new URL('../supabase/migrations/20261029183641_valuation_launch_dnp.sql',import.meta.url),'utf8');
+  await db.exec(sql.match(/create or replace function public\.kickx_report_plan\([\s\S]*?end \$\$;/)[0]);
+  const pg=(await db.query('select public.kickx_report_plan($1,$2,$3) plan',[rows,baseline,p])).rows[0].plan;
+  assert.equal(pg.price,plan.price);assert.deepEqual(pg.steps.map(x=>x.priceAfter),plan.steps.map(x=>x.priceAfter));
+ }finally{await db.close();}
+});
+test('October launch warms seasonal form without publishing earlier prices and orders by completion',()=>{
+ const launch=Date.parse('2026-10-01T00:00:00+09:00');
+ const rows=[game(1,8),{...game(2,10),endedAt:'2026-10-01T01:00:00Z'},{...game(3,null),status:'not-played',minutes:0,endedAt:'2026-10-01T00:00:00Z'}];
+ const plan=price(rows,baseline,{...p,valuationStartMs:launch});assert.equal(plan.steps.length,2);assert.equal(plan.steps[0].fixtureId,'bsd-3');
+ assert.equal(plan.steps[0].priceBefore,100000);assert.equal(plan.steps[0].priceAfter,98500);assert.equal(plan.steps[1].evidence.n,2);
+ assert.equal(plan.steps[1].targetPrice,105127);assert.equal(plan.steps[1].priceAfter,100470);
+});
+test('unavailable club member can be DNP but a missing player without membership evidence is blocked',()=>{
+ const m=match();m.playerId='bsd-77';m.stats.minutes_played=0;
+ assert.equal(calc(m).status,'blocked');m.source.lineups.unavailable_players={home:[{id:77}],away:[]};
+ assert.equal(calc(m).status,'not-played');m.source.incidents.incidents=[{type:'substitution',minute:70,player_in_id:77}];
+ assert.equal(calc(m).status,'blocked');
 });

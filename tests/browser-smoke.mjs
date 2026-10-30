@@ -430,7 +430,7 @@ try {
   for(const width of [1440,390]){
     await mockPage.setViewportSize({width,height:900});
     for(const path of ['/community','/community/players','/community/clubs','/community/players/test-player','/community/clubs/test-team']){
-      await mockPage.goto(base+path,{waitUntil:'networkidle'});assert.ok(await mockPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${path} community overflows at ${width}`);
+      await mockPage.goto(base+path,{waitUntil:'domcontentloaded'});await mockPage.locator('#main-content h1').first().waitFor();assert.ok(await mockPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${path} community overflows at ${width}`);
       await mockPage.screenshot({path:`test-artifacts/community-${path.split('/').slice(2).join('-')||'entry'}-${width}.png`,fullPage:true});
     }
     await mockPage.goto(base+'/players/test-player',{waitUntil:'networkidle'});await mockPage.getByRole('button',{name:'커뮤니티',exact:true}).click();assert.ok(await mockPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await mockPage.screenshot({path:`test-artifacts/community-player-tab-${width}.png`,fullPage:true});

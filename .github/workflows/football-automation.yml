@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/lib/calculation-archives.mjs'
       - 'scripts/lib/report-reference.ts'
+      - 'scripts/lib/valuation-rebuild.ts'
       - 'supabase/migrations/*_verified_checkpoint_archives.sql'
   schedule:
     - cron: '7,22,37,52 * * * *'
@@ -17,7 +18,7 @@ concurrency:
 jobs:
   operate:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -40,5 +41,11 @@ jobs:
         if: github.event_name == 'push'
         run: npm run data:automatic -- --archives-only
       - name: Daily catalog, finished matches, calculations, rankings and names
-        if: github.event_name != 'push'
         run: npm run data:automatic -- --maintenance
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: valuation-audit
+          path: test-artifacts/valuation-audit.json
+          if-no-files-found: ignore
+          retention-days: 7

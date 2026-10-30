@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const raw=await request.text();if(raw.length>2048)throw new Error('INVALID_INPUT');
     const body=JSON.parse(raw);
     if(typeof body.bsdKey!=='string' || body.bsdKey.length<8 || body.bsdKey.length>512)throw new Error('INVALID_INPUT');
-    const summary=await runRealtimeFootball(db,body.bsdKey,{claim:claim.data,calculate:(id:string)=>calculatePlayer(db,id,null)});
+    const summary=await runRealtimeFootball(db,body.bsdKey,{claim:claim.data,calculate:(id:string)=>calculatePlayer(db,id,null),seedNonParticipation:async()=>{const r=await db.rpc('kickx_seed_non_participation');if(r.error)throw new Error('NON_PARTICIPATION_RETRY');}});
     token=null;
     return Response.json(summary,{status:summary.error?503:200,headers:{'Cache-Control':'no-store'}});
   } catch {

@@ -2,7 +2,7 @@ import { PRICING, RULE_VERSION } from "./policy";
 
 export type PricingMatch = {
   fixtureId: string; score: number | null; status: string; minutes: number | null;
-  startedAt: string; season: number | null;
+  startedAt: string; endedAt?: string; season: number | null;
 };
 export type PricingStep = {
   fixtureId: string; playedAt: string; priceBefore: number; priceAfter: number;

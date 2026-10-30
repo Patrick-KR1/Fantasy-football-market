@@ -1,0 +1,36 @@
+name: Valuation inventory read-only audit
+on:
+  push:
+    branches: [feat/pricing-audit-replay-20261030]
+    paths:
+      - 'scripts/audit-valuation-inventory.ts'
+      - '.github/workflows/valuation-inventory-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: football-automatic-production
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BSD_API_KEY: ${{ secrets.BSD_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node --conditions=react-server --import tsx scripts/audit-valuation-inventory.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: valuation-inventory
+          path: test-artifacts/valuation-inventory.json
+          if-no-files-found: ignore
+          retention-days: 7

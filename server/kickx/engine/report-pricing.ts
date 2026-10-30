@@ -1,7 +1,7 @@
 import { REPORT_PARAMETERS, RULE_VERSION } from './report-policy';
 import type { PricingMatch } from './pricing';
 
-export type ReportParameters = { [K in keyof typeof REPORT_PARAMETERS]: number };
+export type ReportParameters = { [K in keyof typeof REPORT_PARAMETERS]: number } & {valuationStartMs?:number};
 export type ReportBaseline = {
  source:string;season:number;gameCount:number;meanScore:number|null;seedScore:number;
  percentile:number;price:number;lower:number;upper:number;referenceHash:string;
@@ -13,7 +13,7 @@ export function validateReportParameters(p:ReportParameters) {
  if(Object.values(p).some(x=>!Number.isFinite(x)) || p.lambda<=0 || p.kappa<=0 || p.beta<=0 || p.s<=0 || p.deviationLimit<=0 ||
   !Number.isSafeInteger(p.minPrice)||!Number.isSafeInteger(p.maxPrice)||!Number.isSafeInteger(p.initialMin)||!Number.isSafeInteger(p.initialMax)||
   p.minPrice<=0 || p.minPrice>p.initialMin || p.initialMin>p.initialMax || p.initialMax>p.maxPrice || p.maxPrice>1_000_000_000 ||
-  p.maxUp<0 || p.maxUp>=1 || p.maxDown<0 || p.maxDown>=1 || p.lowerQuantile<0 || p.upperQuantile>1 || p.lowerQuantile>=p.upperQuantile)
+  p.maxUp<0 || p.maxUp>=1 || p.maxDown<0 || p.maxDown>=1 || (p.nonParticipationRate??.015)<0 || (p.nonParticipationRate??.015)>=1 || (p.valuationStartMs!=null&&(!Number.isSafeInteger(p.valuationStartMs)||p.valuationStartMs<0)) || p.lowerQuantile<0 || p.upperQuantile>1 || p.lowerQuantile>=p.upperQuantile)
   throw new Error('INVALID_REPORT_PARAMETERS');
 }
 /** Frozen previous-season population; no current-season result can change this baseline. */
@@ -31,31 +31,36 @@ export function reportBaseline(reference:Record<string,unknown>, playerId:string
   percentile,price:Math.round(p.initialMin+(p.initialMax-p.initialMin)*percentile),lower:group.lower,upper:group.upper,
   referenceHash:String(reference.hash),fixtures:own?.fixtures??[],warnings:n?[]:['PREVIOUS_SEASON_PLAYER_UNAVAILABLE']};
 }
-/** Replay every scored appearance of each season; DNPs never enter its numerator or denominator. */
+/** Season form includes pre-launch appearances. Only post-launch completed games issue prices.
+ * Verified DNPs decay the preceding issued price; they never enter the performance average. */
 export function calculateReportPricing(matches:PricingMatch[],baseline:ReportBaseline,p:ReportParameters={...REPORT_PARAMETERS}) {
  validateReportParameters(p);
  if(!baseline || !Number.isFinite(baseline.seedScore) || !Number.isFinite(baseline.lower) || !Number.isFinite(baseline.upper) ||
   baseline.lower>baseline.upper || !Number.isSafeInteger(baseline.price) || baseline.price<p.minPrice || baseline.price>p.maxPrice)
   throw new Error('INVALID_REPORT_BASELINE');
  const ids=new Set<string>();
- for(const m of matches){if(!m.fixtureId||ids.has(m.fixtureId)||!Number.isFinite(Date.parse(m.startedAt)))throw new Error('INVALID_PRICING_MATCH');ids.add(m.fixtureId);}
- const played=matches.filter(m=>['ready','provisional'].includes(m.status)&&m.score!=null&&Number.isFinite(m.score)&&m.minutes!=null&&m.minutes>0&&m.minutes<=180&&m.season!=null&&m.season>baseline.season)
-  .sort((a,b)=>Date.parse(a.startedAt)-Date.parse(b.startedAt)||a.fixtureId.localeCompare(b.fixtureId));
+ for(const m of matches){if(!m.fixtureId||ids.has(m.fixtureId)||!Number.isFinite(Date.parse(m.startedAt))||(m.endedAt!=null&&!Number.isFinite(Date.parse(m.endedAt))))throw new Error('INVALID_PRICING_MATCH');ids.add(m.fixtureId);}
+ const at=(m:PricingMatch)=>m.endedAt??m.startedAt;
+ const played=matches.filter(m=>m.season!=null&&m.season>baseline.season&&((['ready','provisional'].includes(m.status)&&m.score!=null&&Number.isFinite(m.score)&&m.minutes!=null&&m.minutes>0&&m.minutes<=180)||(m.status==='not-played'&&m.minutes===0)))
+  .sort((a,b)=>Date.parse(at(a))-Date.parse(at(b))||a.fixtureId.localeCompare(b.fixtureId));
  let price=baseline.price,season:number|null=null,sum=0,n=0;
  let window:string[]=[];
  const steps=[];
  for(const m of played){
   if(m.season!==season){season=m.season;sum=0;n=0;window=[];}
-  const bounded=clamp(m.score!,baseline.lower,baseline.upper);sum+=bounded;n++;window.push(m.fixtureId);
+  const dnp=m.status==='not-played';
+  const bounded=dnp?null:clamp(m.score!,baseline.lower,baseline.upper);
+  if(!dnp){sum+=bounded!;n++;window.push(m.fixtureId);}
   const cumulative=(p.kappa*baseline.seedScore+sum)/(p.kappa+n);
   const deviation=(cumulative-baseline.seedScore)/Math.max(Math.abs(baseline.seedScore),p.s);
-  const target=clamp(baseline.price*Math.exp(p.beta*clamp(deviation,-p.deviationLimit,p.deviationLimit)),p.minPrice,p.maxPrice);
+  if(Date.parse(at(m))<(p.valuationStartMs??0))continue;
+  const target=dnp?clamp(price*(1-(p.nonParticipationRate??.015)),p.minPrice,p.maxPrice):clamp(baseline.price*Math.exp(p.beta*clamp(deviation,-p.deviationLimit,p.deviationLimit)),p.minPrice,p.maxPrice);
   const before=price;
   // Ceil/floor after rounding: even a 1-P price may not cross the percentage cap.
   price=clamp(Math.round(target),Math.max(p.minPrice,Math.ceil(before*(1-p.maxDown))),Math.min(p.maxPrice,Math.floor(before*(1+p.maxUp))));
-  steps.push({fixtureId:m.fixtureId,playedAt:m.startedAt,priceBefore:before,priceAfter:price,targetPrice:Math.round(target),
+  steps.push({fixtureId:m.fixtureId,playedAt:at(m),priceBefore:before,priceAfter:price,targetPrice:Math.round(target),
    formScore:rounded(cumulative),changePercent:rounded((price-before)*100/before,4),window:[...window],
-   evidence:{season,n,rawScore:m.score,boundedScore:bounded,cumulativeSum:sum,cumulativeScore:cumulative,deviation,target,referenceHash:baseline.referenceHash}});
+   evidence:{season,n,reason:dnp?'NON_PARTICIPATION':'PERFORMANCE',nonParticipationRate:dnp?(p.nonParticipationRate??.015):null,rawScore:m.score,boundedScore:bounded,cumulativeSum:sum,cumulativeScore:cumulative,deviation,target,referenceHash:baseline.referenceHash}});
  }
  return {version:RULE_VERSION,baseline,price,steps};
 }

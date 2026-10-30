@@ -36,7 +36,10 @@ export function calculatePerformance(input: ScoreInput): ScoreResult {
  if (sides.length !== 2 || sides.some(s => list(s.players).length !== 11)) return stop("INCOMPLETE_STARTERS");
  const player = [...starters, ...bench].find(p => id(p.id) === input.playerId);
  result.position = ({ G: "GK", D: "DF", M: "MF", F: "FW", GK: "GK", DF: "DF", MF: "MF", FW: "FW" } as Record<string, string>)[String(player?.position)] ?? null;
- if (!player || !result.position) return stop("MATCH_POSITION_REQUIRED");
+ const unavailable=list(object(lineups.unavailable_players)[input.teamId===input.homeTeam?'home':'away']).some(p=>id(p.id)===input.playerId);
+ const roster=object(input.stats._roster_evidence);
+ const rosterVerified=roster.fixtureId===input.fixtureId&&roster.teamId===input.teamId&&roster.playerId===input.playerId&&['confirmed-lineup','unavailable-list','observed-squad'].includes(String(roster.kind));
+ if ((!player || !result.position) && !(minutes===0&&(unavailable||rosterVerified))) return stop("MATCH_POSITION_REQUIRED");
  if (!Array.isArray(input.source.incidents?.incidents)) return stop("INCIDENTS_REQUIRED");
  const isShootout=(e:Json)=>e.is_penalty_shootout===true || e.penalty_shootout===true || ['penalties','penaltyshootout','shootout'].some(v=>[e.period,e.phase,e.incident_class,e.goal_type].some(x=>code(x)===v));
  const events = list(input.source.incidents?.incidents).filter(e => e.rescinded !== true && e.cancelled !== true && e.disallowed !== true && !isShootout(e));
@@ -63,7 +66,7 @@ export function calculatePerformance(input: ScoreInput): ScoreResult {
  if (enters.length > 1 || exits.length > 1 || (starter && enters.length)) return stop("INVALID_PARTICIPATION");
  if (minutes === 0) {
   if (starter || enters.length || my.some(e => e.type === "goal")) return stop("ZERO_MINUTES_CONFLICT");
-  result.status = "not-played"; result.warnings.push("NO_PRICE_CHANGE_FOR_NON_PARTICIPATION"); return result;
+  result.status = "not-played"; result.warnings.push("NON_PARTICIPATION_PRICE_DECAY"); return result;
  }
  if (!starter && enters.length !== 1) return stop("ENTRY_TIME_REQUIRED");
  const entry = starter ? null : enters[0];
