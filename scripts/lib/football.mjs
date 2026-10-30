@@ -38,7 +38,7 @@ export function normalizeStatus(raw) {
   if(["penalties","after_penalties","pen"].includes(status)) return "PEN";
   if(["upcoming","notstarted","ns"].includes(status)) return "NS";
   if(["live","inprogress","1st_half","halftime","2nd_half","extra_time","penalty_shootout"].includes(status)) return "LIVE";
-  return ({postponed:"PST",cancelled:"CANC",unresolved:"UNRESOLVED"})[status] ?? "UNKNOWN";
+  return ({postponed:"PST",cancelled:"CANC",canceled:"CANC",unresolved:"UNRESOLVED"})[status] ?? "UNKNOWN";
 }
 export function normalizeBatch(task,response,context={}) {
   const batch=emptyBatch(),leagueId=externalId(context.league);

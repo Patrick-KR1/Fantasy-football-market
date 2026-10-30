@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {gzipSync,gunzipSync} from 'node:zlib';
 import {loadTs} from './load-ts.mjs';
+import {SyncError} from '../scripts/lib/football.mjs';
 const policy=loadTs('../server/kickx/engine/report-policy.ts');
 const performance=loadTs('../server/kickx/engine/report-performance.ts',{'./report-policy':policy});
 const pricing=loadTs('../server/kickx/engine/report-pricing.ts',{'./report-policy':policy});
@@ -17,14 +18,14 @@ function setup({missingSeason=false,remaining=7000}={}) {
   if(path.endsWith('lineups/'))return {event_id:id,lineup_status:'confirmed',lineups:{home:{team_id:1,players},away:{team_id:2,players:players.map(p=>({...p,id:p.id+30}))}}};
   if(path.endsWith('player-stats/'))return {event_id:id,player_stats:players.slice(0,4).map(p=>({player_id:p.id,team_id:1,minutes_played:97,goals:0}))};
   if(path.endsWith('incidents/'))return {event_id:id,incidents:[]};
-  return {id,league_id:Math.floor(id/100),season_id:2025,status:'finished',home_team_id:1,away_team_id:2,home_score:0,away_score:0};
- },async page(_path,p){this.requests++;return {results:[{id:p.league_id*100+1}],next:null};}};
- const db={from(){const q={select(){return q;},eq(){return q;},single:async()=>({data:structuredClone(current),error:null}),maybeSingle:async()=>({data:{requests:0},error:null})};return q;},async rpc(name,args){
+  return {id,league_id:Math.floor(id/100),season_id:2025,status:'finished',stage:'league-phase',home_team_id:1,away_team_id:2,home_score:0,away_score:0};
+ },async page(_path,p){this.requests++;return {results:[{id:p.league_id*100+1,stage:'league-phase'}],next:null};}};
+ const db={from(){const q={select(){return q;},eq(){return q;},single:async()=>({data:{...structuredClone(current),regularScope:current.report_reference?.regularSeasonScopeVerified},error:null}),maybeSingle:async()=>({data:{requests:0},error:null})};return q;},async rpc(name,args){
   if(name==='kickx_save_report_reference'){assert.equal(args.p_revision,current.report_reference?.revision??0);const revision=args.p_revision+1;current.report_reference={...structuredClone(args.p_reference),revision};return {data:revision,error:null};}
   if(name==='kickx_activate_report_policy'){assert.equal(current.report_reference.status,'ready');current.version='report-v3';current.valuation_rebuild.status='active';return {data:20,error:null};}
   throw Error(name);
  },storage:{getBucket:async()=>({data:{public:false},error:null}),from(){return {upload:async(path,bytes)=>{objects.set(path,bytes);return {error:null};},download:async path=>({data:new Blob([objects.get(path)]),error:null}),remove:async paths=>{for(const path of paths)objects.delete(path);return {error:null};}};}}};
- const mod=loadTs('../scripts/lib/report-reference.ts',{'node:crypto':{createHash},'node:zlib':{gzipSync,gunzipSync},'./football.mjs':{externalId,normalizeStatus:()=> 'FT',createFootballClient:()=>api},'../../server/kickx/engine/report-performance':performance,'../../server/kickx/engine/report-pricing':pricing});
+ const mod=loadTs('../scripts/lib/report-reference.ts',{'node:crypto':{createHash},'node:zlib':{gzipSync,gunzipSync},'./football.mjs':{externalId,SyncError,normalizeStatus:()=> 'FT',createFootballClient:()=>api},'../../server/kickx/engine/report-performance':performance,'../../server/kickx/engine/report-pricing':pricing});
  return {mod,api,db,calls,objects,current:()=>current};
 }
 test('full previous-season discovery freezes all four cohorts, verifies private archives and activates once',async()=>{
@@ -45,9 +46,22 @@ test('history reserves API capacity for live matches and resumes without duplica
 test('added-time clock requires corroboration and rejects a single extreme counter',()=>{
  const {mod}=setup();assert.equal(mod.observedMatchDuration([97,97,45,180]),97);assert.equal(mod.observedMatchDuration([180]),90);assert.equal(mod.observedMatchDuration([96,97,90]),97);
 });
+test('corroborated substitute counters recover added time when starters are capped at 90',()=>{
+ const {mod}=setup(),stats=[{player_id:1,minutes_played:12},{player_id:2,minutes_played:18}];
+ const incidents={incidents:[{type:'substitution',minute:83,player_in_id:1},{type:'substitution',minute:77,player_in_id:2}]};
+ assert.equal(mod.observedMatchDuration([90,90,12,18],stats,incidents),95);
+ incidents.incidents.pop();assert.equal(mod.observedMatchDuration([90,90,12],stats,incidents),90);
+});
 
 test('a complete reference cannot activate before compatible production code is deployed',async()=>{
  const x=setup();const result=await x.mod.prepareReportReference(x.db,'test-only-key',{runtimeReady:async()=>false});
  assert.equal(result.pending,'WAITING_FOR_DEPLOYMENT');assert.equal(x.current().version,'form-v2');assert.equal(x.current().report_reference.status,'ready');
  assert.equal((await x.mod.prepareReportReference(x.db,'test-only-key',{runtimeReady:async()=>true})).active,true);
+});
+test('partial resource failure never commits a fixture to the reference cohort',async()=>{
+ const x=setup(),get=x.api.get.bind(x.api);
+ x.api.get=async path=>{const reply=await get(path);if(path.endsWith('/incidents/'))throw new SyncError('PROVIDER_NETWORK_ERROR');return reply;};
+ const r=await x.mod.prepareReportReference(x.db,'test-only-key',{runtimeReady:async()=>true});
+ assert.equal(r.reason,'PROVIDER_NETWORK_ERROR');assert.equal(r.completed,0);assert.equal(x.current().version,'form-v2');
+ assert.equal([...x.objects.keys()].filter(p=>!p.includes('/checkpoints/')).length,0);
 });

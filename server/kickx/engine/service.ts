@@ -31,8 +31,8 @@ export async function calculatePlayer(db: SupabaseClient, playerId: string, acto
    const results=records.map(m=>({...((report && !["bsd-1","bsd-3","bsd-4","bsd-5","bsd-6"].includes(m.fixtures.league_id??"")) ? {fixtureId:m.fixture_id,position:null,minutes:null,score:null,status:"blocked",breakdown:[],warnings:["OUTSIDE_COMPETITION_SCOPE"]} : calculator({fixtureId:m.fixture_id,playerId,teamId:m.team_id,
     status:m.fixtures.status,homeTeam:m.fixtures.home_team_id,awayTeam:m.fixtures.away_team_id,
     homeScore:m.fixtures.home_score,awayScore:m.fixtures.away_score,stats:m.stats,legacy:m.legacy_stats,
-    source:m.fixtures.football_event_sources??{},clubCompetitions:clubs,durationMinutes:m.fixtures.durationMinutes})),ruleVersion:report?REPORT_VERSION:RULE_VERSION,
-    ...(clubs?{scoringRevision:'club-competitions-v1'}:{})}));
+    source:m.fixtures.football_event_sources??{},clubCompetitions:clubs,durationMinutes:m.fixtures.durationMinutes,...(report?{regularSeasonOnly:true}:{})})),ruleVersion:report?REPORT_VERSION:RULE_VERSION,
+    ...(report?{scoringRevision:'regular-season-20261030'}:clubs?{scoringRevision:'club-competitions-v1'}:{})}));
    const saved=await db.rpc("kickx_publish_calculation_delta",{p_actor:actor,p_player:playerId,
     p_token:input.data.token,p_results:results});
    checkDatabase(saved.error);

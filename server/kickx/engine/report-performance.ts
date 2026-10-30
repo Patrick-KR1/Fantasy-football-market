@@ -2,7 +2,7 @@
 import { SCORING } from "./report-policy";
 export { RULE_VERSION } from "./report-policy";
 type Json = Record<string, unknown>;
-export type ScoreInput = { fixtureId: string; playerId: string; teamId: string; status: string; homeTeam: string; awayTeam: string; homeScore: number | null; awayScore: number | null; stats: Json; legacy: Json | null; source: { detail?: Json | null; lineups?: Json | null; incidents?: Json | null }; clubCompetitions?: boolean; durationMinutes?: number };
+export type ScoreInput = { fixtureId: string; playerId: string; teamId: string; status: string; homeTeam: string; awayTeam: string; homeScore: number | null; awayScore: number | null; stats: Json; legacy: Json | null; source: { detail?: Json | null; lineups?: Json | null; incidents?: Json | null }; clubCompetitions?: boolean; durationMinutes?: number; regularSeasonOnly?:boolean };
 export type ScoreResult = { fixtureId: string; position: string | null; minutes: number | null; score: number | null; status: "ready" | "provisional" | "blocked" | "not-played"; breakdown: { metric: string; value: number; points: number; evidence: string }[]; warnings: string[] };
 const object = (v: unknown): Json => v && typeof v === "object" && !Array.isArray(v) ? v as Json : {};
 const list = (v: unknown): Json[] => Array.isArray(v) ? v.map(object) : [];
@@ -11,12 +11,20 @@ const id = (v: unknown) => typeof v === "number" && Number.isSafeInteger(v) && v
 const code = (v: unknown) => String(v ?? "").replace(/[^a-z]/gi, "").toLowerCase();
 const ownGoal = (e: Json) => e.own_goal === true || e.is_own_goal === true || ["owngoal", "own"].includes(code(e.goal_type ?? e.incident_class ?? e.incidentClass));
 const cardKind = (e: Json) => code(e.card_type ?? e.card ?? e.incident_class ?? e.incidentClass ?? e.detail);
+export function regularSeasonScope(detail:Json):boolean|null {
+ const stage=code(detail.stage);
+ if(['leaguephase','regularseason'].includes(stage))return true;
+ if(/qualification|final|playoff|relegation|promotion|knockout|roundof/.test(stage))return false;
+ if(!stage&&/^(league phase|regular season)\b/i.test(String(detail.round_label??'')))return true;
+ return null;
+}
 export function calculatePerformance(input: ScoreInput): ScoreResult {
  const result: ScoreResult = { fixtureId: input.fixtureId, position: null, minutes: null, score: null, status: "blocked", breakdown: [], warnings: [] };
  const stop = (why: string) => { result.warnings.push(why); return result; };
  if (!["FT", "AET", "PEN"].includes(input.status)) return stop("MATCH_NOT_FINISHED");
  if (input.status !== "FT" && !input.clubCompetitions) return stop("EXTRA_TIME_REQUIRES_REVIEW");
  const detail=object(input.source.detail),extra=object(detail.extra_time_score),shootout=object(detail.penalty_shootout);
+ if(input.regularSeasonOnly){const scope=regularSeasonScope(detail);if(scope!==true)return stop(scope===false?'OUTSIDE_COMPETITION_SCOPE':'REGULAR_SEASON_SCOPE_REQUIRED');}
  const duration=input.clubCompetitions && (input.status==='AET'||detail.extra_time_score!=null)?120:90;
  if(input.status==='AET' && (count(extra.home)==null||count(extra.away)==null))return stop('EXTRA_TIME_SCORE_REQUIRED');
  if(input.status==='PEN' && (count(shootout.home)==null||count(shootout.away)==null||shootout.home===shootout.away))return stop('SHOOTOUT_RESULT_REQUIRED');
@@ -38,8 +46,8 @@ export function calculatePerformance(input: ScoreInput): ScoreResult {
  result.position = ({ G: "GK", D: "DF", M: "MF", F: "FW", GK: "GK", DF: "DF", MF: "MF", FW: "FW" } as Record<string, string>)[String(player?.position)] ?? null;
  const unavailable=list(object(lineups.unavailable_players)[input.teamId===input.homeTeam?'home':'away']).some(p=>id(p.id)===input.playerId);
  const roster=object(input.stats._roster_evidence);
- const rosterVerified=roster.fixtureId===input.fixtureId&&roster.teamId===input.teamId&&roster.playerId===input.playerId&&['confirmed-lineup','unavailable-list','observed-squad'].includes(String(roster.kind));
- if ((!player || !result.position) && !(minutes===0&&(unavailable||rosterVerified))) return stop("MATCH_POSITION_REQUIRED");
+ const rosterVerified=roster.fixtureId===input.fixtureId&&roster.teamId===input.teamId&&roster.playerId===input.playerId&&(roster.kind==='observed-squad'||roster.kind==='confirmed-lineup'&&bench.some(p=>id(p.id)===input.playerId)||roster.kind==='unavailable-list'&&unavailable);
+ if ((!player || !result.position) && !(minutes===0&&(player||unavailable||rosterVerified))) return stop("MATCH_POSITION_REQUIRED");
  if (!Array.isArray(input.source.incidents?.incidents)) return stop("INCIDENTS_REQUIRED");
  const isShootout=(e:Json)=>e.is_penalty_shootout===true || e.penalty_shootout===true || ['penalties','penaltyshootout','shootout'].some(v=>[e.period,e.phase,e.incident_class,e.goal_type].some(x=>code(x)===v));
  const events = list(input.source.incidents?.incidents).filter(e => e.rescinded !== true && e.cancelled !== true && e.disallowed !== true && !isShootout(e));
@@ -49,7 +57,14 @@ export function calculatePerformance(input: ScoreInput): ScoreResult {
  const goals = ordered.filter(e => e.type === "goal");
  if (input.homeScore == null || input.awayScore == null || goals.some(e => typeof e.is_home !== "boolean" || count(e.minute) == null || !id(e.player_id))) return stop("GOAL_TIMELINE_INCOMPLETE");
  if (goals.filter(e => e.is_home === true).length !== input.homeScore || goals.filter(e => e.is_home === false).length !== input.awayScore) return stop("GOAL_SCORE_MISMATCH");
- if (ordered.some(e => e.type === "varDecision" && ["review","mistakenIdentity","cardUpgrade","redCardGiven"].includes(String(e.decision)))) return stop("VAR_REVIEW_REQUIRED");
+ for(const e of ordered.filter(e=>e.type==='varDecision')){
+  if(['review','mistakenIdentity'].includes(String(e.decision)))return stop('VAR_REVIEW_REQUIRED');
+  if(['cardUpgrade','redCardGiven'].includes(String(e.decision))){
+   if(typeof e.confirmed!=='boolean')return stop('VAR_REVIEW_REQUIRED');
+   if(e.confirmed===true&&!ordered.some(c=>c.type==='card'&&id(c.player_id)===id(e.player_id)&&['red','redcard','yellowred','secondyellow','secondyellowcard'].includes(cardKind(c))))return stop('VAR_CARD_TIMELINE_REQUIRED');
+   if(e.confirmed===true&&e.decision==='cardUpgrade'&&ordered.some(c=>c.type==='card'&&id(c.player_id)===id(e.player_id)&&c.minute===e.minute&&['yellow','yellowcard'].includes(cardKind(c))))return stop('VAR_CARD_TIMELINE_REQUIRED');
+  }
+ }
  const my = ordered.filter(e => id(e.player_id) === input.playerId);
  const cards = my.filter(e => e.type === "card");
  if (cards.some(e => !["yellow", "yellowcard", "red", "redcard", "yellowred", "secondyellow", "secondyellowcard"].includes(cardKind(e)))) return stop("UNKNOWN_CARD_KIND");

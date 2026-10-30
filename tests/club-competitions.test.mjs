@@ -41,6 +41,7 @@ test('a cup fixture is imported when either side is tracked and the opponent ret
  assert.equal(r.batch.fixtures[0].round_label,'Round of 16');
 });
 test('a generic finished status is refined from ET and shootout fields; shootout goals never enter the match score',()=>{
+ assert.equal(normalizeStatus('canceled'),'CANC');assert.equal(normalizeStatus('cancelled'),'CANC');
  assert.equal(normalizeStatus({status:'finished',extra_time_score:{home:1,away:0}}),'AET');
  assert.equal(normalizeStatus({status:'finished',penalty_shootout:{home:5,away:4}}),'PEN');
  const r=normalizeBatch('fixtures',[{id:1,league_id:7,season_id:11,event_date:'2026-10-01T12:00:00Z',home_team_id:1,home_team:'H',away_team_id:2,away_team:'A',status:'finished',home_score:1,away_score:1,extra_time_score:{home:1,away:1},penalty_shootout:{home:5,away:4}}],{league:7,seasonId:11,seasonYear:2026});

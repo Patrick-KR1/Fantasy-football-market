@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { createFootballClient, externalId, normalizeStatus } from './football.mjs';
-import { calculatePerformance } from '../../server/kickx/engine/report-performance';
+import { createFootballClient, externalId, normalizeStatus, SyncError } from './football.mjs';
+import { calculatePerformance,regularSeasonScope } from '../../server/kickx/engine/report-performance';
 import { validateReportParameters, type ReportParameters } from '../../server/kickx/engine/report-pricing';
 
 type PlayerHistory = {n:number;sum:number;fixtures:string[]};
@@ -12,13 +12,23 @@ type Reference = {
  players:Record<string,Record<string,PlayerHistory>>;scores:Record<string,number[]>;
  archives:{path:string;hash:string;fixtureId:string;league:number}[];
  groups?:Record<string,{mean:number;lower:number;upper:number;baselines:number[]}>;hash?:string;
+ regularSeasonScopeMode?:boolean;regularSeasonScopeVerified?:boolean;
 };
 const leagueIds=[1,3,4,5,6],positions=['GK','DF','MF','FW'];
-const checked=<T>(r:{data:T;error:unknown})=>{if(r.error)throw new Error('REFERENCE_DATABASE_RETRY');return r.data;};
+const checked=<T>(r:{data:T;error:unknown})=>{if(r.error){const code=(r.error as {code?:unknown}).code;throw new SyncError(`REFERENCE_DATABASE_${typeof code==='string'&&/^[A-Z0-9]{5}$/.test(code)?code:'RETRY'}`);}return r.data;};
 const digest=(b:Uint8Array|string)=>createHash('sha256').update(b).digest('hex');
 const quantile=(a:number[],q:number)=>{const sorted=[...a].sort((x,y)=>x-y),at=(sorted.length-1)*q,lo=Math.floor(at);return sorted[lo]+(sorted[Math.ceil(at)]-sorted[lo])*(at-lo);};
-export function observedMatchDuration(values:number[]) {
- const plausible=values.filter(v=>Number.isSafeInteger(v)&&v>=90&&v<=180).sort((a,b)=>b-a);
+export function observedMatchDuration(values:number[],stats:{player_id:number;minutes_played:number}[]=[],incidents:{incidents?:Record<string,unknown>[]}={}) {
+ const events=incidents.incidents??[],inferred:number[]=[];
+ for(const e of events){
+  if(e.type!=='substitution'||!Number.isSafeInteger(e.minute)||!Number.isSafeInteger(e.player_in_id))continue;
+  const player=stats.find(s=>s.player_id===e.player_in_id);
+  if(!player||!Number.isSafeInteger(player.minutes_played)||player.minutes_played<=0||events.filter(x=>x.type==='substitution'&&x.player_in_id===e.player_in_id).length!==1||events.some(x=>x.type==='substitution'&&x.player_out_id===e.player_in_id))continue;
+  const minute=Number(e.minute),added=[45,90].includes(minute)&&Number.isSafeInteger(e.added_time)?Number(e.added_time):0;
+  const end=minute+added+player.minutes_played;
+  if(end>=90&&end<=120)inferred.push(end);
+ }
+ const plausible=[...values,...inferred].filter(v=>Number.isSafeInteger(v)&&v>=90&&v<=180).sort((a,b)=>b-a);
  // Require corroboration: one corrupt 180-minute counter must not define a match's duration.
  return plausible.find(v=>plausible.filter(x=>x>=v-2&&x<=v).length>=2)??90;
 }
@@ -41,12 +51,15 @@ export function finalizeReference(ref:Reference,p:ReportParameters) {
 /** Full previous season, four resources per fixture; no player-profile calls or raw DB copies.
  * Uses the existing private archive bucket and shared provider budget; resumes between runs.
  */
-export async function prepareReportReference(db:SupabaseClient,key:string,{budget=600,deadline=Date.now()+240000,emit=(v:unknown)=>{void v;},runtimeReady=async()=>{const r=await fetch('https://kick-x-test.vercel.app/api/kickx',{method:'HEAD',signal:AbortSignal.timeout(5000),cache:'no-store'});return r.ok && r.headers.get('x-kickx-policy-support')==='report-v3' && r.headers.get('x-kickx-pricing-revision')==='launch-dnp-20261030';}}={}) {
+export async function prepareReportReference(db:SupabaseClient,key:string,{budget=600,deadline=Date.now()+240000,emit=(v:unknown)=>{void v;},runtimeReady=async()=>{const r=await fetch('https://kick-x-test.vercel.app/api/kickx',{method:'HEAD',signal:AbortSignal.timeout(5000),cache:'no-store'});return r.ok && r.headers.get('x-kickx-policy-support')==='report-v3' && r.headers.get('x-kickx-pricing-revision')==='launch-dnp-regular-20261030';}}={}) {
  const policyReply=await db.from('kickx_policy').select('version,report_parameters,valuation_rebuild').single();
  if(policyReply.error && ['42703','PGRST204'].includes(policyReply.error.code))return {pending:'MIGRATION_REQUIRED'};
  const policy=checked(policyReply);
  if(!policy)throw new Error("REFERENCE_POLICY_UNAVAILABLE");
- if(policy.version==='report-v3'&&policy.valuation_rebuild?.status==='active')return {active:true};
+ if(policy.version==='report-v3'&&policy.valuation_rebuild?.status==='active'){
+  const scope=checked(await db.from('kickx_policy').select('regularScope:report_reference->regularSeasonScopeVerified').single());
+  return scope?.regularScope===true?{active:true}:{pending:'REGULAR_SEASON_SCOPE_REQUIRED'};
+ }
  const parameters=policy.report_parameters as ReportParameters;validateReportParameters(parameters);
  const referenceRow=checked(await db.from('kickx_policy').select('report_reference').single());
  if(!referenceRow)throw new Error('REFERENCE_POLICY_UNAVAILABLE');
@@ -75,7 +88,7 @@ export async function prepareReportReference(db:SupabaseClient,key:string,{budge
   const bytes=Buffer.from(await blob.arrayBuffer());if(digest(bytes)!==descriptor.checkpoint.hash)throw new Error('REFERENCE_CHECKPOINT_INVALID');
   loaded=JSON.parse(gunzipSync(bytes,{maxOutputLength:15*1024*1024}).toString());
  }
- const ref:Reference=loaded??descriptor??{revision:0,status:'collecting',season:null,leagueIndex:0,fixtureIndex:0,fixtureCount:0,completed:0,leagues:[],players:{},scores:{},archives:[]};
+ const ref:Reference=loaded??descriptor??{revision:0,status:'collecting',season:null,leagueIndex:0,fixtureIndex:0,fixtureCount:0,completed:0,leagues:[],players:{},scores:{},archives:[],regularSeasonScopeMode:true};
  let revision=descriptor?.revision??0,dirty=false;
  const save=async()=>{
   if(!dirty)return;
@@ -100,6 +113,7 @@ export async function prepareReportReference(db:SupabaseClient,key:string,{budge
   if(gate?.valuation_rebuild?.status!=='validated'&&gate?.valuation_rebuild?.status!=='active')return {pending:'WAITING_FOR_DATA_AUDIT',completed:ref.completed,total:ref.fixtureCount};
   const queued=checked(await db.rpc('kickx_activate_report_policy'));return {active:true,queued,completed:ref.completed};
  };
+ let currentFixture:string|undefined;
  try {
   if(ref.status==='ready')return await activate();
   while(ref.leagues.length<5){
@@ -113,7 +127,7 @@ export async function prepareReportReference(db:SupabaseClient,key:string,{budge
    const fixtures:number[]=[];let offset:number|null=0;
    do {
     const page=await api.page('/api/v2/events/',{league_id:id,season_id:season.id,status:'finished',limit:200,offset});
-    fixtures.push(...page.results.map((f:{id:number})=>f.id));offset=page.next;
+    for(const fixture of page.results){const scope=regularSeasonScope(fixture);if(scope===null)throw Error('REGULAR_SEASON_SCOPE_REQUIRED');if(scope)fixtures.push(fixture.id);}offset=page.next;
    }while(offset!=null);
    if(!fixtures.length)throw new Error('REFERENCE_SEASON_EMPTY');
    ref.season=season.year;ref.leagues.push({id,seasonId:season.id,year:season.year,fixtures:[...new Set(fixtures)].sort((a,b)=>a-b)});
@@ -130,9 +144,13 @@ export async function prepareReportReference(db:SupabaseClient,key:string,{budge
    const league=ref.leagues[ref.leagueIndex];
    if(ref.fixtureIndex>=league.fixtures.length){ref.leagueIndex++;ref.fixtureIndex=0;dirty=true;await save();continue;}
    const id=league.fixtures[ref.fixtureIndex],base=`/api/v2/events/${id}/`;
-   const detail=await api.get(base),stats=await api.get(base+'player-stats/'),lineups=await api.get(base+'lineups/'),incidents=await api.get(base+'incidents/');
+   currentFixture=externalId(id);
+   const fetched=await Promise.allSettled([base,base+'player-stats/',base+'lineups/',base+'incidents/'].map(path=>api.get(path)));
+   const failed=fetched.find(r=>r.status==='rejected');if(failed?.status==='rejected')throw failed.reason;
+   const [detail,stats,lineups,incidents]=fetched.map(r=>r.status==='fulfilled'?r.value:null);
    if(detail.id!==id||detail.league_id!==league.id||detail.season_id!==league.seasonId||!Array.isArray(stats.player_stats)||stats.event_id!==id||lineups.event_id!==id||incidents.event_id!==id)throw new Error('REFERENCE_FIXTURE_MISMATCH');
-   const duration=observedMatchDuration(stats.player_stats.map((s:{minutes_played:number})=>s.minutes_played));
+   if(regularSeasonScope(detail)!==true)throw Error('REGULAR_SEASON_SCOPE_REQUIRED');
+   const duration=observedMatchDuration(stats.player_stats.map((s:{minutes_played:number})=>s.minutes_played),stats.player_stats,incidents);
    const results=stats.player_stats.map((s:{player_id:number;team_id:number;minutes_played:number})=>{
     const result=calculatePerformance({fixtureId:externalId(id),playerId:externalId(s.player_id),teamId:externalId(s.team_id),status:normalizeStatus(detail),
      homeTeam:externalId(detail.home_team_id),awayTeam:externalId(detail.away_team_id),homeScore:detail.home_score,awayScore:detail.away_score,
@@ -150,13 +168,14 @@ export async function prepareReportReference(db:SupabaseClient,key:string,{budge
    ref.archives.push({path,hash,fixtureId:externalId(id),league:league.id});ref.completed++;ref.fixtureIndex++;dirty=true;
    if(ref.completed%5===0){await save();emit({stage:'report-reference',completed:ref.completed,total:ref.fixtureCount,requests:api.requests});}
   }
-  if(ref.leagueIndex===5){finalizeReference(ref,parameters);dirty=true;}
+  if(ref.leagueIndex===5){finalizeReference(ref,parameters);ref.regularSeasonScopeVerified=ref.regularSeasonScopeMode===true;dirty=true;}
   await save();
   if(ref.status==='ready')return await activate();
   return {pending:'PREVIOUS_SEASON_COLLECTION',completed:ref.completed,total:ref.fixtureCount,requests:api.requests};
- }catch(error){await save();emit({stage:'report-reference',completed:ref.completed,total:ref.fixtureCount,pending:'REFERENCE_RETRY'});
+ }catch(error){await save();const reason=error instanceof SyncError?error.code:error instanceof Error&&/^[A-Z0-9_]+$/.test(error.message)?error.message:'REFERENCE_RESOURCE_RETRY';
+  emit({stage:'report-reference',completed:ref.completed,total:ref.fixtureCount,pending:'REFERENCE_RETRY',reason,fixtureId:currentFixture});
   // No raw responses, URLs, credentials or network errors enter logs.
   if(error instanceof Error && ['REFERENCE_SEASON_UNAVAILABLE','REFERENCE_SEASONS_UNAVAILABLE','REFERENCE_SEASON_EMPTY'].includes(error.message))return {pending:error.message,completed:ref.completed};
-  return {pending:'REFERENCE_RETRY',completed:ref.completed,total:ref.fixtureCount,requests:api.requests};
+  return {pending:'REFERENCE_RETRY',reason,completed:ref.completed,total:ref.fixtureCount,requests:api.requests};
  }
 }

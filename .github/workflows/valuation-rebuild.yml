@@ -1,0 +1,46 @@
+name: Complete approved valuation rebuild
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/valuation-rebuild.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+# The approved rebuild replaces the older worker. Its verified checkpoints and
+# atomic publication allow safe resumption without two competing reference scans.
+concurrency:
+  group: football-automatic-production
+  cancel-in-progress: true
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BSD_API_KEY: ${{ secrets.BSD_API_KEY }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Correct a completed reference using verified regular-season archives
+        run: node --import tsx scripts/rebuild-reference-scope.ts --apply
+      - name: Continue the verified previous-season reference
+        run: npm run data:automatic -- --report-reference
+      - name: Resume the reference within the same shared daily quota
+        run: npm run data:automatic -- --report-reference
+      - name: Verify scope again after any resumed collection
+        run: node --import tsx scripts/rebuild-reference-scope.ts --apply
+      - name: Replay calculations and refresh derived portfolios
+        run: npm run data:automatic -- --maintenance
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: valuation-audit
+          path: test-artifacts/valuation-audit.json
+          if-no-files-found: ignore
+          retention-days: 7

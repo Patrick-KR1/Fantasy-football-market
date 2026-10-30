@@ -17,6 +17,19 @@ test('report scoring applies its positional table and no v2 team-win bonus',()=>
   const r=calc(m);assert.equal(points(r,'minutes'),2);assert.equal(points(r,'goals'),goal);assert.equal(points(r,'assists'),assist);assert.equal(points(r,'team_win'),undefined);
  }
 });
+test('regular-season scope rejects league-code playoffs and keeps an unknown stage unverified',()=>{
+ const m=match();m.regularSeasonOnly=true;m.source.detail={stage:'league-phase'};assert.equal(calc(m).status,'provisional');
+ m.source.detail.stage='final';assert.deepEqual(calc(m).warnings,['OUTSIDE_COMPETITION_SCOPE']);
+ m.source.detail={};assert.deepEqual(calc(m).warnings,['REGULAR_SEASON_SCOPE_REQUIRED']);
+});
+test('settled card checks do not block verified final cards; an accepted upgrade requires a red-card incident',()=>{
+ const m=match();const review={type:'varDecision',minute:39,decision:'cardUpgrade',confirmed:false,player_id:2};
+ m.source.incidents.incidents=[review];assert.equal(calc(m).status,'provisional');
+ review.confirmed=true;assert.deepEqual(calc(m).warnings,['VAR_CARD_TIMELINE_REQUIRED']);
+ m.source.incidents.incidents.push({type:'card',minute:39,card_type:'red',player_id:2});m.stats.minutes_played=39;m.stats.red_card=1;
+ assert.equal(calc(m).status,'provisional');
+ delete review.confirmed;assert.deepEqual(calc(m).warnings,['VAR_REVIEW_REQUIRED']);
+});
 test('report counts DF defensive groups and MF individual actions, pass success above zero attempts',()=>{
  const m=match();Object.assign(m.stats,{won_tackle:4,interception:3,total_pass:10,accurate_pass:9});
  assert.equal(points(calc(m),'defensive_actions'),2);assert.equal(points(calc(m),'pass_accuracy'),1);
@@ -34,6 +47,11 @@ test('observed added-time duration rescues real 90+ appearances without permitti
 test('unknown counters and missing required facts stay distinguishable from DNP',()=>{
  const m=match();assert.ok(calc(m).warnings.some(x=>x.includes('UNVERIFIED')));m.playerId='bsd-30';m.stats.minutes_played=0;assert.equal(calc(m).status,'not-played');
  m.stats.minutes_played=15;m.source.lineups.lineup_status='predicted';assert.equal(calc(m).score,null);
+});
+test('a confirmed unused substitute does not require a match position for fixed DNP decay',()=>{
+ const m=match(null);m.playerId='bsd-30';m.stats.minutes_played=0;
+ assert.equal(calc(m).status,'not-played');assert.equal(calc(m).score,null);
+ m.stats.minutes_played=15;assert.equal(calc(m).status,'blocked');
 });
 test('report pricing reproduces its 104040-P example with every season appearance counted once',()=>{
  const plan=price([game(1,8),game(2,10)],baseline,p);assert.equal(plan.steps[0].priceAfter,102000);assert.equal(plan.price,104040);assert.equal(plan.steps[1].formScore,7);assert.equal(plan.steps[1].targetPrice,105127);
@@ -90,4 +108,13 @@ test('unavailable club member can be DNP but a missing player without membership
  assert.equal(calc(m).status,'blocked');m.source.lineups.unavailable_players={home:[{id:77}],away:[]};
  assert.equal(calc(m).status,'not-played');m.source.incidents.incidents=[{type:'substitution',minute:70,player_in_id:77}];
  assert.equal(calc(m).status,'blocked');
+});
+test('corrected lineup evidence cannot keep an obsolete DNP eligible for decay',()=>{
+ const m=match();m.playerId='bsd-77';m.stats.minutes_played=0;
+ m.stats._roster_evidence={fixtureId:m.fixtureId,teamId:m.teamId,playerId:m.playerId,kind:'confirmed-lineup'};
+ assert.equal(calc(m).status,'blocked');
+ m.source.lineups.lineups.home.substitutes.push({id:77});assert.equal(calc(m).status,'not-played');
+ m.source.lineups.lineups.home.substitutes.pop();m.stats._roster_evidence.kind='unavailable-list';assert.equal(calc(m).status,'blocked');
+ m.source.lineups.unavailable_players={home:[{id:77}]};assert.equal(calc(m).status,'not-played');
+ m.source.lineups.unavailable_players={home:[]};m.stats._roster_evidence.kind='observed-squad';assert.equal(calc(m).status,'not-played');
 });

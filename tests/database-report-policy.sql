@@ -14,6 +14,7 @@ insert into public.fixtures(id,league_id,home_team_id,away_team_id,starts_at,sta
  values('report-policy-1','bsd-1','report-policy-home','report-policy-away','2026-09-01T12:00:00Z','FT',0,0,2026),
  ('report-policy-2','bsd-1','report-policy-home','report-policy-away','2026-09-02T12:00:00Z','FT',0,0,2026),
  ('report-policy-cup','report-cup','report-policy-home','report-policy-away','2026-09-03T12:00:00Z','FT',0,0,2026);
+update public.fixtures set stage='league-phase' where id in('report-policy-1','report-policy-2');
 insert into public.football_match_stats(player_id,fixture_id,team_id,stats)
  select 'report-policy-player',id,'report-policy-home','{"minutes_played":97}' from public.fixtures where id like 'report-policy-%';
 insert into public.football_match_stats(player_id,fixture_id,team_id,stats) select 'report-policy-support',id,'report-policy-home','{"minutes_played":97}' from public.fixtures where id like 'report-policy-%';
@@ -21,7 +22,7 @@ insert into public.player_market_snapshots(id,price,pricing_rule_version,pricing
 do $$declare input jsonb;results jsonb;answer jsonb;first_hash text;old_input_hash text;begin
  input:=public.kickx_calculation_input('report-policy-player');first_hash:=input->>'token';
  select jsonb_agg(jsonb_build_object('fixtureId',f.id,'position','FW','score',case when f.id='report-policy-1' then 8 when f.id='report-policy-2' then 10 else null end,
-  'status',case when f.id='report-policy-cup' then 'blocked' else 'provisional' end,'ruleVersion','report-v3','breakdown','[]'::jsonb,'warnings','[]'::jsonb)) into results
+  'status',case when f.id='report-policy-cup' then 'blocked' else 'provisional' end,'ruleVersion','report-v3','scoringRevision','regular-season-20261030','breakdown','[]'::jsonb,'warnings','[]'::jsonb)) into results
  from public.fixtures f where f.id like 'report-policy-%';
  answer:=public.kickx_publish_calculation_delta(null,'report-policy-player',first_hash,results);
  if (answer->>'price')::integer<>104040 then raise exception 'Report publication: %',answer;end if;

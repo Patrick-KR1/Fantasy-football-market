@@ -20,8 +20,10 @@ async function main() {
   if (!archivesOnly && (process.argv.includes('--maintenance') || process.argv.includes('--report-reference'))) {
     const audit=await ensureValuationRebuild(db,bsd!,{emit:v=>console.log(JSON.stringify(v))});
     console.log(JSON.stringify({stage:'valuation-rebuild',...audit}));
-    const reference = await prepareReportReference(db, bsd!, {budget:process.argv.includes('--report-reference')?1500:600,deadline:Date.now()+240000,emit:v=>console.log(JSON.stringify(v))});
+    const catchUp=process.argv.includes('--report-reference');
+    const reference = await prepareReportReference(db, bsd!, {budget:catchUp?3000:600,deadline:Date.now()+(catchUp?20*60000:240000),emit:v=>console.log(JSON.stringify(v))});
     console.log(JSON.stringify({stage:'report-reference-result',...reference}));
+    if(reference.pending==='REGULAR_SEASON_SCOPE_REQUIRED')return;
     if(process.argv.includes('--report-reference'))return;
   }
   let footballFailure: unknown;
@@ -57,6 +59,6 @@ async function main() {
 }
 main().catch(error => {
   // Never print raw network/DB errors, input records, URLs or credentials.
-  console.error(JSON.stringify({ error: error instanceof Error && error.message === 'AUTOMATION_CONFIG_REQUIRED' ? error.message : errorCode(error) }));
+  console.error(JSON.stringify({ error: error instanceof Error && /^(AUTOMATION_CONFIG_REQUIRED|VALUATION_[A-Z0-9_]+)$/.test(error.message) ? error.message : errorCode(error) }));
   process.exitCode = 1;
 });

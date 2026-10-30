@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/football-automation.yml'
+      - 'scripts/automatic-football.ts'
       - 'scripts/lib/calculation-archives.mjs'
       - 'scripts/lib/report-reference.ts'
       - 'scripts/lib/valuation-rebuild.ts'
