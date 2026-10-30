@@ -1,0 +1,296 @@
+{
+  "asOf": "2026-10-30T10:31:55.528392+00:00",
+  "eligible": 2901,
+  "ready": 2555,
+  "pending": 346,
+  "queueErrors": [
+    {
+      "count": 346,
+      "error_code": "CALCULATION_WITHHELD"
+    }
+  ],
+  "performance": [
+    {
+      "status": "blocked",
+      "players": 346,
+      "records": 360,
+      "fixtures": 103
+    },
+    {
+      "status": "not-played",
+      "players": 1816,
+      "records": 5501,
+      "fixtures": 399
+    },
+    {
+      "status": "provisional",
+      "players": 2184,
+      "records": 12351,
+      "fixtures": 399
+    }
+  ],
+  "withholding": [
+    {
+      "reason": "GOAL_BOUNDARY_TIME_AMBIGUOUS",
+      "players": 35,
+      "records": 37,
+      "fixtures": 17
+    },
+    {
+      "reason": "GOAL_SCORE_MISMATCH",
+      "players": 46,
+      "records": 46,
+      "fixtures": 1
+    },
+    {
+      "reason": "MATCH_POSITION_REQUIRED",
+      "players": 3,
+      "records": 3,
+      "fixtures": 3
+    },
+    {
+      "reason": "MINUTES_INTERVAL_MISMATCH",
+      "players": 82,
+      "records": 84,
+      "fixtures": 83
+    },
+    {
+      "reason": "VAR_CARD_TIMELINE_REQUIRED",
+      "players": 46,
+      "records": 46,
+      "fixtures": 1
+    },
+    {
+      "reason": "VAR_REVIEW_REQUIRED",
+      "players": 143,
+      "records": 143,
+      "fixtures": 3
+    },
+    {
+      "reason": "ZERO_MINUTES_CONFLICT",
+      "players": 1,
+      "records": 1,
+      "fixtures": 1
+    }
+  ],
+  "prices": 6598,
+  "wrongResults": 0,
+  "dnpMismatches": 0,
+  "history": {
+    "checkedAt": "2026-10-30T10:31:55.528392+00:00",
+    "heldPending": 0,
+    "oldReference": 0,
+    "initialValues": 2901,
+    "prelaunchHistory": 0,
+    "wrongHistoryPolicy": 0,
+    "initialHistoryPoints": 2901
+  },
+  "referenceHash": "ff426bb1b487ff396ee4627c6ff08da7cc1e9b3bba23428326385a846b18a611",
+  "integrity": {
+    "trades": "5894bd4faa304c017d6a8b1869bcf666",
+    "wallets": "1169c7f66829fecdac89c88dfc632550",
+    "holdings": "53efd34dfa38c8ec147c41135a98fb69"
+  },
+  "expectedIntegrity": {
+    "trades": "5894bd4faa304c017d6a8b1869bcf666",
+    "wallets": "1169c7f66829fecdac89c88dfc632550",
+    "holdings": "53efd34dfa38c8ec147c41135a98fb69"
+  },
+  "financialIntegrityUnchanged": true,
+  "recovery": {
+    "stage": "evidence-recovery",
+    "checkedAt": "2026-10-30T09:41:19.246Z",
+    "attempted": 118,
+    "recovered": [
+      "bsd-2890",
+      "bsd-8563",
+      "bsd-1822",
+      "bsd-711",
+      "bsd-3663",
+      "bsd-2250",
+      "bsd-2356",
+      "bsd-744",
+      "bsd-148588",
+      "bsd-1345",
+      "bsd-1220",
+      "bsd-2205",
+      "bsd-1682",
+      "bsd-5837",
+      "bsd-1698",
+      "bsd-2888",
+      "bsd-1444",
+      "bsd-1441",
+      "bsd-614",
+      "bsd-456",
+      "bsd-1995",
+      "bsd-205764",
+      "bsd-4941",
+      "bsd-28573",
+      "bsd-1935",
+      "bsd-1925",
+      "bsd-2348",
+      "bsd-2354",
+      "bsd-22792",
+      "bsd-1114",
+      "bsd-5652",
+      "bsd-2352",
+      "bsd-405",
+      "bsd-390",
+      "bsd-458",
+      "bsd-2900",
+      "bsd-1686",
+      "bsd-709",
+      "bsd-1693",
+      "bsd-1690",
+      "bsd-2471",
+      "bsd-28557",
+      "bsd-91520",
+      "bsd-1991",
+      "bsd-6160",
+      "bsd-1733",
+      "bsd-21657",
+      "bsd-64190",
+      "bsd-14143",
+      "bsd-6989",
+      "bsd-3839",
+      "bsd-29438",
+      "bsd-39443",
+      "bsd-770",
+      "bsd-1812",
+      "bsd-1622",
+      "bsd-8726",
+      "bsd-2102",
+      "bsd-21997",
+      "bsd-2163",
+      "bsd-3892",
+      "bsd-1336",
+      "bsd-401",
+      "bsd-4027",
+      "bsd-2202",
+      "bsd-29368",
+      "bsd-4237",
+      "bsd-394",
+      "bsd-581",
+      "bsd-746",
+      "bsd-2525",
+      "bsd-4104",
+      "bsd-4900",
+      "bsd-2534",
+      "bsd-446",
+      "bsd-2003"
+    ],
+    "withheld": [
+      "bsd-4898",
+      "bsd-765",
+      "bsd-1216",
+      "bsd-2435",
+      "bsd-762",
+      "bsd-2529",
+      "bsd-1306",
+      "bsd-7538",
+      "bsd-8575",
+      "bsd-4823",
+      "bsd-22392",
+      "bsd-720",
+      "bsd-951",
+      "bsd-4127",
+      "bsd-1747",
+      "bsd-1594",
+      "bsd-778",
+      "bsd-8953",
+      "bsd-2422",
+      "bsd-8503",
+      "bsd-29649",
+      "bsd-952",
+      "bsd-6535",
+      "bsd-2372",
+      "bsd-771",
+      "bsd-4248",
+      "bsd-2119",
+      "bsd-3832",
+      "bsd-2112",
+      "bsd-4629",
+      "bsd-2430",
+      "bsd-3860",
+      "bsd-1365",
+      "bsd-41479",
+      "bsd-41476",
+      "bsd-4308",
+      "bsd-1770",
+      "bsd-494",
+      "bsd-4851",
+      "bsd-2591",
+      "bsd-4003",
+      "bsd-451"
+    ],
+    "failed": [],
+    "portfolios": {
+      "assetSnapshotsRebuilt": 11
+    },
+    "financialIntegrityUnchanged": true
+  },
+  "identityPreview": {
+    "stage": "identity-preview",
+    "results": [
+      {
+        "fixtureId": "bsd-1",
+        "league": 1,
+        "resolved": 2,
+        "scorable": 1,
+        "reasons": {
+          "MATCH_POSITION_REQUIRED": 38,
+          "ZERO_MINUTES_CONFLICT": 1
+        }
+      },
+      {
+        "fixtureId": "bsd-690",
+        "league": 3,
+        "resolved": 0,
+        "scorable": 0,
+        "reasons": {
+          "MATCH_POSITION_REQUIRED": 44
+        }
+      },
+      {
+        "fixtureId": "bsd-1071",
+        "league": 4,
+        "resolved": 1,
+        "scorable": 1,
+        "reasons": {
+          "MATCH_POSITION_REQUIRED": 48
+        }
+      },
+      {
+        "fixtureId": "bsd-1457",
+        "league": 5,
+        "resolved": 1,
+        "scorable": 1,
+        "reasons": {
+          "MATCH_POSITION_REQUIRED": 39
+        }
+      },
+      {
+        "fixtureId": "bsd-1763",
+        "league": 6,
+        "resolved": 0,
+        "scorable": 0,
+        "reasons": {
+          "MATCH_POSITION_REQUIRED": 40
+        }
+      }
+    ],
+    "fixturesChecked": 5,
+    "scorablePlayers": 3,
+    "applied": false,
+    "reason": "Only three scorable players across five samples; insufficient reliable ID coverage for a general historical rebase. Raw records and reference remain unchanged."
+  },
+  "workflow": {
+    "recoveryRun": 41035072224,
+    "previewRun": 41036559368,
+    "verifiedFullCI": 41036559502
+  },
+  "unitTests": {
+    "passed": 241,
+    "failed": 0
+  }
+}

@@ -39,6 +39,15 @@ test('report goalkeeper saves, clean-sheet threshold and actual participation',(
  const m=match('G');m.stats.saves=7;m.legacy={penalty_save:1};assert.equal(points(calc(m),'saves'),2);assert.equal(points(calc(m),'penalty_saves'),5);assert.equal(points(calc(m),'clean_sheet'),4);
  m.stats.minutes_played=45;m.source.incidents.incidents=[{type:'substitution',minute:45,player_out_id:2,player_in_id:30}];assert.equal(points(calc(m),'clean_sheet'),0);
 });
+test('same-minute goals only block when boundary order can affect positional points',()=>{
+ const m=match('D');m.stats.minutes_played=60;m.homeScore=1;
+ m.source.incidents.incidents=[{type:'goal',minute:60,is_home:true,player_id:3},{type:'substitution',minute:60,player_out_id:2,player_in_id:30}];
+ assert.equal(calc(m).status,'provisional');assert.equal(points(calc(m),'clean_sheet'),4);
+ m.homeScore=0;m.awayScore=1;m.source.incidents.incidents[0].is_home=false;m.source.incidents.incidents[0].player_id=12;
+ assert.ok(calc(m).warnings.includes('GOAL_BOUNDARY_TIME_AMBIGUOUS'));
+ m.source.lineups.lineups.home.players[1].position='F';assert.equal(calc(m).status,'provisional');
+ assert.equal(points(calc(m),'clean_sheet'),undefined);assert.equal(points(calc(m),'conceded'),undefined);
+});
 test('observed added-time duration rescues real 90+ appearances without permitting corrupt counters',()=>{
  const m=match();m.stats.minutes_played=97;m.durationMinutes=97;assert.equal(calc(m).score,6);assert.equal(calc(m).status,'provisional');
  m.stats.minutes_played=180;assert.ok(calc(m).warnings.includes('INVALID_MINUTES'));

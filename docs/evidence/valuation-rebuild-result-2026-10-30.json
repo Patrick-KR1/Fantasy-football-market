@@ -1,22 +1,22 @@
 {
-  "asOf": "2026-10-30T08:39:38.433228+00:00",
+  "asOf": "2026-10-30T10:31:55.528392+00:00",
   "market": {
-    "queue": 422,
-    "ready": 2479,
-    "pending": 422,
+    "queue": 346,
+    "ready": 2555,
+    "pending": 346,
     "rebuild": {
       "status": "active",
       "startsAt": "2026-09-30T15:00:00Z",
       "activatedAt": "2026-10-30T08:19:02.201351+00:00",
       "scopeCorrectedAt": "2026-10-30T08:19:02.081316+00:00",
-      "portfolioRebuiltAt": "2026-10-30T08:34:57.958723+00:00",
+      "portfolioRebuiltAt": "2026-10-30T09:41:18.978324+00:00",
       "assetSnapshotsRebuilt": 11
     },
     "eligible": 2901,
-    "checkedAt": "2026-10-30T08:39:38.433228+00:00",
+    "checkedAt": "2026-10-30T10:31:55.528392+00:00",
     "queueErrors": [
       {
-        "count": 422,
+        "count": 346,
         "error_code": "CALCULATION_WITHHELD"
       }
     ],
@@ -93,20 +93,20 @@
   "performance": [
     {
       "status": "blocked",
-      "records": 444,
-      "players": 422,
-      "fixtures": 117
+      "players": 346,
+      "records": 360,
+      "fixtures": 103
     },
     {
       "status": "not-played",
-      "records": 5501,
       "players": 1816,
+      "records": 5501,
       "fixtures": 399
     },
     {
       "status": "provisional",
-      "records": 12267,
       "players": 2184,
+      "records": 12351,
       "fixtures": 399
     }
   ],
@@ -121,50 +121,55 @@
     "max_appearances": 7,
     "fullHistoricalStatisticsAvailable": false,
     "identityLimitation": "Archived historical teamsheets include null player IDs despite available positions; five fresh provider rechecks reproduce this gap. No name-only identity repairs were performed.",
-    "qualityEvidence": "historical-reference-quality-2026-10-30.json"
+    "qualityEvidence": "historical-reference-quality-2026-10-30.json",
+    "identityPreview": {
+      "fixturesChecked": 5,
+      "scorablePlayers": 3,
+      "applied": false
+    }
   },
   "withholding": [
     {
-      "reason": "VAR_REVIEW_REQUIRED",
-      "records": 143,
-      "fixtures": 3,
-      "players": 143
-    },
-    {
       "reason": "GOAL_BOUNDARY_TIME_AMBIGUOUS",
-      "records": 121,
-      "fixtures": 34,
-      "players": 118
-    },
-    {
-      "reason": "MINUTES_INTERVAL_MISMATCH",
-      "records": 84,
-      "fixtures": 83,
-      "players": 82
-    },
-    {
-      "reason": "VAR_CARD_TIMELINE_REQUIRED",
-      "records": 46,
-      "fixtures": 1,
-      "players": 46
+      "players": 35,
+      "records": 37,
+      "fixtures": 17
     },
     {
       "reason": "GOAL_SCORE_MISMATCH",
+      "players": 46,
       "records": 46,
-      "fixtures": 1,
-      "players": 46
+      "fixtures": 1
     },
     {
       "reason": "MATCH_POSITION_REQUIRED",
+      "players": 3,
       "records": 3,
-      "fixtures": 3,
-      "players": 3
+      "fixtures": 3
+    },
+    {
+      "reason": "MINUTES_INTERVAL_MISMATCH",
+      "players": 82,
+      "records": 84,
+      "fixtures": 83
+    },
+    {
+      "reason": "VAR_CARD_TIMELINE_REQUIRED",
+      "players": 46,
+      "records": 46,
+      "fixtures": 1
+    },
+    {
+      "reason": "VAR_REVIEW_REQUIRED",
+      "players": 143,
+      "records": 143,
+      "fixtures": 3
     },
     {
       "reason": "ZERO_MINUTES_CONFLICT",
+      "players": 1,
       "records": 1,
-      "fixtures": 1,
-      "players": 1
+      "fixtures": 1
     }
   ],
   "examples": [
@@ -220,13 +225,13 @@
     "nonParticipationRate": 0.015
   },
   "verification": {
-    "unitTests": 237,
+    "unitTests": 241,
     "unitFailed": 0,
     "databaseIntegration": true,
     "typescript": true,
     "lint": true,
     "productionBuild": true,
-    "postgres17AndDesktopMobileCI": 41027575073
+    "postgres17AndDesktopMobileCI": 41036559502
   },
   "privateBackup": {
     "bytes": 2336745,
@@ -236,5 +241,18 @@
     "birthDates": 13,
     "countries": 2,
     "players": 14
+  },
+  "postRecovery": {
+    "additionalPlayersRecovered": 76,
+    "pricingResults": 6598,
+    "wrongPricingResults": 0,
+    "dnpMismatches": 0,
+    "heldPending": 0,
+    "financialIntegrity": {
+      "trades": "5894bd4faa304c017d6a8b1869bcf666",
+      "wallets": "1169c7f66829fecdac89c88dfc632550",
+      "holdings": "53efd34dfa38c8ec147c41135a98fb69"
+    },
+    "evidence": "valuation-evidence-recovery-2026-10-30.json"
   }
 }
