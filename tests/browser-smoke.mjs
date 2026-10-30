@@ -412,7 +412,8 @@ try {
   await mockPage.goto(base+'/community',{waitUntil:'networkidle'});
   assert.equal(await mockPage.locator('.community-switch').count(),0);assert.equal(await mockPage.locator('.popular-list').count(),0);assert.equal(await mockPage.locator('.explorer').count(),0);assert.equal(await mockPage.locator('.feed-composer').count(),0);
   await mockPage.getByRole('link',{name:'구단 전용 제목',exact:true}).waitFor();
-  await mockPage.goto(base+'/community/players',{waitUntil:'networkidle'});assert.equal(new URL(mockPage.url()).pathname,'/players');
+  await mockPage.goto(base+'/community/players',{waitUntil:'domcontentloaded'});
+  await mockPage.waitForURL(url=>url.pathname==='/players',{waitUntil:'domcontentloaded'});assert.equal(new URL(mockPage.url()).pathname,'/players');
   await mockPage.goto(base+'/players/test-player',{waitUntil:'networkidle'});await mockPage.getByRole('button',{name:'커뮤니티',exact:true}).click();
   await mockPage.getByRole('link',{name:/^테스트 경기 후기/}).first().waitFor();
   assert.equal(await mockPage.locator('.community-board-table tr[data-scope=club]').count(),0);

@@ -1,0 +1,35 @@
+name: Create approved 50-user sample dataset
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sample-data.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: kickx-sample-data
+  cancel-in-progress: false
+jobs:
+  seed:
+    if: github.repository == 'hyun1290/kick-x-test'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Create marked accounts and use normal trading and community rules
+        run: node scripts/seed-demo.mjs --apply
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sample-data-result
+          path: test-artifacts/demo-seed-result.json
+          if-no-files-found: ignore
+          retention-days: 7
