@@ -1,0 +1,77 @@
+{
+  "asOf": "2026-10-30T14:11:06.755642+00:00",
+  "batch": "kickx-demo-20261030",
+  "sourceAsOf": "2026-10-30T13:46:31.81474+00:00",
+  "counts": {
+    "users": 50,
+    "wallets": 50,
+    "trades": 419,
+    "holdings": 377,
+    "posts": 100,
+    "comments": 120,
+    "attachments": 35,
+    "buys": 398,
+    "sells": 21
+  },
+  "validation": {
+    "asOf": "2026-10-30T14:11:06.755642+00:00",
+    "posts": 100,
+    "users": 50,
+    "trades": 419,
+    "wallets": 50,
+    "comments": 120,
+    "holdings": 377,
+    "sessions": 0,
+    "notBanned": 0,
+    "attachments": 35,
+    "feeMismatch": 0,
+    "walletMismatch": 0,
+    "holdingMismatch": 0,
+    "missingHoldings": 0,
+    "foreignAttachments": 0,
+    "minCash": 198107,
+    "sampleAdmins": 0,
+    "replyMismatch": 0,
+    "postFanMismatch": 0,
+    "commentFanMismatch": 0,
+    "attachmentTargetMismatch": 0,
+    "postBodiesWithActualLineBreaks": 100,
+    "postBodiesWithLiteralBackslashN": 0
+  },
+  "auth": {
+    "bannedAccounts": 50,
+    "activeSessions": 0,
+    "passwordProvidedBySeeder": false,
+    "internalPasswordHashes": 50,
+    "invitationEmailsSent": 0
+  },
+  "initialPoints": 1300000,
+  "existingFinanceUnchanged": true,
+  "financialFingerprints": {
+    "before": {
+      "wallets": "690e0e1bd5107a0f7aa4206fc4fc9f2a22553899a1f54d398eede52483c493b8",
+      "trades": "5defd2b73477390741458f8c78807c8d5682b54f49dcb16f5f756646fe1242a9",
+      "holdings": "378d1ed6a37ebec5cf1df6182f3a886b0031d6b8316708d0ce2e48ddc90fd02a"
+    },
+    "after": {
+      "wallets": "690e0e1bd5107a0f7aa4206fc4fc9f2a22553899a1f54d398eede52483c493b8",
+      "trades": "5defd2b73477390741458f8c78807c8d5682b54f49dcb16f5f756646fe1242a9",
+      "holdings": "378d1ed6a37ebec5cf1df6182f3a886b0031d6b8316708d0ce2e48ddc90fd02a"
+    }
+  },
+  "seedWorkflow": {
+    "run": 41068955338,
+    "job": 124107669058,
+    "success": true
+  },
+  "verification": {
+    "unitTests": 245,
+    "unitFailed": 0,
+    "databaseIntegration": true,
+    "typecheckBuild": true,
+    "fullCI": 41071189420,
+    "browserRerunPending": false,
+    "browserDesktopMobile": true,
+    "fullCISuccess": true
+  }
+}
