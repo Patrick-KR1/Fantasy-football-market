@@ -1,0 +1,1610 @@
+{
+  "allArchives": {
+    "stage": "reference-quality-complete",
+    "checkedAt": "2026-10-30T08:49:25.006Z",
+    "referenceHash": "ff426bb1b487ff396ee4627c6ff08da7cc1e9b3bba23428326385a846b18a611",
+    "archives": 1751,
+    "scorableFixtures": 278,
+    "archivesHashVerified": true,
+    "leagues": [
+      {
+        "league": 1,
+        "archives": 380,
+        "scorableFixtures": 59,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 15189,
+        "examples": [
+          {
+            "fixtureId": "bsd-1",
+            "date": "2025-08-15T19:00:00+00:00",
+            "home": "Liverpool FC",
+            "away": "Bournemouth",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 22
+          },
+          {
+            "fixtureId": "bsd-2",
+            "date": "2025-08-16T11:30:00+00:00",
+            "home": "Aston Villa",
+            "away": "Newcastle United",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 10
+          },
+          {
+            "fixtureId": "bsd-324",
+            "date": "2026-04-19T13:00:00+00:00",
+            "home": "Aston Villa",
+            "away": "Sunderland",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 23
+          },
+          {
+            "fixtureId": "bsd-325",
+            "date": "2026-04-18T11:30:00+00:00",
+            "home": "Brentford",
+            "away": "Fulham",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 10
+          }
+        ]
+      },
+      {
+        "league": 3,
+        "archives": 380,
+        "scorableFixtures": 68,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 16940,
+        "examples": [
+          {
+            "fixtureId": "bsd-690",
+            "date": "2025-08-15T17:00:00+00:00",
+            "home": "Girona FC",
+            "away": "Rayo Vallecano",
+            "scorable": false,
+            "statsRows": 44,
+            "declaredStats": 44,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 20
+          },
+          {
+            "fixtureId": "bsd-691",
+            "date": "2025-08-15T19:30:00+00:00",
+            "home": "Villarreal",
+            "away": "Real Oviedo",
+            "scorable": false,
+            "statsRows": 46,
+            "declaredStats": 46,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 21
+          },
+          {
+            "fixtureId": "bsd-1001",
+            "date": "2026-04-25T19:00:00+00:00",
+            "home": "Atlético Madrid",
+            "away": "Athletic Club",
+            "scorable": true,
+            "statsRows": 45,
+            "declaredStats": 45,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19
+          },
+          {
+            "fixtureId": "bsd-1002",
+            "date": "2026-04-25T12:00:00+00:00",
+            "home": "Deportivo Alavés",
+            "away": "Mallorca",
+            "scorable": true,
+            "statsRows": 46,
+            "declaredStats": 46,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19
+          }
+        ]
+      },
+      {
+        "league": 4,
+        "archives": 380,
+        "scorableFixtures": 60,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 17775,
+        "examples": [
+          {
+            "fixtureId": "bsd-1071",
+            "date": "2025-08-23T16:30:00+00:00",
+            "home": "Genoa",
+            "away": "Lecce",
+            "scorable": false,
+            "statsRows": 49,
+            "declaredStats": 49,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19
+          },
+          {
+            "fixtureId": "bsd-1072",
+            "date": "2025-08-23T16:30:00+00:00",
+            "home": "Sassuolo",
+            "away": "SSC Napoli",
+            "scorable": false,
+            "statsRows": 51,
+            "declaredStats": 51,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 20
+          },
+          {
+            "fixtureId": "bsd-1397",
+            "date": "2026-04-19T10:30:00+00:00",
+            "home": "Cremonese",
+            "away": "Torino",
+            "scorable": true,
+            "statsRows": 46,
+            "declaredStats": 46,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 18
+          },
+          {
+            "fixtureId": "bsd-1398",
+            "date": "2026-04-19T13:00:00+00:00",
+            "home": "Hellas Verona",
+            "away": "AC Milan",
+            "scorable": true,
+            "statsRows": 47,
+            "declaredStats": 47,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 16
+          }
+        ]
+      },
+      {
+        "league": 5,
+        "archives": 306,
+        "scorableFixtures": 45,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 12218,
+        "examples": [
+          {
+            "fixtureId": "bsd-1457",
+            "date": "2025-08-22T18:30:00+00:00",
+            "home": "FC Bayern München",
+            "away": "RB Leipzig",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 26
+          },
+          {
+            "fixtureId": "bsd-1458",
+            "date": "2025-08-23T13:30:00+00:00",
+            "home": "1. FC Heidenheim",
+            "away": "VfL Wolfsburg",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 22
+          },
+          {
+            "fixtureId": "bsd-1718",
+            "date": "2026-04-18T13:30:00+00:00",
+            "home": "1. FC Union Berlin",
+            "away": "VfL Wolfsburg",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19
+          },
+          {
+            "fixtureId": "bsd-1719",
+            "date": "2026-04-18T13:30:00+00:00",
+            "home": "Bayer 04 Leverkusen",
+            "away": "FC Augsburg",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19
+          }
+        ]
+      },
+      {
+        "league": 6,
+        "archives": 305,
+        "scorableFixtures": 46,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 12160,
+        "examples": [
+          {
+            "fixtureId": "bsd-1763",
+            "date": "2025-08-15T18:45:00+00:00",
+            "home": "Stade Rennais",
+            "away": "Olympique de Marseille",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 22
+          },
+          {
+            "fixtureId": "bsd-1764",
+            "date": "2025-08-16T15:00:00+00:00",
+            "home": "RC Lens",
+            "away": "Olympique Lyonnais",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 17
+          },
+          {
+            "fixtureId": "bsd-1994",
+            "date": "2026-04-22T17:00:00+00:00",
+            "home": "Paris Saint-Germain",
+            "away": "Nantes",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 22
+          },
+          {
+            "fixtureId": "bsd-2025",
+            "date": "2026-04-18T17:00:00+00:00",
+            "home": "Angers",
+            "away": "Le Havre",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 20
+          }
+        ]
+      }
+    ],
+    "freshChecks": [],
+    "freshChecksDeferred": false
+  },
+  "identitySamples": {
+    "stage": "reference-quality-complete",
+    "checkedAt": "2026-10-30T08:57:26.093Z",
+    "referenceHash": "ff426bb1b487ff396ee4627c6ff08da7cc1e9b3bba23428326385a846b18a611",
+    "archives": 10,
+    "samplesOnly": true,
+    "referenceArchives": 1751,
+    "scorableFixtures": 278,
+    "archivesHashVerified": true,
+    "leagues": [
+      {
+        "league": 1,
+        "archives": 2,
+        "scorableFixtures": 1,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 80,
+        "examples": [
+          {
+            "fixtureId": "bsd-1",
+            "date": "2025-08-15T19:00:00+00:00",
+            "home": "Liverpool FC",
+            "away": "Bournemouth",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 22,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 27,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 325,
+                "teamId": 1,
+                "minutes": 90
+              },
+              {
+                "playerId": 322,
+                "teamId": 1,
+                "minutes": 90
+              },
+              {
+                "playerId": 324,
+                "teamId": 1,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MATCH_POSITION_REQUIRED": 40
+            }
+          },
+          {
+            "fixtureId": "bsd-324",
+            "date": "2026-04-19T13:00:00+00:00",
+            "home": "Aston Villa",
+            "away": "Sunderland",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 23,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 30,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 1629,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 503,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 504,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 511,
+                "teamId": 3,
+                "minutes": 90
+              },
+              {
+                "playerId": 508,
+                "teamId": 3,
+                "minutes": 90
+              },
+              {
+                "playerId": 1629,
+                "teamId": 3,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MINUTES_INTERVAL_MISMATCH": 1
+            }
+          }
+        ]
+      },
+      {
+        "league": 3,
+        "archives": 2,
+        "scorableFixtures": 1,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 89,
+        "examples": [
+          {
+            "fixtureId": "bsd-690",
+            "date": "2025-08-15T17:00:00+00:00",
+            "home": "Girona FC",
+            "away": "Rayo Vallecano",
+            "scorable": false,
+            "statsRows": 44,
+            "declaredStats": 44,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 20,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 25,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 4804,
+                "teamId": 39,
+                "minutes": 90
+              },
+              {
+                "playerId": 3904,
+                "teamId": 39,
+                "minutes": 90
+              },
+              {
+                "playerId": 3853,
+                "teamId": 39,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MATCH_POSITION_REQUIRED": 44
+            }
+          },
+          {
+            "fixtureId": "bsd-1001",
+            "date": "2026-04-25T19:00:00+00:00",
+            "home": "Atlético Madrid",
+            "away": "Athletic Club",
+            "scorable": true,
+            "statsRows": 45,
+            "declaredStats": 45,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 32,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 760,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 3832,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 778,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 567,
+                "teamId": 51,
+                "minutes": 90
+              },
+              {
+                "playerId": 581,
+                "teamId": 51,
+                "minutes": 90
+              },
+              {
+                "playerId": 580,
+                "teamId": 51,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {}
+          }
+        ]
+      },
+      {
+        "league": 4,
+        "archives": 2,
+        "scorableFixtures": 1,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 95,
+        "examples": [
+          {
+            "fixtureId": "bsd-1071",
+            "date": "2025-08-23T16:30:00+00:00",
+            "home": "Genoa",
+            "away": "Lecce",
+            "scorable": false,
+            "statsRows": 49,
+            "declaredStats": 49,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 32,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 2588,
+                "teamId": 59,
+                "minutes": 90
+              },
+              {
+                "playerId": 3923,
+                "teamId": 59,
+                "minutes": 90
+              },
+              {
+                "playerId": 2589,
+                "teamId": 59,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MATCH_POSITION_REQUIRED": 49
+            }
+          },
+          {
+            "fixtureId": "bsd-1397",
+            "date": "2026-04-19T10:30:00+00:00",
+            "home": "Cremonese",
+            "away": "Torino",
+            "scorable": true,
+            "statsRows": 46,
+            "declaredStats": 46,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 18,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 32,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 970,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 971,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 972,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 972,
+                "teamId": 64,
+                "minutes": 90
+              },
+              {
+                "playerId": 978,
+                "teamId": 64,
+                "minutes": 90
+              },
+              {
+                "playerId": 974,
+                "teamId": 64,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MINUTES_INTERVAL_MISMATCH": 2
+            }
+          }
+        ]
+      },
+      {
+        "league": 5,
+        "archives": 2,
+        "scorableFixtures": 1,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 80,
+        "examples": [
+          {
+            "fixtureId": "bsd-1457",
+            "date": "2025-08-22T18:30:00+00:00",
+            "home": "FC Bayern München",
+            "away": "RB Leipzig",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 26,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 32,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 2467,
+                "teamId": 79,
+                "minutes": 90
+              },
+              {
+                "playerId": 2456,
+                "teamId": 79,
+                "minutes": 90
+              },
+              {
+                "playerId": 2468,
+                "teamId": 79,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MATCH_POSITION_REQUIRED": 40
+            }
+          },
+          {
+            "fixtureId": "bsd-1718",
+            "date": "2026-04-18T13:30:00+00:00",
+            "home": "1. FC Union Berlin",
+            "away": "VfL Wolfsburg",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 19,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 32,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 2416,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 2417,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 2418,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 1380,
+                "teamId": 82,
+                "minutes": 90
+              },
+              {
+                "playerId": 4380,
+                "teamId": 82,
+                "minutes": 90
+              },
+              {
+                "playerId": 1379,
+                "teamId": 82,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MINUTES_INTERVAL_MISMATCH": 3
+            }
+          }
+        ]
+      },
+      {
+        "league": 6,
+        "archives": 2,
+        "scorableFixtures": 1,
+        "emptyStats": 0,
+        "unconfirmedLineups": 0,
+        "missingIncidents": 0,
+        "statisticsRows": 80,
+        "examples": [
+          {
+            "fixtureId": "bsd-1763",
+            "date": "2025-08-15T18:45:00+00:00",
+            "home": "Stade Rennais",
+            "away": "Olympique de Marseille",
+            "scorable": false,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 22,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 31,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": null,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 2807,
+                "teamId": 97,
+                "minutes": 90
+              },
+              {
+                "playerId": 2812,
+                "teamId": 97,
+                "minutes": 90
+              },
+              {
+                "playerId": 2801,
+                "teamId": 97,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {
+              "MATCH_POSITION_REQUIRED": 40
+            }
+          },
+          {
+            "fixtureId": "bsd-1994",
+            "date": "2026-04-22T17:00:00+00:00",
+            "home": "Paris Saint-Germain",
+            "away": "Nantes",
+            "scorable": true,
+            "statsRows": 40,
+            "declaredStats": 40,
+            "lineupStatus": "confirmed",
+            "homeStarters": 11,
+            "awayStarters": 11,
+            "incidents": 22,
+            "status": "finished",
+            "normalizedStatus": "FT",
+            "extraTimeScore": null,
+            "shootout": null,
+            "positiveMinutes": 32,
+            "lineupSamples": [
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 2257,
+                "position": "G",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 4241,
+                "position": "D",
+                "nestedPlayer": null
+              },
+              {
+                "keys": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "position",
+                  "jersey_number",
+                  "captain",
+                  "ai_score"
+                ],
+                "id": 2244,
+                "position": "D",
+                "nestedPlayer": null
+              }
+            ],
+            "statisticsSamples": [
+              {
+                "playerId": 1420,
+                "teamId": 113,
+                "minutes": 90
+              },
+              {
+                "playerId": 1124,
+                "teamId": 113,
+                "minutes": 90
+              },
+              {
+                "playerId": 1128,
+                "teamId": 113,
+                "minutes": 90
+              }
+            ],
+            "priorResultReasons": {}
+          }
+        ]
+      }
+    ],
+    "freshChecks": [
+      {
+        "fixtureId": "bsd-1",
+        "league": 1,
+        "archivedStats": 40,
+        "statsRows": 40,
+        "declaredStats": 40,
+        "lineupStatus": "confirmed",
+        "homeStarters": 11,
+        "awayStarters": 11,
+        "incidents": 22,
+        "status": "finished",
+        "normalizedStatus": "FT",
+        "extraTimeScore": null,
+        "shootout": null,
+        "positiveMinutes": 27,
+        "lineupSamples": [
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "G",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          }
+        ],
+        "statisticsSamples": [
+          {
+            "playerId": 325,
+            "teamId": 1,
+            "minutes": 90
+          },
+          {
+            "playerId": 322,
+            "teamId": 1,
+            "minutes": 90
+          },
+          {
+            "playerId": 324,
+            "teamId": 1,
+            "minutes": 90
+          }
+        ],
+        "priorResultReasons": {}
+      },
+      {
+        "fixtureId": "bsd-690",
+        "league": 3,
+        "archivedStats": 44,
+        "statsRows": 44,
+        "declaredStats": 44,
+        "lineupStatus": "confirmed",
+        "homeStarters": 11,
+        "awayStarters": 11,
+        "incidents": 20,
+        "status": "finished",
+        "normalizedStatus": "FT",
+        "extraTimeScore": null,
+        "shootout": null,
+        "positiveMinutes": 25,
+        "lineupSamples": [
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "G",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          }
+        ],
+        "statisticsSamples": [
+          {
+            "playerId": 4804,
+            "teamId": 39,
+            "minutes": 90
+          },
+          {
+            "playerId": 3904,
+            "teamId": 39,
+            "minutes": 90
+          },
+          {
+            "playerId": 3853,
+            "teamId": 39,
+            "minutes": 90
+          }
+        ],
+        "priorResultReasons": {}
+      },
+      {
+        "fixtureId": "bsd-1071",
+        "league": 4,
+        "archivedStats": 49,
+        "statsRows": 49,
+        "declaredStats": 49,
+        "lineupStatus": "confirmed",
+        "homeStarters": 11,
+        "awayStarters": 11,
+        "incidents": 19,
+        "status": "finished",
+        "normalizedStatus": "FT",
+        "extraTimeScore": null,
+        "shootout": null,
+        "positiveMinutes": 32,
+        "lineupSamples": [
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "G",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          }
+        ],
+        "statisticsSamples": [
+          {
+            "playerId": 2588,
+            "teamId": 59,
+            "minutes": 90
+          },
+          {
+            "playerId": 3923,
+            "teamId": 59,
+            "minutes": 90
+          },
+          {
+            "playerId": 2589,
+            "teamId": 59,
+            "minutes": 90
+          }
+        ],
+        "priorResultReasons": {}
+      },
+      {
+        "fixtureId": "bsd-1457",
+        "league": 5,
+        "archivedStats": 40,
+        "statsRows": 40,
+        "declaredStats": 40,
+        "lineupStatus": "confirmed",
+        "homeStarters": 11,
+        "awayStarters": 11,
+        "incidents": 26,
+        "status": "finished",
+        "normalizedStatus": "FT",
+        "extraTimeScore": null,
+        "shootout": null,
+        "positiveMinutes": 32,
+        "lineupSamples": [
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "G",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          }
+        ],
+        "statisticsSamples": [
+          {
+            "playerId": 2467,
+            "teamId": 79,
+            "minutes": 90
+          },
+          {
+            "playerId": 2456,
+            "teamId": 79,
+            "minutes": 90
+          },
+          {
+            "playerId": 2468,
+            "teamId": 79,
+            "minutes": 90
+          }
+        ],
+        "priorResultReasons": {}
+      },
+      {
+        "fixtureId": "bsd-1763",
+        "league": 6,
+        "archivedStats": 40,
+        "statsRows": 40,
+        "declaredStats": 40,
+        "lineupStatus": "confirmed",
+        "homeStarters": 11,
+        "awayStarters": 11,
+        "incidents": 22,
+        "status": "finished",
+        "normalizedStatus": "FT",
+        "extraTimeScore": null,
+        "shootout": null,
+        "positiveMinutes": 31,
+        "lineupSamples": [
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "G",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          },
+          {
+            "keys": [
+              "id",
+              "name",
+              "short_name",
+              "position",
+              "jersey_number",
+              "captain",
+              "ai_score"
+            ],
+            "id": null,
+            "position": "D",
+            "nestedPlayer": null
+          }
+        ],
+        "statisticsSamples": [
+          {
+            "playerId": 2807,
+            "teamId": 97,
+            "minutes": 90
+          },
+          {
+            "playerId": 2812,
+            "teamId": 97,
+            "minutes": 90
+          },
+          {
+            "playerId": 2801,
+            "teamId": 97,
+            "minutes": 90
+          }
+        ],
+        "priorResultReasons": {}
+      }
+    ],
+    "freshChecksDeferred": false
+  },
+  "notes": [
+    "Scorable fixture count is distinct from raw resource completeness.",
+    "Five fresh provider rechecks retain null lineup player IDs; no name-only identity repairs were performed.",
+    "Not every individual rejection among the 1473 unscorable fixtures was separately classified."
+  ]
+}

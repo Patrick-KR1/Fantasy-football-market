@@ -1,0 +1,33 @@
+name: Audit historical statistics coverage
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/valuation-reference-quality.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'hyun1290/kick-x-test'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BSD_API_KEY: ${{ secrets.BSD_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Inspect historical match-position identities and recheck provider payloads
+        run: node scripts/audit-reference-quality.mjs --samples
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: historical-statistics-coverage
+          path: test-artifacts/reference-quality.json
+          if-no-files-found: ignore
+          retention-days: 7

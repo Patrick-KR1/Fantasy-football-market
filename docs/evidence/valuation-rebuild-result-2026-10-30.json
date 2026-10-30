@@ -1,0 +1,240 @@
+{
+  "asOf": "2026-10-30T08:39:38.433228+00:00",
+  "market": {
+    "queue": 422,
+    "ready": 2479,
+    "pending": 422,
+    "rebuild": {
+      "status": "active",
+      "startsAt": "2026-09-30T15:00:00Z",
+      "activatedAt": "2026-10-30T08:19:02.201351+00:00",
+      "scopeCorrectedAt": "2026-10-30T08:19:02.081316+00:00",
+      "portfolioRebuiltAt": "2026-10-30T08:34:57.958723+00:00",
+      "assetSnapshotsRebuilt": 11
+    },
+    "eligible": 2901,
+    "checkedAt": "2026-10-30T08:39:38.433228+00:00",
+    "queueErrors": [
+      {
+        "count": 422,
+        "error_code": "CALCULATION_WITHHELD"
+      }
+    ],
+    "prelaunchHistory": 0,
+    "wrongHistoryPolicy": 0,
+    "initialHistoryPoints": 2901,
+    "financialIntegrityUnchanged": true
+  },
+  "currentRoster": {
+    "checked_at": "2026-10-30 08:00:24.323535+00",
+    "leagues": [
+      {
+        "teams": 20,
+        "players": 605,
+        "league_id": "bsd-1",
+        "missing_birth": 2,
+        "missing_korean": 0,
+        "missing_country": 0,
+        "missing_players": 0,
+        "missing_position": 0,
+        "wrong_membership": 0
+      },
+      {
+        "teams": 20,
+        "players": 602,
+        "league_id": "bsd-3",
+        "missing_birth": 4,
+        "missing_korean": 0,
+        "missing_country": 1,
+        "missing_players": 0,
+        "missing_position": 0,
+        "wrong_membership": 0
+      },
+      {
+        "teams": 20,
+        "players": 636,
+        "league_id": "bsd-4",
+        "missing_birth": 1,
+        "missing_korean": 0,
+        "missing_country": 1,
+        "missing_players": 0,
+        "missing_position": 0,
+        "wrong_membership": 0
+      },
+      {
+        "teams": 18,
+        "players": 539,
+        "league_id": "bsd-5",
+        "missing_birth": 1,
+        "missing_korean": 0,
+        "missing_country": 0,
+        "missing_players": 0,
+        "missing_position": 0,
+        "wrong_membership": 0
+      },
+      {
+        "teams": 18,
+        "players": 519,
+        "league_id": "bsd-6",
+        "missing_birth": 5,
+        "missing_korean": 0,
+        "missing_country": 0,
+        "missing_players": 0,
+        "missing_position": 0,
+        "wrong_membership": 0
+      }
+    ]
+  },
+  "initialValues": {
+    "initial_values": 2901,
+    "old_reference": 0,
+    "position_prior": 1374
+  },
+  "performance": [
+    {
+      "status": "blocked",
+      "records": 444,
+      "players": 422,
+      "fixtures": 117
+    },
+    {
+      "status": "not-played",
+      "records": 5501,
+      "players": 1816,
+      "fixtures": 399
+    },
+    {
+      "status": "provisional",
+      "records": 12267,
+      "players": 2184,
+      "fixtures": 399
+    }
+  ],
+  "reference": {
+    "hash": "ff426bb1b487ff396ee4627c6ff08da7cc1e9b3bba23428326385a846b18a611",
+    "regularFixtures": 1751,
+    "excludedNonRegular": 6,
+    "scored_appearances": 8432,
+    "fixtures_with_scores": 278,
+    "player_position_samples": 2490,
+    "median_appearances": 3,
+    "max_appearances": 7,
+    "fullHistoricalStatisticsAvailable": false,
+    "identityLimitation": "Archived historical teamsheets include null player IDs despite available positions; five fresh provider rechecks reproduce this gap. No name-only identity repairs were performed.",
+    "qualityEvidence": "historical-reference-quality-2026-10-30.json"
+  },
+  "withholding": [
+    {
+      "reason": "VAR_REVIEW_REQUIRED",
+      "records": 143,
+      "fixtures": 3,
+      "players": 143
+    },
+    {
+      "reason": "GOAL_BOUNDARY_TIME_AMBIGUOUS",
+      "records": 121,
+      "fixtures": 34,
+      "players": 118
+    },
+    {
+      "reason": "MINUTES_INTERVAL_MISMATCH",
+      "records": 84,
+      "fixtures": 83,
+      "players": 82
+    },
+    {
+      "reason": "VAR_CARD_TIMELINE_REQUIRED",
+      "records": 46,
+      "fixtures": 1,
+      "players": 46
+    },
+    {
+      "reason": "GOAL_SCORE_MISMATCH",
+      "records": 46,
+      "fixtures": 1,
+      "players": 46
+    },
+    {
+      "reason": "MATCH_POSITION_REQUIRED",
+      "records": 3,
+      "fixtures": 3,
+      "players": 3
+    },
+    {
+      "reason": "ZERO_MINUTES_CONFLICT",
+      "records": 1,
+      "fixtures": 1,
+      "players": 1
+    }
+  ],
+  "examples": [
+    {
+      "id": "bsd-1457",
+      "name_ko": "에단 음바페",
+      "price": "350527.0000",
+      "pricing_status": "ready",
+      "performance": "7",
+      "initial_price": "336916",
+      "initial_source": "previous-season",
+      "seed_score": "4.3495844876",
+      "previous_appearances": "5"
+    },
+    {
+      "id": "bsd-594",
+      "name_ko": "킬리안 음바페",
+      "price": "999949.0000",
+      "pricing_status": "ready",
+      "performance": "12",
+      "initial_price": "942276",
+      "initial_source": "previous-season",
+      "seed_score": "4.7988058943",
+      "previous_appearances": "5"
+    },
+    {
+      "id": "bsd-852",
+      "name_ko": "엘링 홀란드",
+      "price": "1000000.0000",
+      "pricing_status": "ready",
+      "performance": "8",
+      "initial_price": "991302",
+      "initial_source": "previous-season",
+      "seed_score": "5.8875621048",
+      "previous_appearances": "4"
+    }
+  ],
+  "parameters": {
+    "s": 1,
+    "beta": 0.3,
+    "kappa": 4,
+    "maxUp": 0.02,
+    "lambda": 5,
+    "maxDown": 0.02,
+    "maxPrice": 1000000,
+    "minPrice": 10000,
+    "initialMax": 1000000,
+    "initialMin": 10000,
+    "lowerQuantile": 0.05,
+    "upperQuantile": 0.95,
+    "deviationLimit": 1,
+    "valuationStartMs": 1790780400000,
+    "nonParticipationRate": 0.015
+  },
+  "verification": {
+    "unitTests": 237,
+    "unitFailed": 0,
+    "databaseIntegration": true,
+    "typescript": true,
+    "lint": true,
+    "productionBuild": true,
+    "postgres17AndDesktopMobileCI": 41027575073
+  },
+  "privateBackup": {
+    "bytes": 2336745,
+    "sha256Verified": true
+  },
+  "optionalProfileGaps": {
+    "birthDates": 13,
+    "countries": 2,
+    "players": 14
+  }
+}

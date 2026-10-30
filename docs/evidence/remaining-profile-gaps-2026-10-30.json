@@ -1,0 +1,135 @@
+{
+  "checkedAt": "2026-10-30T04:24:16Z",
+  "currentSquadPlayers": 2901,
+  "missingBirthDates": 13,
+  "missingCountries": 2,
+  "players": [
+    {
+      "id": "bsd-213612",
+      "name": "Nathanael James Kalembo",
+      "nameKo": "너새니얼 제임스 칼렘보",
+      "club": "크리스털 팰리스",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-216024",
+      "name": "Billie Lawrence",
+      "nameKo": "빌리 로런스",
+      "club": "브라이턴 앤드 호브 앨비언",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-216227",
+      "name": "Leonardo Taddei",
+      "nameKo": "레오나르도 타데이",
+      "club": "프로시노네",
+      "missing": [
+        "country"
+      ]
+    },
+    {
+      "id": "bsd-216435",
+      "name": "David Mensah Osei",
+      "nameKo": "데이비드 멘사 오세이",
+      "club": "마인츠 05",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-217787",
+      "name": "Youssef Khoudda",
+      "nameKo": "유세프 쿠다",
+      "club": "오세르",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-219410",
+      "name": "Mandjou Camara",
+      "nameKo": "만드주 카마라",
+      "club": "AS 로마",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-221269",
+      "name": "Angel Daniel Garcia",
+      "nameKo": "앙헬 다니엘 가르시아",
+      "club": "올랭피크 리옹",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-221776",
+      "name": "Ibrahim Meïté",
+      "nameKo": "이브라힘 메이테",
+      "club": "파리 FC",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-224062",
+      "name": "Sebastian Salazar Trujillo",
+      "nameKo": "세바스티안 사라자르 트루지로",
+      "club": "헤타페",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-224087",
+      "name": "Álvaro Fernández Fernández",
+      "nameKo": "알바로 페르난데스 페르난데스",
+      "club": "라싱 산탄데르",
+      "missing": [
+        "birthDate",
+        "country"
+      ]
+    },
+    {
+      "id": "bsd-31736",
+      "name": "Héctor Mejía",
+      "nameKo": "헤크토르 메지아",
+      "club": "라싱 산탄데르",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-38415",
+      "name": "Mathis Lainé",
+      "nameKo": "마티스 레네",
+      "club": "스타드 브레스트",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-67178",
+      "name": "Marc Santos",
+      "nameKo": "마르크 산토스",
+      "club": "레반테",
+      "missing": [
+        "birthDate"
+      ]
+    },
+    {
+      "id": "bsd-79566",
+      "name": "Lenny Videira",
+      "nameKo": "레니 비뎨라",
+      "club": "르망",
+      "missing": [
+        "birthDate"
+      ]
+    }
+  ]
+}
