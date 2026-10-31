@@ -299,7 +299,7 @@ export function HomeScreen() {
       <section className="home-movers" aria-labelledby="movers-title">
         <div className="home-section-head">
           <div>
-            <span className="eyebrow">시세 한눈에</span>
+            <span className="eyebrow">PLAYER TRENDS</span>
             <h2 id="movers-title">선수 시세 동향</h2>
           </div>
           <Link className="button secondary small" href="/market">선수 시장 <ArrowRight size={15} /></Link>
