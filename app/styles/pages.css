@@ -191,6 +191,12 @@ a.movers-player:hover strong { text-decoration: underline; text-decoration-color
 .mover-card-value { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; padding-top: var(--s-3); border-top: var(--border); }
 .mover-card-value b { font-size: 20px; font-weight: 900; letter-spacing: -0.03em; }
 .browser { display: grid; grid-template-columns: minmax(0, 1fr); }
+.market-heading .page-heading h1 { font-size:40px; }
+.market-browser { scroll-margin-top:80px; }
+.market-browser .league-tiles { margin-bottom:var(--s-5); }
+@media (max-width:700px) {
+  .market-heading .page-heading h1 { font-size:30px; }
+}
 .browser-top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-4); border-bottom: var(--border); margin-bottom: var(--s-5); }
 .browser-top .tabs.line { border-bottom: 0; }
 .view-switch { display: flex; margin-bottom: 6px; border: 1.5px solid var(--line-2); border-radius: var(--radius-1); }

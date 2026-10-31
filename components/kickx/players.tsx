@@ -6,8 +6,8 @@ import { Select } from "./select";
 import { useLeagueOptions, useTeamOptions } from "./options";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState, type CSSProperties } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, LayoutGrid, List, MessageCircle, RotateCcw, Search, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { ArrowRight, LayoutGrid, List, MessageCircle, RotateCcw, Search, Sparkles } from "lucide-react";
 import { dateText, money, seriesForDays, score } from "@/lib/kickx/data";
 import { leagueIdentity } from "@/lib/kickx/club-identity";
 import { DOMESTIC_LEAGUES } from "@/lib/kickx/support";
@@ -15,6 +15,7 @@ import type { Player, PlayerRecord } from "@/lib/kickx/types";
 import { usePlatform } from "./provider";
 import { useCatalogPage, useCatalogPlayer } from "./catalog";
 import { PlayerCard } from "./player-card";
+import { Pagination } from "./pagination";
 import {
   BackLink,
   Change,
@@ -37,7 +38,8 @@ import {
   useClub,
 } from "./ui";
 
-const PAGE = 12;
+const LIST_PAGE_SIZE = 12;
+const CARD_PAGE_SIZE = 48;
 const SORT_OPTIONS = [
   { value: "name", label: "이름순" },
   { value: "price", label: "가치 높은 순" },
@@ -51,14 +53,17 @@ function compareNumber(a: number | null, b: number | null, ascending = false) {
   if (b == null) return -1;
   return ascending ? a - b : b - a;
 }
-function MarketHero({ league, onLeague }: { league: string; onLeague: (id: string) => void }) {
+function useMarketCatalog() {
   const { data } = usePlatform();
   const leagues = data.leagues.filter(l=>DOMESTIC_LEAGUES.includes(l.id as typeof DOMESTIC_LEAGUES[number]));
   const teams = data.teams.filter(t=>leagues.some(l=>l.id===t.leagueId));
+  return {data,leagues,teams};
+}
+function MarketHero() {
+  const {data,leagues,teams}=useMarketCatalog();
   const featured = [...data.players].filter(p=>!p.id.startsWith('bsd-')||teams.some(t=>t.id===p.team)).sort((a, b) => Number(!!b.photo) - Number(!!a.photo)).slice(0, 3);
   const total = data.market?.totalPlayers ?? data.playerTotal ?? data.players.length;
   return (
-    <>
       <section className="market-hero" aria-labelledby="market-hero-title">
         <div className="market-hero-copy">
           <span className="eyebrow plain">PLAYER EXCHANGE · BIG FIVE</span>
@@ -79,6 +84,12 @@ function MarketHero({ league, onLeague }: { league: string; onLeague: (id: strin
           ))}
         </div>
       </section>
+  );
+}
+function MarketLeagues({ league, onLeague }: { league: string; onLeague: (id: string) => void }) {
+  const {leagues,teams}=useMarketCatalog();
+  return (
+    <>
       {leagues.length > 0 && (
         <div className="league-tiles" role="group" aria-label="리그로 선수 보기">
           <button type="button" className={`league-tile all ${league === "all" ? "active" : ""}`} aria-pressed={league === "all"} onClick={() => onLeague("all")}>
@@ -110,9 +121,11 @@ export function PlayerList({ market = false }: { market?: boolean }) {
     [team, setTeam] = useState(sp.get("team") || "all"),
     [pos, setPos] = useState("전체");
   const [sort, setSort] = useState(market ? "volume" : "name"),
-    [viewChoice, setView] = useState<string | null>(null),
+    [view, setView] = useState(market ? "list" : "grid"),
     [tab, setTab] = useState(sp.get("watchlist") === "1" ? "관심 선수" : "전체 선수"),
     [page, setPage] = useState(1);
+  const browserRef=useRef<HTMLElement>(null);
+  const pageSize=view === "grid" ? CARD_PAGE_SIZE : LIST_PAGE_SIZE;
   const leagueOptions = useLeagueOptions();
   const teamOptions = useTeamOptions("모든 구단", league);
   useEffect(() => {
@@ -141,11 +154,11 @@ export function PlayerList({ market = false }: { market?: boolean }) {
       const key = (sort === "price-asc" ? "price" : sort) as "price" | "change" | "performance" | "volume";
       return compareNumber(a[key], b[key], ["price-asc"].includes(sort)) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
     });
-  const remote=useCatalogPage<Player>("players",{q,league,team,position:pos === "전체" ? undefined : pos,sort,page,size:PAGE,scope:({"관심 선수":"watch","보유 선수":"owned","상승 선수":"rising","하락 선수":"falling"} as Record<string,string>)[tab] ?? "all"});
+  const remote=useCatalogPage<Player>("players",{q,league,team,position:pos === "전체" ? undefined : pos,sort,page,size:pageSize,scope:({"관심 선수":"watch","보유 선수":"owned","상승 선수":"rising","하락 선수":"falling"} as Record<string,string>)[tab] ?? "all"});
   const status=remote.enabled ? remote.status : platformStatus;
   const total=remote.enabled ? remote.data.total : results.length;
-  const pageCount=Math.max(1,Math.ceil(total/PAGE)), current=remote.enabled ? page : Math.min(page,pageCount);
-  const visible=remote.enabled ? (status === "ready" ? remote.data.items : []) : results.slice((current-1)*PAGE,current*PAGE);
+  const pageCount=Math.max(1,Math.ceil(total/pageSize)), current=remote.enabled ? page : Math.min(page,pageCount);
+  const visible=remote.enabled ? (status === "ready" ? remote.data.items : []) : results.slice((current-1)*pageSize,current*pageSize);
   const filtered = !!q || league !== "all" || team !== "all" || pos !== "전체" || tab !== "전체 선수";
   const reset = () => {
     setQ("");
@@ -155,35 +168,28 @@ export function PlayerList({ market = false }: { market?: boolean }) {
     setTab("전체 선수");
     setPage(1);
   };
-  const view = viewChoice ?? (market && data.market ? "list" : "grid");
+  function changeView(next:string) {
+    if(next===view)return;
+    const nextSize=next === "grid" ? CARD_PAGE_SIZE : LIST_PAGE_SIZE;
+    setPage(Math.floor((current-1)*pageSize/nextSize)+1);
+    setView(next);
+  }
+  function changePage(next:number) {
+    setPage(next);
+    browserRef.current?.scrollIntoView({block:"start",behavior:"smooth"});
+  }
   const movers = [...data.players].filter((p) => p.change != null).sort((a, b) => Math.abs(b.change!) - Math.abs(a.change!)).slice(0, 4);
   return (
     <>
-      <PageHeading
+      <div className={market ? "market-heading" : undefined}><PageHeading
         eyebrow={market ? "PLAYER EXCHANGE" : "DISCOVER YOUR NEXT PLAYER"}
         title={market ? "선수 시장" : "선수 탐색"}
-        description={market ? "경기의 흐름을 읽고, 가치가 움직이는 순간을 잡으세요." : "리그·구단·포지션으로 나에게 맞는 선수를 찾아보세요."}
+        description={market ? undefined : "리그·구단·포지션으로 나에게 맞는 선수를 찾아보세요."}
         action={<span className="updated-at">가격 적용 <b>{dateText(data.updatedAt)}</b></span>}
-      />
+      /></div>
       {market && (
         <>
-          <MarketHero league={league} onLeague={(id) => { setLeague(id); setTeam("all"); setPage(1); }} />
-          {data.market ? (
-            <div className="stat-grid market-stats">
-              <StatCard label="전체 거래량" value={money(data.market.volume)} unit="건" hint={data.market.calculatedAt ? `${dateText(data.market.calculatedAt)} 집계` : "집계 대기"} />
-              <StatCard label="상승 선수" value={<span className="up">{money(data.market.rising)}</span>} unit="명" hint="직전 갱신 대비" />
-              <StatCard label="하락 선수" value={<span className="down">{money(data.market.falling)}</span>} unit="명" hint="직전 갱신 대비" />
-              <StatCard label="거래 가능 선수" value={money(data.market.pricedPlayers)} unit="명" hint={`전체 ${data.market.totalPlayers ?? data.playerTotal ?? data.players.length}명 · 거래 제한 제외`} tone="yellow" />
-            </div>
-          ) : (
-            <div className="market-pending" role="note">
-              <span className="market-pending-icon" aria-hidden="true"><Sparkles size={18} /></span>
-              <div>
-                <strong>선수 가치와 변동률은 산정 준비 중입니다</strong>
-                <span>실제 경기 기록으로 Performance가 계산되면 가치·상승/하락·거래량이 이곳에 집계됩니다. 지금은 선수 정보와 수집된 경기 기록을 탐색할 수 있어요.</span>
-              </div>
-            </div>
-          )}
+          <MarketHero />
           {movers.length > 0 && (
             <section className="market-movers" aria-labelledby="market-movers">
               <SectionTitle title="최근 변동" meta="직전 발행 대비 변동폭 상위" />
@@ -206,7 +212,8 @@ export function PlayerList({ market = false }: { market?: boolean }) {
           )}
         </>
       )}
-      <section className="browser">
+      <section className={`browser${market ? " market-browser" : ""}`} ref={browserRef} aria-label="선수 목록">
+        {market && <MarketLeagues league={league} onLeague={(id) => { setLeague(id); setTeam("all"); setPage(1); }} />}
         <div className="browser-top">
           <Tabs
             items={market ? ["전체 선수", "상승 선수", "하락 선수", "관심 선수", "보유 선수"] : ["전체 선수", "관심 선수", "보유 선수"]}
@@ -215,8 +222,8 @@ export function PlayerList({ market = false }: { market?: boolean }) {
             label="선수 목록 보기"
           />
           <div className="view-switch" role="group" aria-label="보기 방식">
-            <button aria-label="카드 보기" aria-pressed={view === "grid"} onClick={() => setView("grid")} className={view === "grid" ? "active" : ""}><LayoutGrid size={17} /></button>
-            <button aria-label="목록 보기" aria-pressed={view === "list"} onClick={() => setView("list")} className={view === "list" ? "active" : ""}><List size={17} /></button>
+            <button aria-label="카드 보기" aria-pressed={view === "grid"} onClick={() => changeView("grid")} className={view === "grid" ? "active" : ""}><LayoutGrid size={17} /></button>
+            <button aria-label="목록 보기" aria-pressed={view === "list"} onClick={() => changeView("list")} className={view === "list" ? "active" : ""}><List size={17} /></button>
           </div>
         </div>
         <div className="toolbar browser-filters">
@@ -277,16 +284,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
           </div>
         ) : null}
         {!visible.length && <DataEmpty entity="선수" status={status} retry={remote.enabled ? remote.reload : undefined} filtered={filtered} rows={6} />}
-        {total > 0 && (
-          <div className="pagination">
-            <span>{(current - 1) * PAGE + 1}–{Math.min(current * PAGE, total)} / 총 {total}명</span>
-            <div>
-              <button aria-label="이전 페이지" disabled={current === 1} onClick={() => setPage(current - 1)}><ChevronLeft size={16} /></button>
-              <span className="num">{current} / {pageCount}</span>
-              <button aria-label="다음 페이지" disabled={current === pageCount} onClick={() => setPage(current + 1)}><ChevronRight size={16} /></button>
-            </div>
-          </div>
-        )}
+        {status === "ready" && <Pagination key={pageSize} page={current} total={total} size={pageSize} onPage={changePage} label="선수 시장" centered allowJump />}
       </section>
     </>
   );

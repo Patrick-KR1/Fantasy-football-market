@@ -79,8 +79,8 @@
 .page-jump-form button[type=submit] { background:var(--ink); color:var(--yellow); border-color:var(--ink); }
 .page-jump-form p { flex-basis:100%; margin:0; text-align:center; color:var(--down); font-size:12px; font-weight:400; }
 @media (max-width:700px) {
-  .numbered-pagination.pagination-centered { display:flex; flex-direction:column; gap:10px; padding:14px 10px; }
-  .pagination-centered>span { flex-basis:auto; text-align:center; }
+  .numbered-pagination.pagination-centered { display:flex; flex-direction:column; flex-wrap:nowrap; gap:10px; padding:14px 10px; }
+  .numbered-pagination.pagination-centered>span { flex-basis:auto; text-align:center; }
   .pagination-centered>.pagination-pages { width:100%; justify-content:center; }
   .page-jump-form { width:100%; max-width:340px; align-self:center; }
 }
