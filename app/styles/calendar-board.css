@@ -3,23 +3,30 @@
 .schedule-controls { display:flex; align-items:center; justify-content:center; gap:16px; height:58px; padding:0 24px; background:var(--surface); position:sticky; top:56px; z-index:22; border-bottom:1px solid var(--line); border-radius:12px 12px 0 0; }
 .schedule-year { display:flex; align-items:center; gap:8px; }
 .schedule-year>.kx-select { width:150px; }
-.schedule-year>button,.schedule-month-heading>button { display:grid; place-items:center; min-width:34px; min-height:34px; border-radius:6px; }
-.schedule-year>button:hover,.schedule-month-heading>button:hover { background:var(--yellow); }
-.schedule-year>button:disabled,.schedule-month-heading>button:disabled { opacity:.3; }
+.schedule-year>button,.schedule-month-navigation>button { display:grid; place-items:center; min-width:34px; min-height:34px; border-radius:6px; }
+.schedule-year>button:hover,.schedule-month-navigation>button:hover { background:var(--yellow); }
+.schedule-year>button:disabled,.schedule-month-navigation>button:disabled { opacity:.3; }
 .schedule-months { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); background:var(--surface); position:sticky; top:114px; z-index:21; border-bottom:1px solid var(--line-2); }
 .schedule-months button { min-height:42px; font-weight:800; color:var(--text-2); border-bottom:3px solid transparent; }
 .schedule-months button.active { background:var(--yellow); color:var(--ink); border-bottom-color:var(--ink); }
 .schedule-months button:hover { background:#fff8c9; }
 .schedule-filter-bar { display:flex; flex-wrap:wrap; gap:12px; padding:20px 24px 0; }
 .schedule-filter-bar>.input-search { flex:1; min-width:180px; }
-.schedule-month-heading { display:flex; align-items:center; justify-content:center; gap:20px; padding:18px 12px; border-bottom:2px solid var(--ink); }
-.schedule-month-heading h2 { font-size:19px; }
+.schedule-month-heading { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:20px; padding:18px 24px; border-bottom:2px solid var(--ink); }
+.schedule-month-navigation { grid-column:2; display:flex; align-items:center; justify-content:center; gap:20px; }
+.schedule-expand-actions { justify-self:end; display:flex; gap:6px; }
+.schedule-expand-actions .button { white-space:nowrap; }
+.schedule-month-heading h2 { font-size:19px; white-space:nowrap; }
 .schedule-month-heading h2 span { margin-left:12px; font-size:12px; font-weight:500; }
 .schedule-calendar .match-day { padding:0; margin:0; scroll-margin-top:172px; }
-.schedule-calendar .match-day>h2 { display:flex; align-items:center; padding:14px 24px; gap:8px; margin:0; background:#f7f7f3; border-bottom:1px solid var(--line); border-radius:0; }
+.schedule-calendar .match-day>h2 { padding:0; margin:0; background:#f7f7f3; border-bottom:1px solid var(--line); border-radius:0; }
+.match-day-toggle { display:flex; align-items:center; width:100%; gap:8px; padding:14px 24px; text-align:left; }
+.match-day-toggle:hover { background:rgba(0,0,0,.035); }
+.match-day-toggle:focus-visible { outline:2px solid var(--ink); outline-offset:-3px; }
+.match-day-toggle[aria-expanded=true]>svg { transform:rotate(180deg); }
 .schedule-calendar .match-day.today>h2 { background:#fff6b2; }
 .schedule-calendar .match-day-date { font-size:16px; }
-.schedule-calendar .match-day>h2 small { margin-left:auto; }
+.schedule-calendar .match-day-toggle small { margin-left:auto; }
 .schedule-calendar .match-day ul { padding:0; margin:0; border:0; border-radius:0; }
 .schedule-calendar .match-day .match-row { border-radius:0; box-shadow:none; }
 .schedule-calendar .match-day .match-row::before,.schedule-calendar .match-day .match-row::after { display:none; }
@@ -106,6 +113,11 @@
   .community-board-table th.board-views,.community-board-table th.board-likes { width:50px; }
 }
 /* The site subnav stops sticking at 860px, so the calendar bars stick to the viewport top. */
+@media(max-width:900px) {
+  .schedule-month-heading { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+  .schedule-month-navigation { flex:1; }
+  .schedule-expand-actions { margin-left:auto; }
+}
 @media(max-width:860px) {
   .schedule-controls { top:0; }
   .schedule-months { top:58px; }
@@ -116,10 +128,11 @@
   .schedule-months { grid-template-columns:repeat(6,minmax(0,1fr)); }
   .schedule-months button { min-height:38px; font-size:12px; }
   .schedule-calendar .match-day { scroll-margin-top:146px; }
-  .schedule-calendar .match-day>h2 { padding:12px 14px; }
+  .match-day-toggle { padding:12px 14px; }
   .schedule-filter-bar { padding:14px 14px 0; gap:8px; }
   .schedule-filter-bar>.kx-select { width:100%; }
-  .schedule-month-heading { gap:10px; }
+  .schedule-month-heading { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; padding:14px; }
+  .schedule-month-navigation { grid-column:1; gap:10px; }
   .schedule-month-heading h2 { font-size:16px; }
   .schedule-month-heading h2 span { margin-left:6px; }
   .supported-board-clubs { flex-wrap:wrap; gap:8px 10px; padding:10px 12px; }
