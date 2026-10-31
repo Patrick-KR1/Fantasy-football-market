@@ -5,7 +5,7 @@ import { DOMESTIC_LEAGUES } from "@/lib/kickx/support";
 import { useLeagueOptions } from "./options";
 import Link from "next/link";
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { usePlatform } from "./provider";
 import { useCatalogPage } from "./catalog";
 import type { Fixture } from "@/lib/kickx/types";
@@ -19,10 +19,10 @@ const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const weekday = (day: string) => { const d = new Date(day + "T00:00:00Z"); return Number.isNaN(d.getTime()) ? "" : WEEKDAYS[d.getUTCDay()]; };
 const STATES: [string, string][] = [["all", "전체"], ["live", "진행 중"], ["scheduled", "예정"], ["finished", "종료"], ["other", "연기·기타"]];
 const REFLECTION: Record<string, { label: string; tone: string; detail: string }> = {
-  pending: { label: "계산 대기", tone: "wait", detail: "경기 기록을 수집하는 중입니다. 수집이 끝나면 선수 점수와 가치가 계산됩니다." },
-  withheld: { label: "계산 보류", tone: "hold", detail: "기록 확인이 필요해 점수 계산을 보류했습니다. 확인 전까지 선수 가치에 반영되지 않습니다." },
-  partial: { label: "일부 반영", tone: "part", detail: "일부 선수만 점수가 계산되었습니다. 나머지 선수는 기록을 확인하고 있습니다." },
-  reflected: { label: "반영 완료", tone: "done", detail: "이 경기의 선수 점수 계산이 완료되었습니다." },
+  pending: { label: "점수 산정 대기", tone: "wait", detail: "이 경기의 선수 점수 결과가 아직 없습니다. 경기 기록 수집과 계산이 필요합니다." },
+  withheld: { label: "기록 확인 필요", tone: "hold", detail: "이 경기의 필수 기록이 누락되거나 서로 맞지 않아 선수 점수를 확정하지 못했습니다." },
+  partial: { label: "일부 점수 산정", tone: "part", detail: "이 경기의 일부 선수 점수는 산정됐습니다. 나머지는 출전 시간·득점·VAR 등 원천 기록 확인이 필요합니다. 가격 발행 여부는 선수별로 다를 수 있습니다." },
+  reflected: { label: "점수 산정 완료", tone: "done", detail: "이 경기에 저장된 선수 점수의 산정이 완료됐습니다. 가격 변동 대상 기간과 다른 경기의 기록 상태에 따라 선수별 가격 발행 여부는 다를 수 있습니다." },
 };
 /** Corner badge for the match's scoring state; the full explanation shows on hover or keyboard focus. */
 function ReflectionBadge({ status }: { status?: string | null }) {
@@ -71,7 +71,11 @@ export function MatchRow({ fixture, showDate = false }: { fixture: Fixture; show
 export function FixturesScreen() {
   const {data,status:platformStatus}=usePlatform();
   const today=koreanDay(new Date().toISOString()),todayMonth=today.slice(0,7);
+  const weekStart=new Date(Date.parse(today+'T00:00:00Z')-6*86400000).toISOString().slice(0,10);
   const [month,setMonth]=useState(todayMonth),[league,setLeague]=useState('all'),[state,setState]=useState('all'),[query,setQuery]=useState(''),[page,setPage]=useState(1),[jump,setJump]=useState(0);
+  const [expanded,setExpanded]=useState<{all:boolean|null;days:Record<string,boolean>}>({all:null,days:{}});
+  const dayExpanded=(day:string,value=expanded)=>value.days[day]??value.all??(day>=weekStart&&day<=today);
+  const toggleDay=(day:string)=>setExpanded(previous=>({...previous,days:{...previous.days,[day]:!dayExpanded(day,previous)}}));
   const [year,monthNumber]=month.split('-').map(Number);
   const todayRef=useRef<HTMLElement>(null),scrolled=useRef('');
   const leagueOptions=useLeagueOptions('5대 리그 전체');
@@ -94,9 +98,9 @@ export function FixturesScreen() {
     const frame=requestAnimationFrame(()=>{if(todayRef.current){todayRef.current.scrollIntoView({block:'start',behavior:'instant'});scrolled.current=key;}});
     return()=>cancelAnimationFrame(frame);
   },[status,month,todayMonth,jump]);
-  const changeMonth=(value:string)=>{setMonth(value);setPage(1);};
+  const changeMonth=(value:string)=>{setMonth(value);setPage(1);setExpanded({all:null,days:{}});};
   const shift=(delta:number)=>{const d=new Date(Date.UTC(year,monthNumber-1+delta,1));changeMonth(`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`);};
-  const latest=()=>{setMonth(todayMonth);setPage(1);setJump(n=>n+1);};
+  const latest=()=>{changeMonth(todayMonth);setJump(n=>n+1);};
   const stateLabel=STATES.find(([v])=>v===state)?.[1]??'전체';
   return <>
     <PageHeading eyebrow="MATCH CENTRE" title="경기 일정" description="5대 정규 리그의 월별 일정과 결과를 확인하세요. 구단 상세페이지에서는 모든 대회의 일정을 볼 수 있습니다." action={<span className="tag outline"><CalendarDays size={14}/>대한민국 시간 · KST</span>}/>
@@ -112,11 +116,13 @@ export function FixturesScreen() {
         <label className="input-search"><Search size={16}/><input aria-label="경기 구단 검색" placeholder="구단 이름 검색" maxLength={100} value={query} onChange={e=>{setQuery(e.target.value);setPage(1);}}/></label>
       </div>
       <div className="panel-head"><Tabs items={STATES.map(([,label])=>label)} value={stateLabel} onChange={label=>{setState(STATES.find(([,l])=>l===label)?.[0]??'all');setPage(1);}} label="경기 상태"/></div>
-      <div className="schedule-month-heading"><button aria-label="이전 월" onClick={()=>shift(-1)} disabled={year<=2000&&monthNumber===1}><ChevronLeft size={18}/></button><h2>{year}년 {monthNumber}월 <span className="muted num">{status==='ready'?`${total}경기`:'불러오는 중'}</span></h2><button aria-label="다음 월" onClick={()=>shift(1)} disabled={year>=Number(today.slice(0,4))+5&&monthNumber===12}><ChevronRight size={18}/></button></div>
-      {status==='ready'?days.map(([day,fixtures])=><section className={`match-day${day===today?' today':''}`} key={day} ref={day===today?todayRef:undefined} data-date={day}>
-        <h2><span className="match-day-date num">{Number(day.slice(5,7))}월 {Number(day.slice(8))}일</span><span className={`match-day-week ${['토','일'].includes(weekday(day))?'weekend':''}`}>({weekday(day)})</span>{day===today&&<span className="tag yellow">오늘</span>}<small className="num">{fixtures.length}경기</small></h2>
-        {fixtures.length?<ul>{fixtures.map(f=><MatchRow key={f.id} fixture={f}/>)}</ul>:<p className="schedule-no-match">오늘은 선택한 조건에 맞는 경기가 없습니다.</p>}
-      </section>):<DataEmpty entity="경기 일정" status={status} retry={remote.enabled?remote.reload:undefined}/>}
+      <div className="schedule-month-heading"><div className="schedule-month-navigation"><button aria-label="이전 월" onClick={()=>shift(-1)} disabled={year<=2000&&monthNumber===1}><ChevronLeft size={18}/></button><h2>{year}년 {monthNumber}월 <span className="muted num">{status==='ready'?`${total}경기`:'불러오는 중'}</span></h2><button aria-label="다음 월" onClick={()=>shift(1)} disabled={year>=Number(today.slice(0,4))+5&&monthNumber===12}><ChevronRight size={18}/></button></div>
+        <div className="schedule-expand-actions" role="group" aria-label="날짜별 경기 표시"><button className="button secondary small" disabled={status!=='ready'} onClick={()=>setExpanded({all:false,days:{}})}>모두 접기</button><button className="button secondary small" disabled={status!=='ready'} onClick={()=>setExpanded({all:true,days:{}})}>모두 펼치기</button></div>
+      </div>
+      {status==='ready'?days.map(([day,fixtures])=>{const open=dayExpanded(day),contentId=`match-day-${day}`;return <section className={`match-day${day===today?' today':''}`} key={day} ref={day===today?todayRef:undefined} data-date={day}>
+        <h2><button type="button" className="match-day-toggle" aria-expanded={open} aria-controls={contentId} aria-label={`${Number(day.slice(5,7))}월 ${Number(day.slice(8))}일 경기 ${open?'접기':'펼치기'}`} onClick={()=>toggleDay(day)}><span className="match-day-date num">{Number(day.slice(5,7))}월 {Number(day.slice(8))}일</span><span className={`match-day-week ${['토','일'].includes(weekday(day))?'weekend':''}`}>({weekday(day)})</span>{day===today&&<span className="tag yellow">오늘</span>}<small className="num">{fixtures.length}경기</small><ChevronDown size={18} aria-hidden="true"/></button></h2>
+        <div id={contentId} hidden={!open}>{fixtures.length?<ul>{fixtures.map(f=><MatchRow key={f.id} fixture={f}/>)}</ul>:<p className="schedule-no-match">오늘은 선택한 조건에 맞는 경기가 없습니다.</p>}</div>
+      </section>}):<DataEmpty entity="경기 일정" status={status} retry={remote.enabled?remote.reload:undefined}/>}
       {status==='ready'&&!total&&<p className="schedule-no-match">{year}년 {monthNumber}월에 수집된 경기가 없습니다.</p>}
       {total>500&&<Pagination page={page} total={total} size={500} onPage={setPage} label="경기"/>}
     </section>

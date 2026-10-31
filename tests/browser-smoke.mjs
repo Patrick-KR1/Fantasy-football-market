@@ -518,13 +518,30 @@ try {
   const year=today.slice(0,4),month=Number(today.slice(5,7));
   state.fixtures=[{id:'regular-test',leagueId:'bsd-1',home:'bsd-4401',away:'bsd-4402',startsAt:`${today}T01:00:00+09:00`,status:'FT',homeScore:2,awayScore:1,reflectionStatus:'partial'},
     {id:'cup-test',leagueId:'bsd-7',home:'bsd-4401',away:'bsd-4402',startsAt:`${today}T02:00:00+09:00`,status:'PEN',homeScore:1,awayScore:1,penaltiesHome:5,penaltiesAway:4,roundLabel:'League phase · Matchday 5'}];
-  for(const width of [1440,390]){
+  const dayOffset=days=>new Date(Date.parse(today+'T00:00:00Z')+days*86400000).toISOString().slice(0,10);
+  for(const offset of [-7,-6,1])state.fixtures.push({...state.fixtures[0],id:`fold-test-${offset}`,startsAt:`${dayOffset(offset)}T03:00:00+09:00`});
+  for(const width of [1440,800,390]){
     await mockPage.setViewportSize({width,height:900});
     await mockPage.goto(base+'/fixtures',{waitUntil:'networkidle'});
     await mockPage.locator('.match-day.today .match-row').waitFor();
-    assert.equal(await mockPage.locator('.match-row').count(),1);assert.equal(await mockPage.getByText('승부차기 5 : 4',{exact:true}).count(),0);
     await mockPage.waitForFunction(()=>window.scrollY>0);
     const todayTop=await mockPage.locator('.match-day.today').evaluate(el=>el.getBoundingClientRect().top);assert.ok(todayTop>=0&&todayTop<750,`Today anchor hidden: ${todayTop}`);
+    const calendar=mockPage.locator('.schedule-calendar');
+    const defaultDays=await calendar.locator('.match-day').evaluateAll(days=>days.map(day=>({date:day.dataset.date,expanded:day.querySelector('.match-day-toggle').getAttribute('aria-expanded')})));
+    for(const day of defaultDays)assert.equal(day.expanded,String(day.date>=dayOffset(-6)&&day.date<=today));
+    const defaultMatches=state.fixtures.filter(f=>f.leagueId==='bsd-1'&&f.startsAt.slice(0,10)>=dayOffset(-6)&&f.startsAt.slice(0,10)<=today&&f.startsAt.slice(0,7)===today.slice(0,7)).length;
+    assert.equal(await calendar.locator('.match-row:visible').count(),defaultMatches);assert.equal(await mockPage.getByText('승부차기 5 : 4',{exact:true}).count(),0);
+    await mockPage.getByRole('button',{name:'모두 접기',exact:true}).click();
+    assert.equal(await calendar.locator('.match-row:visible').count(),0);
+    assert.equal(await calendar.locator('.match-day-toggle[aria-expanded=true]').count(),0);
+    await mockPage.getByRole('button',{name:'모두 펼치기',exact:true}).click();
+    assert.equal(await calendar.locator('.match-day-toggle[aria-expanded=false]').count(),0);
+    const todayToggle=calendar.locator('.match-day.today .match-day-toggle');
+    await todayToggle.focus();await mockPage.keyboard.press('Enter');
+    assert.equal(await todayToggle.getAttribute('aria-expanded'),'false');
+    assert.equal(await calendar.locator('.match-day.today .match-row:visible').count(),0);
+    await mockPage.keyboard.press('Space');
+    assert.equal(await todayToggle.getAttribute('aria-expanded'),'true');
     assert.ok(await mockPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`monthly fixtures overflow at ${width}`);
     await mockPage.getByRole('button',{name:'1월',exact:true}).click();
     await mockPage.getByRole('heading',{name:new RegExp(`${year}년 1월`)}).waitFor();
@@ -532,12 +549,12 @@ try {
     await mockPage.getByRole('heading',{name:new RegExp(`${year}년 ${month}월`)}).waitFor();
     await mockPage.locator('.match-day.today .match-row').waitFor();
     await mockPage.screenshot({path:`test-artifacts/monthly-fixtures-${width}.png`,fullPage:true});
-    await mockPage.goto(base+'/teams/bsd-4401',{waitUntil:'networkidle'});await mockPage.getByText('승부차기 5 : 4',{exact:true}).waitFor();assert.equal(await mockPage.locator('.match-row').count(),2);
+    await mockPage.goto(base+'/teams/bsd-4401',{waitUntil:'networkidle'});await mockPage.getByText('승부차기 5 : 4',{exact:true}).waitFor();assert.equal(await mockPage.locator('.match-row').count(),state.fixtures.length);
     assert.ok(await mockPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`club all-competition schedule overflow at ${width}`);
     await mockPage.screenshot({path:`test-artifacts/club-all-fixtures-${width}.png`,fullPage:true});
   }
   assert.ok(fixtureRequests.some(q=>q.includes(`month=${year}-${String(month).padStart(2,'0')}`)));assert.ok(fixtureRequests.some(q=>q.includes('team=bsd-4401')));
-  report.checks.push('Five support selectors save independently by league; monthly regular-league schedule scrolls to today and latest resets month; club detail keeps cup fixtures');
+  report.checks.push('Five support selectors save independently by league; monthly schedule defaults to the last seven KST days with accessible day/all toggles; today/latest navigation and all-competition club schedules remain intact');
   state.policy={...state.policy,version:'report-v3',clubCompetitionsEnabled:false};
   await mockPage.goto(base+'/rules',{waitUntil:'networkidle'});
   assert.equal(await mockPage.getByRole('heading',{name:'시즌 누적 가격',exact:true}).isVisible(),true);

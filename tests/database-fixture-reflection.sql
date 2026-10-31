@@ -26,9 +26,16 @@ insert into public.performance_results(player_id,fixture_id,score,status,rule_ve
  values('reflection-a','reflection-match',70,'ready','form-v2','reflection-a','[]','[]');
 insert into public.player_market_snapshots(id,price,pricing_rule_version,pricing_status)
  values('reflection-a',100000,'form-v2','pending');
-select pg_temp.expect_reflection('pending');
+-- Pricing can be withheld by another fixture; this fixture remains scored.
+select pg_temp.expect_reflection('reflected');
 update public.player_market_snapshots set pricing_status='ready' where id='reflection-a';
 select pg_temp.expect_reflection('reflected');
+update public.performance_results set score=null,status='not-played' where player_id='reflection-a' and fixture_id='reflection-match';
+select pg_temp.expect_reflection('reflected');
+insert into public.performance_results(player_id,fixture_id,score,status,rule_version,input_hash,breakdown,warnings)
+ values('reflection-b','reflection-match',null,'blocked','form-v2','reflection-b','[]','[]');
+select pg_temp.expect_reflection('partial');
+delete from public.performance_results where player_id='reflection-b';
 update public.fixtures set status='PEN' where id='reflection-match';
 set local role authenticated;
 select pg_temp.expect_reflection('reflected');
