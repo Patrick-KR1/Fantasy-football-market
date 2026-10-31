@@ -190,7 +190,7 @@ a.movers-player:hover strong { text-decoration: underline; text-decoration-color
 .mover-card-text span { font-size: var(--fs-caption); color: var(--text-3); font-weight: 600; }
 .mover-card-value { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; padding-top: var(--s-3); border-top: var(--border); }
 .mover-card-value b { font-size: 20px; font-weight: 900; letter-spacing: -0.03em; }
-.browser { display: grid; grid-template-columns: minmax(0, 1fr); }
+.browser { --player-grid-min-width:236px; --player-grid-gap:var(--s-5); --player-grid-columns:auto-fill; display: grid; grid-template-columns: minmax(0, 1fr); }
 .market-heading .page-heading h1 { font-size:40px; }
 .market-browser { scroll-margin-top:80px; }
 .market-browser .league-tiles { margin-bottom:var(--s-5); }
@@ -206,7 +206,7 @@ a.movers-player:hover strong { text-decoration: underline; text-decoration-color
 .browser-filters select, .browser-filters .kx-select { flex: 0 1 210px; }
 .result-count { display: inline-flex; align-items: center; gap: var(--s-3); white-space: nowrap; }
 .row-identity { display: flex; align-items: center; gap: var(--s-2); }
-.player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: var(--s-5); }
+.player-grid { display: grid; grid-template-columns: repeat(var(--player-grid-columns), minmax(var(--player-grid-min-width), 1fr)); gap: var(--player-grid-gap); }
 
 /* Collectible player card */
 .pcard {
@@ -1311,7 +1311,7 @@ button.pitch-player:hover { transform: translateY(-3px); }
   .browser-top { flex-wrap: wrap; }
   .browser-filters select { flex: 1 1 140px; }
   .result-line { flex-direction: column; align-items: flex-start; }
-  .player-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+  .browser { --player-grid-min-width:0px; --player-grid-columns:2; --player-grid-gap:var(--s-3); }
   .detail-hero { grid-template-columns: 116px minmax(0, 1fr); gap: var(--s-3); padding: var(--s-5) var(--s-4) 0; min-height: 0; }
   .detail-photo { height: 150px; }
   .detail-identity { padding-bottom: var(--s-4); }

@@ -39,7 +39,6 @@ import {
 } from "./ui";
 
 const LIST_PAGE_SIZE = 12;
-const CARD_PAGE_SIZE = 48;
 const SORT_OPTIONS = [
   { value: "name", label: "이름순" },
   { value: "price", label: "가치 높은 순" },
@@ -123,9 +122,30 @@ export function PlayerList({ market = false }: { market?: boolean }) {
   const [sort, setSort] = useState(market ? "volume" : "name"),
     [view, setView] = useState(market ? "list" : "grid"),
     [tab, setTab] = useState(sp.get("watchlist") === "1" ? "관심 선수" : "전체 선수"),
-    [page, setPage] = useState(1);
+    [page, setPage] = useState(1),
+    [cardPageSize, setCardPageSize] = useState(LIST_PAGE_SIZE);
   const browserRef=useRef<HTMLElement>(null);
-  const pageSize=view === "grid" ? CARD_PAGE_SIZE : LIST_PAGE_SIZE;
+  const pageSize=view === "grid" ? cardPageSize : LIST_PAGE_SIZE;
+  useEffect(() => {
+    const element=browserRef.current;
+    if(!element)return;
+    const resize=() => {
+      // Share the grid's CSS sizing so each page contains exactly two rows.
+      const style=getComputedStyle(element);
+      const gap=parseFloat(style.getPropertyValue("--player-grid-gap")) || 0;
+      const minimum=parseFloat(style.getPropertyValue("--player-grid-min-width")) || 1;
+      const fixedColumns=parseInt(style.getPropertyValue("--player-grid-columns"),10);
+      const columns=fixedColumns || Math.max(1,Math.floor((element.clientWidth+gap)/(minimum+gap)));
+      const nextSize=Math.min(50,columns*2);
+      if(nextSize===cardPageSize)return;
+      if(view==="grid")setPage(previous=>Math.floor((previous-1)*cardPageSize/nextSize)+1);
+      setCardPageSize(nextSize);
+    };
+    resize();
+    const observer=new ResizeObserver(resize);
+    observer.observe(element);
+    return () => observer.disconnect();
+  },[view,cardPageSize]);
   const leagueOptions = useLeagueOptions();
   const teamOptions = useTeamOptions("모든 구단", league);
   useEffect(() => {
@@ -170,7 +190,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
   };
   function changeView(next:string) {
     if(next===view)return;
-    const nextSize=next === "grid" ? CARD_PAGE_SIZE : LIST_PAGE_SIZE;
+    const nextSize=next === "grid" ? cardPageSize : LIST_PAGE_SIZE;
     setPage(Math.floor((current-1)*pageSize/nextSize)+1);
     setView(next);
   }
