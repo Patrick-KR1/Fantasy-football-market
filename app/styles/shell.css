@@ -1,6 +1,5 @@
 /* App frame: top bar, yellow masthead, sub navigation, content container, footer. */
-.app { max-width: var(--app-max); min-height: 100dvh; margin: 0 auto; background: var(--surface); display: flex; flex-direction: column; }
-@media (min-width: 1700px) { .app { border-left: var(--border-strong); border-right: var(--border-strong); } }
+.app { width: 100%; min-height: 100dvh; margin: 0 auto; background: var(--surface); display: flex; flex-direction: column; }
 .content { flex: 1; width: 100%; padding: var(--s-10) var(--gutter) var(--s-16); }
 .content.home { padding-top: 0; }
 
@@ -19,13 +18,15 @@
 .masthead {
   position: relative; display: grid; align-items: center; gap: var(--s-8);
   grid-template-columns: auto auto minmax(0, 1fr) auto auto;
-  min-height: 112px; padding: 0 var(--gutter); background: var(--yellow); border-bottom: var(--border-strong); isolation: isolate; z-index: 40;
+  min-height: 112px; padding: 0 var(--gutter); background: var(--yellow); isolation: isolate; z-index: 40;
 }
 .wordmark {
   display: inline-block; font-size: 64px; font-weight: 900; line-height: 0.9; letter-spacing: -0.07em; color: var(--ink);
   transform: skewX(-6deg); padding-right: 6px; white-space: nowrap;
 }
 .wordmark.small { font-size: 34px; }
+.logo { display: inline-flex; align-items: center; gap: 0.1em; }
+.logo-mark { flex-shrink: 0; width: 1.12em; height: 1.07em; margin: -0.06em 0.06em -0.06em 0; transform: skewX(6deg); }
 .masthead-tagline { font-size: 13px; font-weight: 700; line-height: 1.7; color: var(--ink); white-space: nowrap; }
 .main-nav { display: flex; align-items: stretch; gap: var(--s-1); align-self: stretch; }
 .main-nav a {

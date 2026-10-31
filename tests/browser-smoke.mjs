@@ -96,7 +96,7 @@ try {
     const concurrentPage=await concurrent.newPage();
     try {
       const requested=concurrentPage.waitForRequest(request=>endpoint.test(request.url()),{timeout:10000});
-      await concurrentPage.goto(base+(detail?'/players/test-player':'/players'),{waitUntil:'domcontentloaded'});
+      await concurrentPage.goto(base+(detail?'/players/test-player':'/market'),{waitUntil:'domcontentloaded'});
       await requested;
       assert.equal(released,false);
       await concurrentPage.getByRole('heading',{name:'CI-only player',exact:true}).waitFor({timeout:10000});
@@ -155,7 +155,7 @@ try {
   await mockPage.getByRole("button",{name:"관심 선수 해제",exact:true}).first().waitFor();
   assert.deepEqual(state.member.watchlist,["test-player"]);
   report.checks.push("Zero price renders; failed watchlist writes do not pretend to succeed");
-  await mockPage.goto(base+"/players?watchlist=1",{waitUntil:"networkidle"});
+  await mockPage.goto(base+"/market?watchlist=1",{waitUntil:"networkidle"});
   assert.ok(await mockPage.getByRole("heading",{name:"CI-only player",exact:true}).isVisible());
   report.checks.push("Saved watchlist feeds the filtered player list");
   await mockPage.getByRole("button",{name:"전체 선수",exact:true}).click();
@@ -452,7 +452,7 @@ try {
   assert.equal(await mockPage.locator('.community-switch').count(),0);assert.equal(await mockPage.locator('.popular-list').count(),0);assert.equal(await mockPage.locator('.explorer').count(),0);assert.equal(await mockPage.locator('.feed-composer').count(),0);
   await mockPage.getByRole('link',{name:'구단 전용 제목',exact:true}).waitFor();
   await mockPage.goto(base+'/community/players',{waitUntil:'domcontentloaded'});
-  await mockPage.waitForURL(url=>url.pathname==='/players',{waitUntil:'domcontentloaded'});assert.equal(new URL(mockPage.url()).pathname,'/players');
+  await mockPage.waitForURL(url=>url.pathname==='/market',{waitUntil:'domcontentloaded'});assert.equal(new URL(mockPage.url()).pathname,'/market');
   await mockPage.goto(base+'/players/test-player',{waitUntil:'networkidle'});await mockPage.getByRole('button',{name:'커뮤니티',exact:true}).click();
   await mockPage.getByRole('link',{name:/^테스트 경기 후기/}).first().waitFor();
   assert.equal(await mockPage.locator('.community-board-table tr[data-scope=club]').count(),0);
@@ -543,6 +543,31 @@ try {
   assert.ok((await mockPage.locator('body').innerText()).includes('보유 인원에는 제한이 없으며'));
   report.checks.push('Report rules explain cumulative seasons, positional baselines and unlimited holdings');
   await mock.close();
+  const marketContext=await browser.newContext();
+  const marketPage=await marketContext.newPage();marketPage.on('pageerror',error=>errors.push(error.message));
+  const marketPlayer={...state.players[0],team:'market-scope-team'};
+  const marketData={...state,players:[marketPlayer],playerTotal:2,market:{totalPlayers:2,readyPlayers:1,pricedPlayers:1,volume:0,rising:1,falling:0,calculatedAt:null},
+    leagues:[...['bsd-1','bsd-3','bsd-4','bsd-5','bsd-6'].map((id,i)=>({id,name:`정규 리그 ${i}`})),{id:'bsd-7',name:'범위 밖 컵대회'}],
+    teams:[{id:'market-scope-team',name:'범위 안 구단',leagueId:'bsd-1'},{id:'market-scope-team2',name:'두 번째 구단',leagueId:'bsd-3'},{id:'market-foreign-team',name:'범위 밖 구단',leagueId:'bsd-7'}]};
+  await marketContext.route(/\/api\/kickx$/,route=>route.fulfill({json:{status:'ready',data:marketData}}));
+  await marketContext.route(/\/api\/kickx\/players\?/,route=>route.fulfill({json:{status:'ready',data:{items:[marketPlayer],total:2,page:1,size:12}}}));
+  for(const width of [1440,390]){
+    await marketPage.setViewportSize({width,height:900});await marketPage.goto(base+'/market',{waitUntil:'networkidle'});
+    await marketPage.locator('.market-hero-stats').waitFor();
+    for(const [label,value]of [['등록 선수','2'],['구단','2'],['리그','5']])assert.equal(await marketPage.locator('.market-hero-stats>div').filter({has:marketPage.locator('dt',{hasText:label})}).locator('dd').innerText(),value);
+    assert.equal(await marketPage.locator('.league-tiles button').count(),6);
+    assert.equal(await marketPage.getByText('범위 밖 컵대회',{exact:true}).count(),0);
+    assert.equal(await marketPage.getByText('실제 경기 기록으로 움직이는 선수 가치. 관심 선수를 모아두고 가치가 열리는 순간을 기다리세요.',{exact:true}).count(),0);
+    assert.equal(await marketPage.getByRole('link',{name:'선수 탐색',exact:true}).count(),0);
+    assert.ok(await marketPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    await marketPage.screenshot({path:`test-artifacts/market-scope-${width}.png`,fullPage:true});
+  }
+  await marketPage.goto(base+'/players?q=CI&watchlist=1&team=market-scope-team',{waitUntil:'networkidle'});
+  assert.equal(new URL(marketPage.url()).pathname,'/market');
+  for(const [key,value]of [['q','CI'],['watchlist','1'],['team','market-scope-team']])assert.equal(new URL(marketPage.url()).searchParams.get(key),value);
+  assert.equal(await marketPage.getByLabel('선수 검색',{exact:true}).inputValue(),'CI');
+  await marketContext.close();
+  report.checks.push('Market shows only five regular leagues and their clubs; explorer redirects preserve search, watched scope and team');
   assert.deepEqual(errors,[],"Browser JavaScript errors");
   report.checks.push("No browser JavaScript errors");
   await writeFile("test-artifacts/report.json",JSON.stringify(report,null,2));

@@ -24,7 +24,7 @@ export function CommunityHub({ kind }: { kind: "club" | "player" }) {
   const [target,setTarget]=useState('');
   const teams=supportedTeams(data.session?.profile);
   const clubOptions=useTeamOptions('전체 구단','all','');
-  if(kind==='player')return <><PageHeading eyebrow="PLAYER COMMUNITY" title="선수 커뮤니티" description="선수 상세페이지의 커뮤니티 탭에서 이야기를 나눠보세요."/><Link className="button primary" href="/players">선수 탐색 <ArrowRight size={16}/></Link></>;
+  if(kind==='player')return <><PageHeading eyebrow="PLAYER COMMUNITY" title="선수 커뮤니티" description="선수 상세페이지의 커뮤니티 탭에서 이야기를 나눠보세요."/><Link className="button primary" href="/market">선수 시장 <ArrowRight size={16}/></Link></>;
   return <>
     <PageHeading eyebrow="COMMUNITY" title="구단 커뮤니티" description="응원 구단의 경기와 이야기를 나누세요." action={<Link className="button primary" href={`/community/write?scope=club${target?`&target=${target}`:''}`}><Pencil size={16}/>글쓰기</Link>}/>
     <section className="supported-board-clubs" aria-label="나의 응원 구단">

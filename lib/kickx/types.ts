@@ -186,6 +186,8 @@ export type PublicData = {
   comments: Comment[];
   rankings: RankingPeriod[];
   market: {
+    totalPlayers?: number;
+    readyPlayers?: number;
     pricedPlayers?: number;
     volume: number | null;
     rising: number | null;

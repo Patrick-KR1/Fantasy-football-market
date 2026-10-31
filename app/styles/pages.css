@@ -13,6 +13,7 @@
 .home-hero-copy { position: relative; z-index: 1; }
 .home-hero-copy h1 { margin-top: var(--s-3); font-size: var(--fs-display); font-weight: 900; letter-spacing: -0.06em; line-height: 0.98; }
 .home-hero-copy p { margin-top: var(--s-4); font-size: 19px; color: var(--text-2); }
+.home-hero-copy .home-hero-motto { font-size: 21px; font-weight: 900; letter-spacing: -0.02em; color: var(--ink); }
 .home-hero-art { position: absolute; right: 0; top: calc(var(--s-8) * -1); width: 300px; height: calc(100% + var(--s-8)); clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%); }
 .home-search { display: grid; grid-template-columns: minmax(200px, 1.5fr) repeat(3, minmax(120px, 0.62fr)) 112px; border: var(--border-strong); background: var(--surface); }
 .home-search > * + * { border-left: 1.5px solid var(--ink); }
