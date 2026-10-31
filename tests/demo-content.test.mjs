@@ -8,7 +8,7 @@ test('50 marked accounts have consistent affordable trades and no duplicate hold
  assert.equal(plan.batch,SAMPLE_BATCH);assert.equal(plan.users.length,50);assert.equal(new Set(plan.users.map(u=>u.id)).size,50);
  assert.equal(new Set(plan.users.map(u=>u.nickname)).size,50);
  for(const u of plan.users){
-  assert.ok(u.nickname.endsWith('_샘플')&&u.nickname.length<=20);assert.ok(u.email.endsWith('@example.invalid'));
+  assert.ok(!u.nickname.includes('샘플')&&u.nickname.length>=2&&u.nickname.length<=20);assert.ok(u.email.endsWith('@example.invalid'));
   assert.equal(new Set(u.teams.map(id=>source.clubs.find(t=>t.id===id).league)).size,u.teams.length);
   let cash=1_300_000;const owned=new Set();
   for(const t of u.trades){const price=byId.get(t.playerId).price;

@@ -3,7 +3,7 @@ insert into auth.users(id)values('50000000-0000-4000-8000-000000000001'),('50000
 insert into public.leagues(id,name)values('bsd-1','Sample test')on conflict do nothing;
 insert into public.teams(id,name,league_id)values('sample-test-team','Team','bsd-1');
 insert into public.profiles(id,nickname,team_id,sample_batch)values
- ('50000000-0000-4000-8000-000000000001','테스트_샘플','sample-test-team','kickx-demo-20261030'),
+ ('50000000-0000-4000-8000-000000000001','주말엔축구','sample-test-team','kickx-demo-20261030'),
  ('50000000-0000-4000-8000-000000000002','Regular account','sample-test-team',null);
 insert into public.players(id,name,provider,team_id,position)values('sample-test-a','A','bsd','sample-test-team','FW'),('sample-test-b','B','bsd','sample-test-team','DF');
 insert into public.player_market_snapshots(id,price,pricing_status,pricing_rule_version)values('sample-test-a',100000,'ready','report-v3'),('sample-test-b',100000,'ready','report-v3');

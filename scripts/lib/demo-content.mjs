@@ -4,11 +4,11 @@ export const sampleId=key=>{
  const h=createHash('sha1').update(`${SAMPLE_BATCH}:${key}`).digest('hex');
  return `${h.slice(0,8)}-${h.slice(8,12)}-5${h.slice(13,16)}-a${h.slice(17,20)}-${h.slice(20,32)}`;
 };
-const names=['박스밖한입','주말엔축구','왼발감아차기','원터치패스','골대뒤관중','후반전커피','역습한스푼','수비도예술','중원산책','오늘도직관',
- '라리가산책','짧게주고받기','터치라인옆','볼보이출신','새벽경기러','패스맵수집가','스루패스좋아','잔디위낭만','풋볼메모장','느린빌드업',
- '세리에한바퀴','수비라인맞춰','오프사이드깃발','코너킥한번더','경기장앞카페','공은둥글다','백패스도전술','측면돌파중','전술판낙서','연장전은없다',
- '독일축구일기','압박좀더','세컨드볼먼저','풀백관찰자','발끝의온도','노란카드주의','문전앞침착','유니폼수집중','한골차의미학','볼점유중',
- '리그앙산책','하프스페이스','전반끝나면커피','낭만적인패스','킥오프대기중','골키퍼도주인공','경기복기하는밤','포지션은중미','매치데이노트','휘슬불면시작'];
+const names=['박스밖한입','주말엔늦잠','왼발만씁니다','원터치좀','골대뒤아저씨','라떼두잔','역습한방','축알못92','중원청소부','막차탄직관러',
+ '라리가보는곰','초코우유','터치라인김씨','볼보이였음','새벽3시축구','패스미스장인','오늘도야근','잔디냄새','축구노트','천천히가자',
+ '세리에보는중','수비가먼저','깃발좀내려요','한골만더','아아한잔','공은둥글다','백패스금지','측면만판다','전술판낙서','연장전에라면',
+ '맥주한캔만','압박좀해줘','세컨볼내꺼','풀백이좋아요','발끝의온도','카드좀그만','문전앞침착','유니폼또샀다','퇴근후킥오프','점유율만높음',
+ '리그앙산책','반박시네말맞음','전반끝나고옴','낭만은있었다','킥오프5분전','우리집골키퍼','경기복기하는밤','중미가편해','Matchday11','아직전반이야'];
 const heads=['기록 다시 보니 생각이 좀 달라짐','일단 한 경기 더 보려고요','이 점수는 조금 반가웠다','지금 자리 그대로 둘까 고민 중','출전 시간부터 확인하고 들어옴',
  '이름값 말고 기록으로 보니까','생각보다 자꾸 눈이 가는 선수','이런 경기 기록 보는 재미가 있네요','보유할지 바꿀지 아직 고민','숫자만 보고 판단하기는 어렵네',
  '이 선수 보는 분들 기준이 궁금함','당장 갈아타기엔 조금 아쉬워서','오늘은 거래보다 기록 복기','요즘 먼저 확인하는 이름','이 정도면 다음 경기 기다려볼 만한가',
@@ -114,7 +114,7 @@ export function buildDemoData(source){
   const sold=new Set();if(i%4===0)sold.add(anchor.id);if(i%7===0)sold.add(buys.at(-1).id);
   const trades=[...buys.map(p=>({playerId:p.id,side:'buy',requestId:sampleId(`${i}:buy:${p.id}`)})),...Array.from(sold,id=>({playerId:id,side:'sell',requestId:sampleId(`${i}:sell:${id}`)}))];
   const teams=[club.id];if(i%2===0){const other=source.clubs.find(t=>t.league===leagues[(Math.floor(i/10)+1)%5]);teams.push(other.id);}
-  const user={index:i,id:sampleId(`user:${i}`),nickname:`${names[i]}_샘플`,email:`kickx-demo-${String(i+1).padStart(2,'0')}@example.invalid`,teams,primaryTeam:club.id,anchor:anchor.id,trades};users.push(user);
+  const user={index:i,id:sampleId(`user:${i}`),nickname:names[i],email:`kickx-demo-${String(i+1).padStart(2,'0')}@example.invalid`,teams,primaryTeam:club.id,anchor:anchor.id,trades};users.push(user);
   const exited=sold.has(anchor.id),attachment=exited?sampleId(`${i}:sell:${anchor.id}`):i%3===0?sampleId(`${i}:buy:${anchor.id}`):null;
   const closing=exited?'이번에는 정리하면서 매도 수수료 2%도 확인했어요. 다시 볼지는 다음 출전 기록을 보고 정하려고요.':opinions[i%opinions.length];
   posts.push({key:`player-${i}`,author:i,scope:'player',target:anchor.id,title:`${anchor.name_ko}, ${heads[i]}`,body:`${factText(anchor,i)}\n\n${closing}${i%4===1?`\n가격은 ${number(anchor.price)}P로 확인하고 비교 중입니다.`:''}`,tradeRequest:attachment,sourceFixture:anchor.recent[0].fixture_id});
