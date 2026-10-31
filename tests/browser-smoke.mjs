@@ -99,7 +99,7 @@ try {
       await concurrentPage.goto(base+(detail?'/players/test-player':'/market'),{waitUntil:'domcontentloaded'});
       await requested;
       assert.equal(released,false);
-      await concurrentPage.getByRole('heading',{name:'CI-only player',exact:true}).waitFor({timeout:10000});
+      await (detail?concurrentPage.getByRole('heading',{name:'CI-only player',exact:true}):concurrentPage.locator('.market-table').getByText('CI-only player',{exact:true})).waitFor({timeout:10000});
     } finally {
       const completed=concurrentPage.waitForResponse(response=>new URL(response.url()).pathname==='/api/kickx',{timeout:5000}).catch(()=>null);
       released=true;release();await completed;await concurrent.close();
@@ -156,21 +156,21 @@ try {
   assert.deepEqual(state.member.watchlist,["test-player"]);
   report.checks.push("Zero price renders; failed watchlist writes do not pretend to succeed");
   await mockPage.goto(base+"/market?watchlist=1",{waitUntil:"networkidle"});
-  assert.ok(await mockPage.getByRole("heading",{name:"CI-only player",exact:true}).isVisible());
+  assert.ok(await mockPage.locator('.market-table').getByText("CI-only player",{exact:true}).isVisible());
   report.checks.push("Saved watchlist feeds the filtered player list");
   await mockPage.getByRole("button",{name:"전체 선수",exact:true}).click();
   await mockPage.getByLabel("선수 검색",{exact:true}).fill("서버에서만 조회");
-  await mockPage.getByRole("heading",{name:"목록 선수 0",exact:true}).waitFor();
-  await mockPage.getByRole("button",{name:"다음 페이지",exact:true}).click();
-  await mockPage.getByRole("heading",{name:"목록 선수 12",exact:true}).waitFor();
+  await mockPage.locator('.market-table').getByText("목록 선수 0",{exact:true}).waitFor();
+  await mockPage.getByRole("button",{name:"다음 선수 시장 페이지",exact:true}).click();
+  await mockPage.locator('.market-table').getByText("목록 선수 12",{exact:true}).waitFor();
   assert.ok(catalogRequests.some(url=>url.includes("page=2")));
   await mockPage.getByLabel("선수 검색",{exact:true}).fill("");
-  await mockPage.getByRole("heading",{name:"CI-only player",exact:true}).waitFor();
+  await mockPage.locator('.market-table').getByText("CI-only player",{exact:true}).waitFor();
   failSearch=true;
   await mockPage.getByLabel("선수 검색",{exact:true}).fill("서버에서만 조회");
   await mockPage.getByRole("heading",{name:"데이터를 불러오지 못했습니다",exact:true}).waitFor();
   await mockPage.getByRole("button",{name:"다시 시도",exact:true}).click();
-  await mockPage.getByRole("heading",{name:"목록 선수 0",exact:true}).waitFor();
+  await mockPage.locator('.market-table').getByText("목록 선수 0",{exact:true}).waitFor();
   await mockPage.goto(base+"/players/catalog-23",{waitUntil:"networkidle"});
   await mockPage.getByRole("heading",{name:"목록 선수 23",exact:true}).waitFor();
   report.checks.push("Server search, second page, retry and direct detail outside bootstrap");
@@ -342,7 +342,9 @@ try {
     }
     return route.fulfill({json:{items:[managed],total:1,page:1,size:30}});
   });
-  await mockPage.goto(base+"/admin/data",{waitUntil:"networkidle"});
+  await mockPage.goto(base+"/admin/data",{waitUntil:"domcontentloaded"});
+  await mockPage.waitForURL(url=>url.pathname==='/admin',{waitUntil:'domcontentloaded'});
+  await mockPage.getByRole('heading',{name:'운영 개요',exact:true}).waitFor();
   assert.equal(new URL(mockPage.url()).pathname,"/admin");assert.deepEqual(actions,[]);
   assert.equal(await mockPage.getByRole("button",{name:"5대 리그 데이터 갱신",exact:true}).count(),0);
   await mockPage.goto(base+"/admin/users",{waitUntil:"networkidle"});
@@ -546,22 +548,77 @@ try {
   const marketContext=await browser.newContext();
   const marketPage=await marketContext.newPage();marketPage.on('pageerror',error=>errors.push(error.message));
   const marketPlayer={...state.players[0],team:'market-scope-team'};
-  const marketData={...state,players:[marketPlayer],playerTotal:2,market:{totalPlayers:2,readyPlayers:1,pricedPlayers:1,volume:0,rising:1,falling:0,calculatedAt:null},
+  const marketData={...state,players:[marketPlayer],playerTotal:319,market:{totalPlayers:319,readyPlayers:1,pricedPlayers:1,volume:0,rising:1,falling:0,calculatedAt:null},
     leagues:[...['bsd-1','bsd-3','bsd-4','bsd-5','bsd-6'].map((id,i)=>({id,name:`정규 리그 ${i}`})),{id:'bsd-7',name:'범위 밖 컵대회'}],
     teams:[{id:'market-scope-team',name:'범위 안 구단',leagueId:'bsd-1'},{id:'market-scope-team2',name:'두 번째 구단',leagueId:'bsd-3'},{id:'market-foreign-team',name:'범위 밖 구단',leagueId:'bsd-7'}]};
   await marketContext.route(/\/api\/kickx$/,route=>route.fulfill({json:{status:'ready',data:marketData}}));
-  await marketContext.route(/\/api\/kickx\/players\?/,route=>route.fulfill({json:{status:'ready',data:{items:[marketPlayer],total:2,page:1,size:12}}}));
+  const marketRows=Array.from({length:319},(_,i)=>({...marketPlayer,id:`market-page-${i}`,name:`페이지 선수 ${i}`,team:i%2?'market-scope-team2':'market-scope-team'}));
+  const marketQueries=[];
+  await marketContext.route(/\/api\/kickx\/players\?/,route=>{
+    const params=new URL(route.request().url()).searchParams;marketQueries.push(params.toString());
+    const page=Number(params.get('page')||1),size=Number(params.get('size')||12);
+    const rows=marketRows.filter(p=>(!params.get('team')||p.team===params.get('team'))&&(!params.get('league')||marketData.teams.find(t=>t.id===p.team)?.leagueId===params.get('league')));
+    return route.fulfill({json:{status:'ready',data:{items:rows.slice((page-1)*size,page*size),total:rows.length,page,size}}});
+  });
   for(const width of [1440,390]){
     await marketPage.setViewportSize({width,height:900});await marketPage.goto(base+'/market',{waitUntil:'networkidle'});
     await marketPage.locator('.market-hero-stats').waitFor();
-    for(const [label,value]of [['등록 선수','2'],['구단','2'],['리그','5']])assert.equal(await marketPage.locator('.market-hero-stats>div').filter({has:marketPage.locator('dt',{hasText:label})}).locator('dd').innerText(),value);
+    for(const [label,value]of [['등록 선수','319'],['구단','2'],['리그','5']])assert.equal(await marketPage.locator('.market-hero-stats>div').filter({has:marketPage.locator('dt',{hasText:label})}).locator('dd').innerText(),value);
     assert.equal(await marketPage.locator('.league-tiles button').count(),6);
     assert.equal(await marketPage.getByText('범위 밖 컵대회',{exact:true}).count(),0);
     assert.equal(await marketPage.getByText('실제 경기 기록으로 움직이는 선수 가치. 관심 선수를 모아두고 가치가 열리는 순간을 기다리세요.',{exact:true}).count(),0);
     assert.equal(await marketPage.getByRole('link',{name:'선수 탐색',exact:true}).count(),0);
+    assert.equal(await marketPage.locator('.market-stats,.market-pending').count(),0);
+    assert.equal(await marketPage.locator('.market-heading .page-heading p').count(),0);
+    assert.equal(await marketPage.locator('.market-browser .league-tiles').count(),1);
+    assert.equal(await marketPage.locator('.market-table tbody tr').count(),12);
+    assert.equal(await marketPage.getByRole('heading',{name:'선수 시장',exact:true}).evaluate(el=>parseFloat(getComputedStyle(el).fontSize)),width===1440?40:30);
     assert.ok(await marketPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     await marketPage.screenshot({path:`test-artifacts/market-scope-${width}.png`,fullPage:true});
   }
+  await marketPage.setViewportSize({width:1440,height:900});
+  const marketPages=marketPage.getByRole('navigation',{name:'선수 시장 페이지 선택',exact:true});
+  await marketPages.getByRole('button',{name:'선수 시장 5페이지',exact:true}).click();
+  await marketPage.locator('.market-table').getByText('페이지 선수 48',{exact:true}).waitFor();
+  await marketPage.getByRole('button',{name:'카드 보기',exact:true}).click();
+  await marketPage.locator('.player-grid').getByRole('heading',{name:'페이지 선수 48',exact:true}).waitFor();
+  assert.equal(await marketPage.locator('.player-grid .pcard').count(),48);
+  assert.equal(await marketPages.getByRole('button',{name:'선수 시장 2페이지',exact:true}).getAttribute('aria-current'),'page');
+  await marketPages.getByRole('button',{name:'선수 시장 다음 구간 페이지 직접 입력',exact:true}).click();
+  const marketInput=marketPages.getByRole('textbox',{name:'선수 시장 이동할 페이지',exact:true});
+  const beforeInvalidMarket=marketQueries.length;
+  await marketInput.fill('8');await marketInput.press('Enter');await marketPages.getByRole('alert').waitFor();
+  assert.equal(marketQueries.length,beforeInvalidMarket);
+  await marketInput.fill('7');await marketInput.press('Enter');
+  await marketPage.locator('.player-grid').getByRole('heading',{name:'페이지 선수 288',exact:true}).waitFor();
+  assert.equal(await marketPage.locator('.player-grid .pcard').count(),31);
+  assert.equal(await marketPages.getByRole('button',{name:'다음 선수 시장 페이지',exact:true}).isDisabled(),true);
+  await marketPage.getByRole('button',{name:'목록 보기',exact:true}).click();
+  await marketPage.locator('.market-table').getByText('페이지 선수 288',{exact:true}).waitFor();
+  assert.equal(await marketPage.locator('.market-table tbody tr').count(),12);
+  assert.equal(await marketPages.getByRole('button',{name:'선수 시장 25페이지',exact:true}).getAttribute('aria-current'),'page');
+  await marketPage.getByRole('button',{name:'카드 보기',exact:true}).click();
+  await marketPage.locator('.player-grid').getByRole('heading',{name:'페이지 선수 288',exact:true}).waitFor();
+  await marketPage.locator('.league-tiles button').filter({hasText:'정규 리그 1'}).click();
+  await marketPage.locator('.player-grid').getByRole('heading',{name:'페이지 선수 1',exact:true}).waitFor();
+  assert.equal(await marketPages.getByRole('button',{name:'선수 시장 1페이지',exact:true}).getAttribute('aria-current'),'page');
+  await marketPage.locator('.league-tiles button.all').click();
+  await marketPage.locator('.player-grid').getByRole('heading',{name:'페이지 선수 0',exact:true}).waitFor();
+  await marketPage.getByRole('combobox',{name:'구단 필터',exact:true}).click();
+  await marketPage.getByRole('option',{name:'두 번째 구단',exact:true}).click();
+  await marketPage.locator('.player-grid').getByRole('heading',{name:'페이지 선수 1',exact:true}).waitFor();
+  assert.ok(marketQueries.some(q=>q.includes('team=market-scope-team2')&&q.includes('page=1')&&q.includes('size=48')));
+  await marketPage.getByRole('button',{name:'필터 초기화',exact:true}).click();
+  await marketPage.locator('.player-grid').getByRole('heading',{name:'페이지 선수 0',exact:true}).waitFor();
+  assert.equal(await marketPage.locator('.player-grid .pcard').count(),48);
+  await marketPage.screenshot({path:'test-artifacts/market-cards-1440.png',fullPage:true});
+  await marketPage.setViewportSize({width:390,height:900});
+  assert.ok(await marketPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await marketPages.getByRole('button',{name:'선수 시장 다음 구간 페이지 직접 입력',exact:true}).click();
+  assert.ok(await marketInput.isVisible());
+  await marketPage.screenshot({path:'test-artifacts/market-cards-390.png',fullPage:true});
+  await marketInput.press('Escape');
+  report.checks.push('Market selectors stay with the results; 48-card pages, list/grid position, filter resets and direct page entry work across desktop and mobile');
   await marketPage.goto(base+'/players?q=CI&watchlist=1&team=market-scope-team',{waitUntil:'networkidle'});
   assert.equal(new URL(marketPage.url()).pathname,'/market');
   for(const [key,value]of [['q','CI'],['watchlist','1'],['team','market-scope-team']])assert.equal(new URL(marketPage.url()).searchParams.get(key),value);
