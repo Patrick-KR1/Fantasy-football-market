@@ -764,7 +764,7 @@ export function TradeNotice({ player }: { player: Player }) {
   if (!player.position) return <p className="trade-notice" role="note"><b>포지션 확인 중</b><span>포지션 정보가 없는 선수는 매입할 수 없습니다.</span></p>;
   return null;
 }
-export function BackLink({ href = "/players", label = "선수 목록" }: { href?: string; label?: string }) {
+export function BackLink({ href = "/market", label = "선수 목록" }: { href?: string; label?: string }) {
   return (
     <Link href={href} className="back-link">
       <ArrowLeft size={16} />

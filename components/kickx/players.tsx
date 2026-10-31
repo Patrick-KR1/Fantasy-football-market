@@ -10,6 +10,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, LayoutGrid, List, MessageCircle, RotateCcw, Search, Sparkles } from "lucide-react";
 import { dateText, money, seriesForDays, score } from "@/lib/kickx/data";
 import { leagueIdentity } from "@/lib/kickx/club-identity";
+import { DOMESTIC_LEAGUES } from "@/lib/kickx/support";
 import type { Player, PlayerRecord } from "@/lib/kickx/types";
 import { usePlatform } from "./provider";
 import { useCatalogPage, useCatalogPlayer } from "./catalog";
@@ -52,19 +53,20 @@ function compareNumber(a: number | null, b: number | null, ascending = false) {
 }
 function MarketHero({ league, onLeague }: { league: string; onLeague: (id: string) => void }) {
   const { data } = usePlatform();
-  const featured = [...data.players].sort((a, b) => Number(!!b.photo) - Number(!!a.photo)).slice(0, 3);
-  const total = data.playerTotal ?? data.players.length;
+  const leagues = data.leagues.filter(l=>DOMESTIC_LEAGUES.includes(l.id as typeof DOMESTIC_LEAGUES[number]));
+  const teams = data.teams.filter(t=>leagues.some(l=>l.id===t.leagueId));
+  const featured = [...data.players].filter(p=>!p.id.startsWith('bsd-')||teams.some(t=>t.id===p.team)).sort((a, b) => Number(!!b.photo) - Number(!!a.photo)).slice(0, 3);
+  const total = data.market?.totalPlayers ?? data.playerTotal ?? data.players.length;
   return (
     <>
       <section className="market-hero" aria-labelledby="market-hero-title">
         <div className="market-hero-copy">
           <span className="eyebrow plain">PLAYER EXCHANGE · BIG FIVE</span>
           <h2 id="market-hero-title">유럽 5대 리그의 선수를<br /><em>한 곳에서.</em></h2>
-          <p>실제 경기 기록으로 움직이는 선수 가치. 관심 선수를 모아두고 가치가 열리는 순간을 기다리세요.</p>
           <dl className="market-hero-stats">
-            <div><dt>등록 선수</dt><dd className="num">{total ? money(total) : "—"}</dd></div>
-            <div><dt>구단</dt><dd className="num">{data.teams.length || "—"}</dd></div>
-            <div><dt>리그</dt><dd className="num">{data.leagues.length || "—"}</dd></div>
+            <div><dt>등록 선수</dt><dd className="num">{money(total)}</dd></div>
+            <div><dt>구단</dt><dd className="num">{teams.length}</dd></div>
+            <div><dt>리그</dt><dd className="num">{leagues.length}</dd></div>
             <div><dt>가격 적용</dt><dd className="num small">{dateText(data.updatedAt)}</dd></div>
           </dl>
         </div>
@@ -77,21 +79,21 @@ function MarketHero({ league, onLeague }: { league: string; onLeague: (id: strin
           ))}
         </div>
       </section>
-      {data.leagues.length > 0 && (
+      {leagues.length > 0 && (
         <div className="league-tiles" role="group" aria-label="리그로 선수 보기">
           <button type="button" className={`league-tile all ${league === "all" ? "active" : ""}`} aria-pressed={league === "all"} onClick={() => onLeague("all")}>
             <span className="league-tile-mark">ALL</span>
             <strong>전체 리그</strong>
-            <small className="num">{data.teams.length}개 구단</small>
+            <small className="num">{teams.length}개 구단</small>
           </button>
-          {data.leagues.map((l) => {
+          {leagues.map((l) => {
             const mark = leagueIdentity(l);
             return (
               <button key={l.id} type="button" className={`league-tile ${league === l.id ? "active" : ""}`} aria-pressed={league === l.id} onClick={() => onLeague(l.id)}
                 style={{ "--league": mark?.color, "--league-ink": mark?.ink } as CSSProperties}>
                 <span className="league-tile-mark">{mark?.short}</span>
                 <strong>{l.name}</strong>
-                <small className="num">{mark?.country ? `${mark.country} · ` : ""}{data.teams.filter((t) => t.leagueId === l.id).length}개 구단</small>
+                <small className="num">{mark?.country ? `${mark.country} · ` : ""}{teams.filter((t) => t.leagueId === l.id).length}개 구단</small>
               </button>
             );
           })}
@@ -171,7 +173,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
               <StatCard label="전체 거래량" value={money(data.market.volume)} unit="건" hint={data.market.calculatedAt ? `${dateText(data.market.calculatedAt)} 집계` : "집계 대기"} />
               <StatCard label="상승 선수" value={<span className="up">{money(data.market.rising)}</span>} unit="명" hint="직전 갱신 대비" />
               <StatCard label="하락 선수" value={<span className="down">{money(data.market.falling)}</span>} unit="명" hint="직전 갱신 대비" />
-              <StatCard label="거래 가능 선수" value={money(data.market.pricedPlayers ?? data.players.filter((p) => !p.status && p.price != null).length)} unit="명" hint={`전체 ${data.playerTotal ?? data.players.length}명`} tone="yellow" />
+              <StatCard label="거래 가능 선수" value={money(data.market.pricedPlayers)} unit="명" hint={`전체 ${data.market.totalPlayers ?? data.playerTotal ?? data.players.length}명 · 거래 제한 제외`} tone="yellow" />
             </div>
           ) : (
             <div className="market-pending" role="note">
@@ -184,7 +186,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
           )}
           {movers.length > 0 && (
             <section className="market-movers" aria-labelledby="market-movers">
-              <SectionTitle title="최근 움직임" meta="직전 발행 대비 변동폭 상위" />
+              <SectionTitle title="최근 변동" meta="직전 발행 대비 변동폭 상위" />
               <div className="mover-cards">
                 {movers.map((p) => (
                   <Link key={p.id} href={`/players/${p.id}`} className="mover-card hover-lift">
@@ -207,7 +209,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
       <section className="browser">
         <div className="browser-top">
           <Tabs
-            items={market ? ["전체 선수", "상승 선수", "하락 선수", "관심 선수"] : ["전체 선수", "관심 선수", "보유 선수"]}
+            items={market ? ["전체 선수", "상승 선수", "하락 선수", "관심 선수", "보유 선수"] : ["전체 선수", "관심 선수", "보유 선수"]}
             value={tab}
             onChange={(v) => { setTab(v); setPage(1); }}
             label="선수 목록 보기"
@@ -324,7 +326,7 @@ export function PlayerDetail() {
         <BackLink />
         <section className="panel">
           {status === "ready" ? (
-            <Empty title="선수를 찾을 수 없습니다" description="주소가 올바른지 확인하거나 선수 목록에서 다시 찾아보세요." action={<Link className="button primary small" href="/players">선수 탐색</Link>} />
+            <Empty title="선수를 찾을 수 없습니다" description="주소가 올바른지 확인하거나 선수 목록에서 다시 찾아보세요." action={<Link className="button primary small" href="/market">선수 시장</Link>} />
           ) : <DataEmpty entity="선수" status={status} retry={detail.reload} />}
         </section>
       </>

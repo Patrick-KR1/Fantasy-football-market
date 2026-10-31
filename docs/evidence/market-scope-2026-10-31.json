@@ -1,0 +1,30 @@
+{
+  "summary": {
+    "rising": 612,
+    "volume": 421,
+    "falling": 1624,
+    "calculatedAt": "2026-10-30T22:02:33.654325+00:00",
+    "readyPlayers": 2553,
+    "totalPlayers": 2901,
+    "pricedPlayers": 2553
+  },
+  "checkedAt": "2026-10-31T09:25:18.76329+00:00",
+  "clubCount": 96,
+  "leagueCount": 5,
+  "catalogTotal": 2901,
+  "before": {
+    "leagues": 14,
+    "clubs": 223,
+    "totalPlayers": 2901,
+    "pricedPlayers": 3260
+  },
+  "sqlExecutionMs": 23.285,
+  "verification": {
+    "unitTests": 245,
+    "unitPassed": true,
+    "databaseIntegrationPassed": true,
+    "buildTypecheckPassed": true,
+    "lintPassed": true,
+    "browserDesktopMobilePassed": true
+  }
+}

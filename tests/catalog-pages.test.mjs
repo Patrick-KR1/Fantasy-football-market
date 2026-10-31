@@ -24,6 +24,7 @@ test("watchlist search uses authenticated RLS-backed relation rather than a supp
  const calls=[];
  await readPlayerPage(client(calls),query.parseCatalogQuery(new URLSearchParams("scope=watch&userId=someone-else"),"players"));
  assert.deepEqual(calls[0],["rpc","watched_player_catalog",{},{count:"exact"}]);
+ assert.deepEqual(calls.find(c=>c[0]==='in'),['in','league_id',['bsd-1','bsd-3','bsd-4','bsd-5','bsd-6']]);
 });
 test("KST day filter includes UTC previous evening and excludes next midnight boundary",async()=>{
  const calls=[];

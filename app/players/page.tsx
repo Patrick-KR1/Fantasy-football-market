@@ -1,4 +1,3 @@
-import { PlayerList } from "@/components/kickx/players";
-export default function Page() {
-  return <PlayerList />;
-}
+import { redirect } from "next/navigation";
+// next.config preserves legacy query strings before this fallback is reached.
+export default function Page() { redirect("/market"); }

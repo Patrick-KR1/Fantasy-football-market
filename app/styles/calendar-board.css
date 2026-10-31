@@ -70,18 +70,19 @@
 .pagination-centered>.pagination-pages { grid-column:2; justify-content:center; }
 .pagination-centered .pagination-pages button { width:32px; height:32px; min-width:32px; }
 .numbered-pagination .page-jump-toggle { color:var(--text-2); }
-.page-jump-form { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; padding-top:4px; }
+.page-jump-form { grid-column:2; justify-self:center; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; padding:8px 10px; border:1px solid var(--line-2); border-radius:10px; background:var(--surface-2); }
 .page-jump-form label { font-size:12px; font-weight:700; }
-.page-jump-form input { width:72px; height:36px; padding:6px 8px; border:1px solid var(--line-2); border-radius:4px; background:var(--surface); color:var(--ink); text-align:center; font-variant-numeric:tabular-nums; }
+.page-jump-form input { width:64px; height:32px; padding:4px 8px; border:1px solid var(--line-2); border-radius:6px; background:var(--surface); color:var(--ink); text-align:center; font-variant-numeric:tabular-nums; }
 .page-jump-range { font-size:12px; font-weight:400; color:var(--text-2); }
-.numbered-pagination .page-jump-form button { width:auto; min-width:48px; padding:4px 10px; }
+.numbered-pagination .page-jump-form button { width:auto; min-width:44px; height:32px; padding:4px 10px; border-radius:6px; background:var(--surface); }
+.numbered-pagination .page-jump-toggle[aria-expanded=true] { border-color:var(--ink); color:var(--ink); background:var(--surface-2); }
 .page-jump-form button[type=submit] { background:var(--ink); color:var(--yellow); border-color:var(--ink); }
 .page-jump-form p { flex-basis:100%; margin:0; text-align:center; color:var(--down); font-size:12px; font-weight:400; }
 @media (max-width:700px) {
   .numbered-pagination.pagination-centered { display:flex; flex-direction:column; gap:10px; padding:14px 10px; }
   .pagination-centered>span { flex-basis:auto; text-align:center; }
   .pagination-centered>.pagination-pages { width:100%; justify-content:center; }
-  .page-jump-form { width:100%; }
+  .page-jump-form { width:100%; max-width:340px; align-self:center; }
 }
 .supported-club-fields { border:0; padding:0; display:grid; gap:8px; min-width:0; }
 .supported-club-fields legend { font-size:16px; font-weight:800; padding-bottom:6px; }

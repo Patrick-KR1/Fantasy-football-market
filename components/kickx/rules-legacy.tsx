@@ -115,7 +115,7 @@ export default function LegacyRules() {
           <li>자산 변경과 정기 작업을 통해 랭킹이 자동 갱신됩니다.</li>
           <li>실제 적용값은 서버가 발행한 거래 견적이 기준입니다.</li>
         </ul>
-        <div className="button-row"><Link className="button primary" href="/players">선수 탐색</Link><Link className="button secondary" href="/ranking">랭킹 보기</Link></div>
+        <div className="button-row"><Link className="button primary" href="/market">선수 시장</Link><Link className="button secondary" href="/ranking">랭킹 보기</Link></div>
       </section>
     </div>
   );
