@@ -99,7 +99,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="app">
       <a className="skip-link" href="#main-content">본문으로 바로가기</a>
       <div className="topbar">
-        <span className="topbar-brand">KICK-X / FOOTBALL MARKET</span>
         <span className="topbar-market">
           {data.market ? (
             <>
@@ -110,7 +109,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </>
           ) : <span>REAL FOOTBALL. YOUR GAME.</span>}
         </span>
-        <span className="topbar-end"><MockBadge compact /><span>가상 포인트 전용 서비스</span></span>
+        <MockBadge compact />
       </div>
       <header className="masthead">
         <Logo />

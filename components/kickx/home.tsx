@@ -286,8 +286,7 @@ export function HomeScreen() {
             </table>
           </div>
           {!visible.length && <DataEmpty entity="선수" status={status} retry={remote.enabled ? remote.reload : undefined} filtered={filtered} rows={6} />}
-          {status==='ready' && <Pagination page={current} total={total} size={pageSize} onPage={setPage} label="홈 선수"/>}
-          {total > 0 && <p className="board-foot">가격 적용 {dateText(data.updatedAt)} · 가치와 Performance는 KICK-X 내부 지표입니다.</p>}
+          {status==='ready' && <Pagination page={current} total={total} size={pageSize} onPage={setPage} label="홈 선수" centered allowJump/>}
         </section>
         <aside className="home-side" aria-label="나의 축구 대시보드">
           <AssetsPanel />
@@ -300,8 +299,8 @@ export function HomeScreen() {
       <section className="home-movers" aria-labelledby="movers-title">
         <div className="home-section-head">
           <div>
-            <span className="eyebrow">MARKET MOVERS</span>
-            <h2 id="movers-title">오늘 가장 크게 움직인 선수</h2>
+            <span className="eyebrow">시세 한눈에</span>
+            <h2 id="movers-title">선수 시세 동향</h2>
           </div>
           <Link className="button secondary small" href="/market">선수 시장 <ArrowRight size={15} /></Link>
         </div>

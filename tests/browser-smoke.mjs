@@ -109,7 +109,7 @@ try {
   await mock.route(/\/api\/kickx$/,route=>route.fulfill({json:{status:"ready",data:state}}));
   const catalogRequests=[];
   let failSearch=false;
-  const extra=Array.from({length:24},(_,i)=>({...state.players[0],id:"catalog-"+i,name:"목록 선수 "+i}));
+  const extra=Array.from({length:74},(_,i)=>({...state.players[0],id:"catalog-"+i,name:"목록 선수 "+i}));
   await mock.route(/\/api\/kickx\/players\?/,route=>{
     const url=new URL(route.request().url()),params=url.searchParams;
     catalogRequests.push(url.search);
@@ -141,6 +141,11 @@ try {
     return route.fulfill({json:input});
   });
   await mockPage.goto(base,{waitUntil:"networkidle"});
+  assert.equal(await mockPage.getByText('KICK-X / FOOTBALL MARKET',{exact:true}).count(),0);
+  assert.equal(await mockPage.getByText('가상 포인트 전용 서비스',{exact:true}).count(),0);
+  assert.equal(await mockPage.locator('.home-market .board-foot').count(),0);
+  assert.ok(await mockPage.getByRole('heading',{name:'선수 시세 동향',exact:true}).isVisible());
+  assert.equal(await mockPage.getByText('MARKET MOVERS',{exact:true}).count(),0);
   assert.match(await mockPage.locator(".yb-price").innerText(),/^0/);
   const watch=mockPage.getByRole("button",{name:"관심 선수 추가",exact:true});
   await watch.click();
@@ -176,6 +181,40 @@ try {
   await mockPage.getByRole('button',{name:'다음 홈 선수 페이지',exact:true}).click();await mockPage.locator('.board-table').getByText('목록 선수 10',{exact:true}).waitFor();
   assert.equal(await mockPage.locator('.board-table tbody tr').count(),10);
   report.checks.push('Home uses fixed ten-row server pages instead of expanding the board');
+  const homePages=mockPage.getByRole('navigation',{name:'홈 선수 페이지 선택',exact:true});
+  const center=await homePages.evaluate(nav=>{const pages=nav.querySelector('.pagination-pages').getBoundingClientRect(),bounds=nav.getBoundingClientRect();return Math.abs((pages.left+pages.right)-(bounds.left+bounds.right))/2;});
+  assert.ok(center<2,'Home page buttons are not centered in the board');
+  await homePages.getByRole('button',{name:'홈 선수 다음 구간 페이지 직접 입력',exact:true}).click();
+  const pageInput=homePages.getByRole('textbox',{name:'홈 선수 이동할 페이지',exact:true});
+  await mockPage.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='홈 선수 이동할 페이지');
+  const beforeInvalid=catalogRequests.length;
+  for(const invalid of ['0','9','2.5','abc','']){
+    await pageInput.fill(invalid);await pageInput.press('Enter');await homePages.getByRole('alert').waitFor();
+    assert.equal(catalogRequests.length,beforeInvalid,'Invalid page requested data');
+  }
+  await pageInput.fill('7');await pageInput.press('Enter');
+  await mockPage.locator('.board-table').getByText('목록 선수 60',{exact:true}).waitFor();
+  assert.equal(await homePages.getByRole('textbox').count(),0);
+  await homePages.getByRole('button',{name:'다음 홈 선수 페이지',exact:true}).click();
+  await mockPage.locator('.board-table').getByText('목록 선수 70',{exact:true}).waitFor();
+  assert.equal(await mockPage.locator('.board-table tbody tr').count(),4);
+  assert.equal(await homePages.getByRole('button',{name:'다음 홈 선수 페이지',exact:true}).isDisabled(),true);
+  await mockPage.setViewportSize({width:390,height:844});
+  await homePages.getByRole('button',{name:'홈 선수 이전 구간 페이지 직접 입력',exact:true}).click();
+  assert.ok(await mockPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await mockPage.screenshot({path:'test-artifacts/home-page-input-mobile.png',fullPage:true});
+  await pageInput.press('Escape');assert.equal(await homePages.getByRole('textbox').count(),0);
+  assert.equal(await homePages.getByRole('button',{name:'홈 선수 이전 구간 페이지 직접 입력',exact:true}).evaluate(el=>el===document.activeElement),true);
+  await homePages.getByRole('button',{name:'홈 선수 이전 구간 페이지 직접 입력',exact:true}).click();
+  await pageInput.fill('1');await homePages.getByRole('button',{name:'이동',exact:true}).click();
+  await mockPage.locator('.board-table').getByText('목록 선수 0',{exact:true}).waitFor();
+  assert.equal(await homePages.getByRole('button',{name:'이전 홈 선수 페이지',exact:true}).isDisabled(),true);
+  await mockPage.setViewportSize({width:1440,height:1000});
+  await homePages.getByRole('button',{name:'홈 선수 다음 구간 페이지 직접 입력',exact:true}).click();
+  await mockPage.screenshot({path:'test-artifacts/home-page-input-desktop.png',fullPage:true});
+  await homePages.getByRole('button',{name:'취소',exact:true}).click();
+  assert.equal(await homePages.getByRole('textbox').count(),0);
+  report.checks.push('Home copy and shared header are simplified; centered pagination validates manual jumps, boundaries, Escape and mobile layout');
   state.players[0].photo="https://sports.bzzoiro.com/img/player/9/";
   state.players[0].statsScope="imported_matches";
   state.players[0].importedMatches=2;
