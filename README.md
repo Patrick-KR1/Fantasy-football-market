@@ -4,7 +4,7 @@
 
 유럽 5대 리그 선수의 경기 기록과 가치 변동을 분석하고 자산 운용 성과를 비교할 수 있습니다. 선수·구단 커뮤니티에서는 경기와 선수에 관한 의견을 나눌 수 있습니다.
 
-[웹 서비스](https://kick-x-test.vercel.app) · [팀 저장소](https://github.com/Patrick-KR1/Fantasy-football-market)
+[웹 서비스](https://fantasy-football-market.vercel.app) · [팀 저장소](https://github.com/Patrick-KR1/Fantasy-football-market)
 
 ## 주요 기능
 
