@@ -1,74 +1,191 @@
-> 2026-10-09 자동 운영 반영: 관리자 화면은 회원·거래·커뮤니티 관리로 변경했습니다. 사용자가 적용한 001→002→003은 재실행하지 않고 새 004→005 SQL과 Actions Secrets를 한 번 설정합니다. [최신 인수인계](docs/HANDOFF.md) · [자동 운영 설정](docs/AUTOMATION_2026-10-09.md)
-
 # KICK-X
 
-실제 축구 경기 기록과 선수 시장을 연결하는 Next.js 판타지 축구 웹 서비스입니다. Yellow Playbook의 노랑·검정·흰색 스타일을 사용합니다.
+**실제 축구 경기 데이터로 선수 가치를 평가하고, 가상 포인트로 나만의 스쿼드를 운용하는 축구 시뮬레이션 게임입니다.**
 
-## 현재 상태 — 2026-10-03 KST
+유럽 5대 리그 선수의 경기 기록과 가치 변동을 분석하고 자산 운용 성과를 비교할 수 있습니다. 선수·구단 커뮤니티에서는 경기와 선수에 관한 의견을 나눌 수 있습니다.
 
-- 기존 20개 화면에 **경기 일정 /fixtures**를 추가했습니다.
-- 홈 검색·정렬·점진적 목록 표시, 선수 탐색/상세, 자산·선수단·커뮤니티·운영 화면과 빈 상태를 제공합니다.
-- **Google OAuth 시작/콜백/로그아웃, 검증된 세션 조회, 프로필 등록·변경, 관심 선수 추가·해제, 공개 축구 데이터 조회 어댑터**를 구현했습니다.
-- **9개 SQL 마이그레이션과 RLS**를 제공합니다. 실제 Supabase 프로젝트에 자동 적용하지 않습니다. 사용자가 기존 BSD 소량 적재와 표시를 확인했습니다.
-- **5대 리그 하루 1회 기본정보 갱신과 15분 주기 종료 경기 확인**을 제공합니다. 자동 계산·가격 반영·랭킹·한글명 매핑은 관리자 클릭 없이 실행됩니다. DB 체크포인트·중복 실행 방지·호출 예산을 지원합니다. [실행 안내](docs/AUTOMATION_2026-10-09.md)
-- 초기 포인트 지급, 거래/원장, 스쿼드 저장, 랭킹 집계, 커뮤니티 저장, 가치 계산·AI 생성은 아직 연결되지 않았습니다. 이번 전체 적재는 실제 키가 있는 환경에서 실행해야 합니다.
+[웹 서비스](https://kick-x-test.vercel.app) · [팀 저장소](https://github.com/Patrick-KR1/Fantasy-football-market)
 
-코드 구현과 운영 연결은 다릅니다. 환경변수만 넣기 전에 SQL과 Google 공급자/리다이렉트를 설정해야 합니다. 기본값은 미연결이며 예시 선수·잔액·거래·회원 데이터를 채우지 않습니다.
+## 주요 기능
 
-## 실행
+| 기능 | 설명 |
+| --- | --- |
+| 선수 시장 | 선수·구단·리그 검색, 포지션 필터, 정렬, 카드형·표형 목록, 관심 선수 등록 |
+| 선수 분석 | 선수 기본정보, 경기 기록, Performance 산정 내역, 가치 변동 차트, 경기 리포트 |
+| 선수 매입·매각 | 시스템 기준가격에 따른 즉시 체결, 견적 확인, 수수료·정원·경기 전후 제한 검사 |
+| 스쿼드 | 19종 포메이션, 주전 배치·교환, 포지션별 선수 탐색, 벤치 이동·주전 복귀 |
+| 자산·랭킹 | 보유 포인트, 선수 평가액, 평가손익, 자산 흐름, 거래 내역, 주간·월간 랭킹 |
+| 커뮤니티 | 선수·구단 게시판, 게시글·댓글·답글, 공감·투표, 보유 인증, 본인 매입·매각 내역 첨부 |
+| 계정·알림 | Google 로그인, 프로필·응원 구단 설정, 가격 변동·경기·댓글·답글 알림 |
+| 운영 | 회원 이용 제한, 신고·게시물·거래 내역 관리, 경기 데이터 수집 및 점수·가치 자동 갱신 |
+
+## 게임 방식
+
+1. Google 계정으로 가입하면 초기 가상 포인트 **1,300,000P**가 지급됩니다.
+2. 선수의 경기 기록과 가치 변동을 확인하고 현재 포메이션의 빈자리에 맞춰 선수를 영입합니다.
+3. 실제 경기 기록을 포지션별 배점으로 계산해 Performance를 산정하고 선수 가치에 반영합니다.
+4. 선수 구성과 매입·매각 시점을 조정하고 자산 변화와 기간별 랭킹을 확인합니다.
+
+회원은 시스템이 제시하는 가격으로 선수를 매입·매각합니다. 다른 회원의 주문이나 매물을 기다릴 필요가 없으며, 여러 회원이 같은 선수를 각각 보유할 수 있습니다.
+
+### 주요 규칙
+
+- 주전은 최대 11명이며 포메이션별 GK·DF·MF·FW 정원을 적용합니다. 같은 선수를 중복 보유할 수 없습니다.
+- 포메이션 변경 시 새 정원을 초과하는 포지션에서 벤치로 이동할 선수를 선택합니다. 나머지 주전은 유지됩니다.
+- 벤치 선수도 현재 시세로 평가하며 전체 보유 자산에 포함됩니다. 벤치 이동 후 **7일 이내**에 조건을 충족하면 주전으로 복귀할 수 있습니다.
+- 기한 내 복귀하거나 직접 매각하지 않은 벤치 선수는 자동 매각 대상이 됩니다. 경기 제한 중에는 제한 해제 후 정산합니다.
+- 매입 수수료는 없으며 매각 수수료는 **2%**입니다.
+- 경기 시작 **90분 전부터 종료 확인 후 10분까지** 해당 선수의 매입·매각을 제한합니다.
+- 가격 반영은 지원하는 5대 정규 리그 경기를 대상으로 하며 취소된 경기는 산정에서 제외합니다.
+- 단일 경기의 가격 변동은 직전 가격 대비 **±10%**, 최저 가격은 **10,000P**를 적용합니다. Performance 점수에는 10점 상한을 두지 않습니다.
+
+KICK-X는 서비스 내부 가상 포인트를 사용합니다. 실제 금전 거래·환전·스포츠 베팅 기능을 제공하지 않습니다.
+
+## 기술 스택
+
+| 구분 | 기술 |
+| --- | --- |
+| 웹 애플리케이션 | Next.js 16, React 19, TypeScript |
+| UI | Tailwind CSS, Radix UI, Lucide |
+| 데이터베이스 | Supabase PostgreSQL, RLS, SQL 함수·트리거 |
+| 인증 | Supabase Auth, Google OAuth |
+| 축구 데이터 | BSD Football API |
+| 경기 리포트 | Gemini API, 동일 입력의 저장 설명 재사용 |
+| 배포·자동화 | Vercel, GitHub Actions, 예약 작업 |
+| 검증 | Node.js Test Runner, ESLint, PostgreSQL·PGlite, Playwright |
+
+## 로컬 실행
+
+### 준비 사항
+
+- Node.js **22 이상** 및 npm
+- 실제 데이터와 로그인을 사용할 경우 Supabase 프로젝트와 Google OAuth 설정
+- 데이터 수집을 실행할 경우 BSD API 키
+
+### 설치
 
 ```sh
+git clone https://github.com/Patrick-KR1/Fantasy-football-market.git
+cd Fantasy-football-market
 npm ci
+```
+
+`.env.example`을 복사해 `.env.local`을 만듭니다.
+
+```sh
+# macOS / Linux
+cp .env.example .env.local
+```
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env.local
+```
+
+환경 설정 후 개발 서버를 실행합니다.
+
+```sh
 npm run dev
 ```
 
-환경변수가 없어도 UI를 확인할 수 있습니다. 화면 개발·시연용 예시 데이터를 보려면 `.env.local`에 `KICKX_MOCK_DATA=true`를 추가하세요(아래 "예시 데이터 모드"). 알 수 없는 수치에는 `—`를 표시하며 실제 조회값이 0일 때만 0을 표시합니다. 로그인·DB 연결 설정은 [연결 안내](docs/backend-setup.md)를 따르세요.
+브라우저에서 [http://localhost:3000](http://localhost:3000)을 엽니다.
 
-## 개발 구조
+### 환경변수
+
+| 변수 | 용도 |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | 웹 애플리케이션에서 사용할 Supabase URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 클라이언트용 publishable 키. 기존 anon 키도 사용 가능 |
+| `KICKX_DATABASE_ENABLED` | DB 및 로그인 설정 완료 후 `true`로 변경 |
+| `KICKX_MOCK_DATA` | DB 연결 없이 화면을 확인하는 예시 데이터 모드 |
+| `SUPABASE_URL` | 데이터 수집·자동 작업에서 사용할 Supabase URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | 데이터 수집·자동 작업의 서버 전용 키 |
+| `BSD_API_KEY` | 축구 데이터 수집용 API 키 |
+| `GEMINI_API_KEY` | 경기 리포트 설명 생성용 서버 전용 키 |
+| `GEMINI_REPORT_MODEL` | 리포트 생성 모델 이름. 기본값은 `.env.example` 참고 |
+
+`SUPABASE_SERVICE_ROLE_KEY`, `BSD_API_KEY`, `GEMINI_API_KEY`는 서버 환경에만 설정합니다. `.env.local`과 실제 비밀키는 Git에 커밋하지 않습니다.
+
+### Supabase 설정
+
+1. 새 Supabase 프로젝트를 생성합니다.
+2. `supabase/migrations/`의 SQL을 **파일명 오름차순으로 한 번씩** 적용합니다. 기존 운영 DB에는 이미 적용한 마이그레이션을 반복 실행하지 않습니다.
+3. Supabase Authentication에서 Google 공급자를 활성화하고 OAuth Client ID와 Secret을 설정합니다.
+4. Google OAuth의 승인된 리디렉션 URI에 해당 프로젝트의 `https://<project-ref>.supabase.co/auth/v1/callback`을 등록합니다.
+5. Supabase의 Site URL을 사용할 웹 주소로 설정하고 Redirect URLs에 `http://localhost:3000/auth/callback`과 실제 배포 주소의 `/auth/callback`을 등록합니다.
+6. `.env.local`에 Supabase URL과 클라이언트용 키를 입력하고 `KICKX_DATABASE_ENABLED=true`로 설정합니다.
+
+테이블 구조 적용과 실제 축구 데이터 적재는 별도 작업입니다. `tests/database-bootstrap.sql`은 격리된 시험 DB를 위한 파일이므로 실제 Supabase 프로젝트에 실행하지 않습니다.
+
+```sh
+npm run connection:check
+```
+
+### 예시 데이터로 화면 확인
+
+DB 연결을 설정하기 전에는 아래 값으로 화면을 확인할 수 있습니다.
+
+```dotenv
+KICKX_DATABASE_ENABLED=false
+KICKX_MOCK_DATA=true
+```
+
+예시 모드에서는 화면에 예시 데이터임을 표시합니다. 선수·가격·잔액은 시연용이며 변경 내용은 실제 DB에 저장되지 않습니다. DB 연결을 활성화하면 예시 데이터 모드는 적용되지 않습니다.
+
+## 데이터 갱신과 경기 리포트
+
+- 경기 일정·선수·구단 정보를 수집하고 종료 경기의 기록을 확인합니다.
+- 기록이 변경된 선수의 Performance와 가격을 계산하며 동일 결과의 중복 반영을 방지합니다.
+- 자산·랭킹·알림과 벤치 만료 처리를 자동 작업에 연결합니다.
+- 경기 리포트는 경기 수치와 산정 결과를 바탕으로 설명을 제공합니다. 같은 입력의 저장된 설명을 재사용해 중복 생성을 줄입니다.
+- AI 키가 없는 환경에서도 정형 경기 수치는 확인할 수 있습니다. 외부 데이터 반영 시점은 제공업체의 갱신과 예약 작업의 실행 시점에 영향을 받습니다.
+
+GitHub Actions 자동 수집을 사용할 경우 저장소의 Actions Secrets에 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `BSD_API_KEY`를 등록합니다. 워크플로는 `.github/workflows/football-automation.yml`에 있습니다.
+
+## 주요 명령
+
+| 명령 | 설명 |
+| --- | --- |
+| `npm run dev` | 개발 서버 실행 |
+| `npm run build` | 배포용 빌드 및 타입 검사 |
+| `npm start` | 빌드된 애플리케이션 실행 |
+| `npm run lint` | ESLint 검사 |
+| `npm test` | 단위 테스트 |
+| `npm run test:db` | 격리된 PGlite DB에서 마이그레이션·DB 동작 검사 |
+| `npm run connection:check` | Supabase 연결 설정 점검 |
+| `npm run data:sync -- <인자>` | BSD 데이터 단건 수집 |
+| `npm run data:sync:all -- <인자>` | BSD 데이터 일괄 수집·재개 |
+| `npm run data:automatic` | 실제 연결된 DB의 수집·산정·운영 작업 실행 |
+
+데이터 수집·자동 작업 명령은 연결한 DB를 갱신합니다. 수집 범위와 실행 옵션은 [수동 수집 안내](docs/manual-refresh.md)와 각 스크립트의 사용법을 확인합니다.
+
+## 프로젝트 구조
 
 | 경로 | 역할 |
 | --- | --- |
-| app/ | 화면, OAuth 콜백, 조회·프로필·관심 선수·관리자 갱신 API |
-| components/kickx/ | 화면, 저장 상태, 반응형 UI |
-| lib/kickx/ | 화면 타입, 입력 검증, 날짜·금액·경기 상태 |
-| server/kickx/ | 서버 전용 Supabase 클라이언트와 조회 어댑터, 인증·요청 검증 |
-| supabase/migrations/ | 카탈로그·계정·축구 원천·수집 진행 상태와 RLS |
-| scripts/ | 연결 검사, BSD 단건/전체 수동 수집 CLI |
-| app/styles/ | Yellow Playbook 디자인 시스템 (tokens, base, components, shell, pages) |
-| tests/ | 데이터 경계, 입력/리다이렉트, 카탈로그, SQL RLS, 브라우저 검사 |
-| .github/workflows/check.yml | 빌드, 테스트, 임시 PostgreSQL 권한 검사, 브라우저 확인 |
+| `app/` | 페이지, API Route Handler, OAuth 콜백 |
+| `components/kickx/` | 화면·모달·차트·스쿼드 등 UI 컴포넌트 |
+| `lib/kickx/` | 타입, 입력 검증, 포메이션, 클라이언트 API |
+| `server/kickx/` | 인증, 데이터 조회·변경, 외부 API 연동 |
+| `server/kickx/engine/` | Performance 및 선수 가치 산정 |
+| `supabase/migrations/` | 테이블, 뷰, 함수, 트리거, RLS 정책 |
+| `scripts/` | 데이터 수집·자동 처리·점검 도구 |
+| `tests/` | 단위·DB·브라우저 검사 |
+| `public/` | 이미지, 아이콘, 글꼴 |
+| `.github/workflows/` | CI 및 데이터 처리 자동화 |
+| `docs/` | 기능별 설계·운영·검증 자료 |
 
-공개 API는 관리자 데이터를 반환하지 않습니다. 사용자 ID와 역할은 서버 검증 결과에서만 가져오며 클라이언트의 역할·ID 입력을 사용하지 않습니다. publishable/anon 키와 RLS를 사용하고 서비스 역할 키를 브라우저나 일반 사용자 API에 사용하지 않습니다.
+## 개발팀
 
-카탈로그 초기 응답은 선수·일정 미리보기와 작은 리그/구단 참조 목록으로 제한합니다. 전체 선수/경기는 전용 API에서 서버 검색·필터·정렬·페이지네이션하고, 목록 밖의 선수 상세도 직접 조회합니다. 운영 대량 적재 후 응답 시간 목표는 별도 측정해야 합니다.
+대진대학교 컴퓨터공학전공 졸업작품
 
-## 예시 데이터 모드 (프론트엔드 개발용)
+- 김승현
+- 소윤섭
+- 오정환
 
-`KICKX_MOCK_DATA=true`이고 DB 연결이 꺼져 있을 때만 `server/kickx/mock-data.ts`의 예시 데이터(유럽 5대 리그 20개 구단, 47명, 경기 일정, 데모 계정의 자산·스쿼드·거래, 게시글, 랭킹)를 제공합니다.
+## 외부 자료
 
-- 응답에 `source: "mock"`이 붙고 모든 화면 상단에 **예시 데이터** 배지가 표시됩니다.
-- 가치·Performance·수수료(매각 2%)·랭킹은 디자인 확인용 예시 값이며 KICK-X 계산 결과가 아닙니다.
-- 관심 선수·프로필·스쿼드 저장과 거래 확정은 화면에서만 동작하고 저장되지 않습니다.
-- DB 연결이 활성화되면 자동으로 무시됩니다. 예시 모드의 사용 환경 제한은 사용자 지시로 해제됐으며, 실제 저장·계산 증거로 사용하면 안 됩니다.
+- 축구 데이터: BSD Football API
+- 글꼴: Noto Sans KR — [SIL Open Font License](public/fonts/OFL-NotoSansKR.txt)
 
-## 디자인 시스템
-
-`app/styles/`에 토큰 → 기본 요소 → 공통 컴포넌트 → 셸 → 페이지 순으로 정리했습니다. 색상·간격·글자 크기·모서리는 `tokens.css`의 변수만 사용합니다. 공통 UI는 `components/kickx/ui.tsx`(StatCard, Change, PositionBadge, PlayerPortrait, Tabs, PriceChart, Modal, 거래 확인 모달, Empty/Skeleton/DataNotice)에 있습니다. 선수 사진은 BSD Image API를 `Player.photo`에 연결하며 미제공/실패 시 일러스트 플레이스홀더를 사용합니다.
-
-## 다음 작업
-
-**[전체 검토](docs/project-review.md)** · [수동 전체 적재](docs/manual-refresh.md) · [인수인계](docs/HANDOFF.md) · [DB/OAuth 연결 안내](docs/backend-setup.md) · [다음 개발 단계와 결정표](docs/next-steps.md)
-
-```sh
-npm run lint
-npm test
-npm run build
-```
-
-CI의 PostgreSQL은 권한 검사용 임시 DB입니다. 실제 Supabase OAuth·배포 환경의 통합 시험을 대신하지 않습니다. 브라우저 테스트의 주입 데이터는 테스트 코드에만 있으며 앱·SQL에는 시드 데이터가 없습니다.
-
-## 시각 자산
-
-`public/images/yellow-playbook-reference.png`는 제공된 레퍼런스의 장식용 비주얼입니다. 실제 선수 정보로 사용하지 않습니다. 로컬 Noto Sans KR의 라이선스는 `public/fonts/OFL-NotoSansKR.txt`에 있습니다. 모션 감소 설정에서는 전환·로딩 애니메이션을 끕니다.
-
-축구 원천 수집·검색 API 연결: [docs/football-data.md](docs/football-data.md). 연결 점검은 `npm run connection:check`, 수동 수집은 `npm run data:sync -- <task> ...`.
+선수 사진·구단 엠블럼 등 외부 자료의 권리는 각 권리자에게 있습니다.
