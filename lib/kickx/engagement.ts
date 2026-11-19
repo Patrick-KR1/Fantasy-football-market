@@ -2,6 +2,7 @@ export type Mission = { id: string; current: number; target: number };
 export type ShopCategory = 'nameplate' | 'frame' | 'pitch' | 'ticket';
 export type ShopItem = { id: string; category: ShopCategory; name: string; description: string; price: number; theme: string };
 export type Loadout = { nameplate?: string | null; frame?: string | null; pitch?: string | null; faces: boolean };
+export const emptyShop = (): {catalog:ShopItem[];poolSize:number} => ({catalog:[],poolSize:0});
 export type DrawReceipt = { id: string; day: string; player_id: string; player_name: string; price_at_draw: number; pool_size: number; status: 'pending' | 'placed' | 'duplicate'; compensation: number | null; bench_player: string | null; created_at: string };
 export type Engagement = {
  day: string; resetsAt: string;

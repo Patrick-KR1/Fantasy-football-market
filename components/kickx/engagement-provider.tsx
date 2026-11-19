@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { usePlatform, useResource } from './provider';
 import { apiRequest } from '@/lib/kickx/client';
-import { emptyEngagement, type Engagement, type Loadout } from '@/lib/kickx/engagement';
+import { emptyEngagement, emptyShop, type Engagement, type Loadout } from '@/lib/kickx/engagement';
 type ContextValue = { state: Engagement; ready: boolean; error: boolean; busy: boolean; reload: () => void; act: (action: string, input?: Record<string, unknown>) => Promise<boolean>; track: (kind: string, target: string) => void };
 const Context = createContext<ContextValue | null>(null);
 export function EngagementProvider({ children }: { children: ReactNode }) {
@@ -10,6 +10,8 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
  const userId = data.session?.profile ? data.session.userId : null;
  // Identity in the URL prevents another account's inventory appearing for one render.
  const resource = useResource(userId ? `/api/kickx/engagement?member=${encodeURIComponent(userId)}` : null, emptyEngagement, 60000);
+ const preview = useResource(userId ? null : '/api/kickx/shop',emptyShop);
+ const state=useMemo(()=>userId?resource.data:{...resource.data,catalog:preview.data.catalog,draw:{...resource.data.draw,poolSize:preview.data.poolSize}},[userId,resource.data,preview.data]);
  const {setData:setEngagement,reload:reloadEngagement}=resource;
  const [busy, setBusy] = useState(false), lock = useRef(false);
  const currentUser = useRef(userId); currentUser.current = userId;
@@ -38,7 +40,7 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
   const timer=setTimeout(reloadEngagement,Math.max(1000,Math.min(2147483647,Date.parse(resource.data.resetsAt)-Date.now()+1000)));
   return ()=>clearTimeout(timer);
  },[resource.data.resetsAt,reloadEngagement]);
- const value = useMemo(()=>({state:resource.data,ready:!!userId&&resource.status==='ready',error:resource.status==='error',busy,reload:resource.reload,act,track}),[resource.data,resource.status,resource.reload,userId,busy,act,track]);
+ const value = useMemo(()=>({state,ready:!!userId&&resource.status==='ready',error:resource.status==='error',busy,reload:resource.reload,act,track}),[state,resource.status,resource.reload,userId,busy,act,track]);
  return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 export function useEngagement() { const c=useContext(Context);if(!c)throw new Error('EngagementProvider is required');return c; }
