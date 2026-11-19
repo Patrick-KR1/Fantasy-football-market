@@ -1,4 +1,5 @@
 "use client";
+import { useMissionView } from "./engagement-provider";
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { reportSentences, matchPriceExplanation } from '@/lib/kickx/match-report';
@@ -25,6 +26,7 @@ export function MatchReportDialog({ playerId, record, onClose }: { playerId: str
     if (!signedIn) return;
     return loader.subscribe(userId, url, state => setSnapshot({ key: `${userId}:${url}`, state }));
   }, [url, signedIn, userId, attempt]);
+  useMissionView("ai_report", record.fixtureId ? `${playerId}:${record.fixtureId}` : null, signedIn && report?.status === "ready" && !!report.text);
   if (!signedIn) return null;
   const facts = report?.facts;
   const text = report?.status === "ready" ? report.text : null;

@@ -39,13 +39,14 @@ export function PortfolioScreen() {
         action={<Link className="button secondary" href="/transactions"><History size={17} />거래 내역</Link>}
       />
       <MemberNotice />
+      {!!member?.pendingDrawAssets && <p className="draw-pending-asset">배치 대기 중인 뽑기 선수 {money(member.pendingDrawAssets)} P가 총자산에 포함되어 있습니다. <Link href="/draw">선수 배치 완료하기</Link></p>}
       {/* Brokerage-style account summary: total and its flow first, composition and key figures beside it. */}
       <section className="pf-summary" aria-label="자산 요약">
         <div className="pf-overview">
           <div className="pf-total">
             <span className="pf-label">총자산</span>
             <strong className="num">{money(total)}<span className="unit">P</span></strong>
-            <div className="pf-delta"><Change value={member?.returnRate} /><span>초기 자산 대비</span></div>
+            <div className="pf-delta"><Change value={member?.returnRate} /><span>미션·치장 지출 제외</span></div>
           </div>
           <div className="pf-chart">
             <div className="pf-chart-head"><span>자산 흐름</span><Tabs items={["1주", "1개월"]} value={period} onChange={setPeriod} variant="segment" label="기간 선택" /></div>
@@ -65,7 +66,7 @@ export function PortfolioScreen() {
           </div>
           <dl className="pf-kpis">
             <div><dt>평가손익</dt><dd className={`num ${tone(member?.profit)}`}>{signed(member?.profit)}<small>P</small></dd><small>매입가 대비</small></div>
-            <div><dt>수익률</dt><dd className={`num ${tone(member?.returnRate)}`}>{percent(member?.returnRate)}</dd><small>초기 자산 대비</small></div>
+            <div><dt>수익률</dt><dd className={`num ${tone(member?.returnRate)}`}>{percent(member?.returnRate)}</dd><small>미션·치장 지출 제외</small></div>
             <div><dt>보유 선수</dt><dd className="num">{member ? member.holdings.length : "—"}<small>명</small></dd></div>
             <div><dt>주간 랭킹</dt><dd className="num">{member?.weeklyRank != null ? member.weeklyRank : "—"}<small>위</small></dd></div>
           </dl>

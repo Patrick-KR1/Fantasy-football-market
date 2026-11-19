@@ -99,7 +99,7 @@ export type Holding = {
   profit: number | null;
   returnRate: number | null;
   /** Current valuation with a last-known fallback when market data is unavailable. */
-  bench?: { price: number; startedAt: string; expiresAt: string; reason: 'transfer' | 'position' | 'transfer_position' | 'formation' } | null;
+  bench?: { price: number; startedAt: string; expiresAt: string; reason: 'transfer' | 'position' | 'transfer_position' | 'formation' | 'draw' } | null;
 };
 export type Post = {
   id: string;
@@ -152,6 +152,7 @@ export type MemberData = {
   transactionTotal?: number;
   realizedProfit?: number | null;
   points: number | null;
+  pendingDrawAssets?: number;
   totalAssets: number | null;
   playerAssets: number | null;
   profit: number | null;

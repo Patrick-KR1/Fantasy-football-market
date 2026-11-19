@@ -1,4 +1,5 @@
 "use client";
+import { useMissionView } from "./engagement-provider";
 import { Select } from "./select";
 import { Pagination } from "./pagination";
 import { DOMESTIC_LEAGUES } from "@/lib/kickx/support";
@@ -87,6 +88,7 @@ export function FixturesScreen() {
   }).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt)),[data.fixtures,data.teams,month,league,state,query]);
   const remote=useCatalogPage<Fixture>('fixtures',{month,league,state,q:query,page,size:500});
   const status=remote.enabled?remote.status:platformStatus,total=remote.enabled?remote.data.total:results.length;
+  useMissionView("fixtures", "schedule", status === "ready");
   const visible=remote.enabled?(status==='ready'?remote.data.items:[]):results.slice((page-1)*500,page*500);
   const groups=new Map<string,Fixture[]>();
   for(const f of visible){const day=koreanDay(f.startsAt);groups.set(day,[...(groups.get(day)??[]),f]);}

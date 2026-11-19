@@ -1,4 +1,5 @@
 "use client";
+import { MemberNameplate } from "./nameplate";
 import { AVATAR_LABELS, UserAvatar } from "./avatar";
 import { Select } from "./select";
 import { useTeamOptions } from "./options";
@@ -212,7 +213,7 @@ export function MyPageScreen() {
       <section className="my-hero" aria-label="내 프로필">
         <UserAvatar className="profile-avatar" avatar={profile?.avatar} seed={data.session?.userId ?? "guest"} label="프로필 아이콘" />
         <div className="my-hero-text">
-          <div className="my-hero-name"><h2>{profile?.primaryTeam&&<TeamBadge id={profile.primaryTeam}/>} {profile?.nickname || (data.session ? "프로필을 완성해 주세요" : "로그인이 필요합니다")}</h2><MockBadge compact /></div>
+          <div className="my-hero-name"><h2>{profile?.primaryTeam&&<TeamBadge id={profile.primaryTeam}/>} <MemberNameplate userId={data.session?.userId}>{profile?.nickname || (data.session ? "프로필을 완성해 주세요" : "로그인이 필요합니다")}</MemberNameplate></h2><MockBadge compact /></div>
           <div className="profile-supported-clubs" aria-label="선택한 응원 구단">{supportedTeams(profile).length ? [...supportedTeams(profile)].sort((a, b) => Number(b === profile?.primaryTeam) - Number(a === profile?.primaryTeam)).map(id => {
             const club = clubIdentity(getTeam(id)), main = id === profile?.primaryTeam;
             // Main club as a solid badge in its colours; the other supported clubs as tinted chips.

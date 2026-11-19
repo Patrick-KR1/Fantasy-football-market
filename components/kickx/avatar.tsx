@@ -2,6 +2,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { AVATAR_ICONS, type AvatarIcon, parseAvatar } from "@/lib/kickx/validation";
 import { ClubCrest } from "./ui";
+import { MemberNameplate } from "./nameplate";
 
 /** Solid football glyphs on a 24px grid. `.cut` shapes take the avatar background to read as holes. */
 const GLYPHS: Record<AvatarIcon, ReactNode> = {
@@ -61,6 +62,6 @@ export function UserAvatar({ avatar, seed, className = "", label, style }: { ava
 }
 
 /** Permanent club identity is separate from the member's changeable profile icon. */
-export function MemberName({primaryTeam,holdsPlayer,children}:{primaryTeam?:string|null;holdsPlayer?:boolean;children:ReactNode}){
- return <span className="member-name">{primaryTeam&&<span className="primary-name-crest" title="메인 응원 구단"><ClubCrest id={primaryTeam} size="small"/></span>}<span>{children}</span>{holdsPlayer&&<small className="ownership-badge" title="현재 이 선수를 보유한 회원입니다">보유 인증</small>}</span>;
+export function MemberName({primaryTeam,holdsPlayer,userId,children}:{primaryTeam?:string|null;holdsPlayer?:boolean;userId?:string;children:ReactNode}){
+ return <span className="member-name">{primaryTeam&&<span className="primary-name-crest" title="메인 응원 구단"><ClubCrest id={primaryTeam} size="small"/></span>}<MemberNameplate userId={userId}>{children}</MemberNameplate>{holdsPlayer&&<small className="ownership-badge" title="현재 이 선수를 보유한 회원입니다">보유 인증</small>}</span>;
 }

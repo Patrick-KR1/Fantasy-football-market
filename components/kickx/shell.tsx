@@ -18,8 +18,11 @@ const links = [
   { href: "/squad", label: "스쿼드" },
   { href: "/ranking", label: "랭킹" },
   { href: "/community/clubs", label: "구단 커뮤니티" },
+  { href: "/draw", label: "선수 뽑기" },
 ];
 const utility = [
+  { href: "/missions", label: "미션" },
+  { href: "/shop", label: "포인트 상점" },
   { href: "/fixtures", label: "경기 일정" },
   { href: "/portfolio", label: "내 자산" },
   { href: "/transactions", label: "거래 내역" },
@@ -73,7 +76,7 @@ function AccountMenu() {
       <button type="button" className="account-trigger" aria-label={`${nickname} 계정 메뉴`} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen(value => !value)}>
         <UserAvatar className="account-avatar" avatar={data.session?.profile?.avatar} seed={data.session?.userId ?? nickname} />
         <span className="account-text">
-          <strong><MemberName primaryTeam={data.session?.profile?.primaryTeam}>{nickname}</MemberName></strong>
+          <strong><MemberName userId={data.session.userId} primaryTeam={data.session?.profile?.primaryTeam}>{nickname}</MemberName></strong>
           <span className="num">{money(points)}<span className="unit">P</span></span>
         </span>
         <ChevronDown size={18} className="account-chevron" />

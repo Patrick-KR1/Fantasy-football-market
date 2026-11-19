@@ -1,4 +1,5 @@
 "use client";
+import { useMissionView } from "./engagement-provider";
 import {MemberName} from "./avatar";
 import {CommunityFeed} from "./community-feed";
 import {PerformanceDetails} from "./performance";
@@ -334,6 +335,7 @@ export function PlayerDetail() {
   const { data, getTeam, getLeague } = usePlatform();
   const detail = useCatalogPlayer(String(params.id));
   const {player:p,status} = detail;
+  useMissionView("price", p?.id ?? null, status === "ready" && p?.price != null);
   const [period, setPeriod] = useState("1개월"),
     [tab, setTab] = useState("최근 경기");
   const [reportRecord, setReportRecord] = useState<PlayerRecord | null>(null);
@@ -477,7 +479,7 @@ export function PlayerDetail() {
                   <li key={post.id}>
                     <Link href={`/community/posts/${post.id}`}>
                       <strong>{post.title}</strong>
-                      <span><MemberName primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName> · 댓글 {post.commentCount}</span>
+                      <span><MemberName userId={post.authorId} primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName> · 댓글 {post.commentCount}</span>
                     </Link>
                   </li>
                 ))}

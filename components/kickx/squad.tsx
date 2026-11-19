@@ -1,4 +1,7 @@
 "use client";
+import { useLoadout } from "./engagement-provider";
+import { SquadAppearanceControls } from "./shop";
+import { cosmeticTheme } from "@/lib/kickx/engagement";
 import { MatchNotificationToggle } from "./notifications";
 import { useId, useRef, useState, type CSSProperties } from "react";
 import { clubIdentity, luminance } from "@/lib/kickx/club-identity";
@@ -146,12 +149,13 @@ export function Pitch({
   targets?: number[];
 }) {
   const { getPlayer, getTeam } = usePlatform();
+  const appearance = useLoadout();
   const rule = formation ? formationRule(formation) : undefined;
   const positions = (rule ?? SQUAD_FORMATION).positions;
   const rows = [...(rule ?? SQUAD_FORMATION).rows].reverse();
   return (
     <div
-      className={`pitch ${compact ? "compact" : ""} ${rule ? "" : "is-empty"} ${targets ? "placing" : ""}`}
+      className={`pitch pitch-theme-${cosmeticTheme(appearance.pitch)} ${compact ? "compact" : ""} ${rule ? "" : "is-empty"} ${targets ? "placing" : ""}`}
       data-lines={rows.length}
     >
       <PitchMarkings />
@@ -179,7 +183,7 @@ export function Pitch({
                 : "";
               const body = p ? (
                 <>
-                  <Jersey kit={kit(getTeam(p.team))} />
+                  <span className={`squad-player-icon frame-${cosmeticTheme(appearance.frame)} ${appearance.faces ? "squad-face" : "squad-shirt"}`}>{appearance.faces ? <PlayerPortrait player={p} size="md" /> : <Jersey kit={kit(getTeam(p.team))} />}</span>
                   <span
                     className="pitch-name"
                     title={p.name}
@@ -367,6 +371,7 @@ export function SquadScreen() {
       <PageHeading eyebrow="BUILD YOUR STARTING XI" title="내 스쿼드" />
       <MemberNotice />
       <MatchNotificationToggle />
+      <SquadAppearanceControls />
       <div className="squad-layout automatic-squad">
         <section className="squad-board">
           <div className="squad-toolbar">

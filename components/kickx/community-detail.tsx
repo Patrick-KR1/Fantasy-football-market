@@ -136,7 +136,7 @@ function PostDetailContent({ postId, focusComment }: { postId: string; focusComm
         <div className="article-author">
           <Link href={`/community/authors/${post.authorId}`} aria-label={`${post.author} 활동 보기`}><UserAvatar className="rank-avatar" avatar={owner ? data.session?.profile?.avatar : post.authorAvatar} seed={post.authorId} /></Link>
           <div>
-            <strong><Link href={`/community/authors/${post.authorId}`}><MemberName primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName></Link></strong>
+            <strong><Link href={`/community/authors/${post.authorId}`}><MemberName userId={post.authorId} primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName></Link></strong>
             <span>{dateText(post.date)} · 조회 {money(post.views)}</span>
           </div>
           {owner && (
@@ -212,7 +212,7 @@ function PostDetailContent({ postId, focusComment }: { postId: string; focusComm
                 <Link href={`/community/authors/${c.authorId}`} aria-label={`${c.author} 활동 보기`}><UserAvatar className="rank-avatar" avatar={mine ? data.session?.profile?.avatar : c.authorAvatar} seed={c.authorId} /></Link>
                 <div>
                   <div className="comment-head">
-                    <strong><Link href={`/community/authors/${c.authorId}`}><MemberName primaryTeam={c.authorPrimaryTeam} holdsPlayer={c.authorHoldsPlayer}>{c.author}</MemberName></Link></strong>
+                    <strong><Link href={`/community/authors/${c.authorId}`}><MemberName userId={c.authorId} primaryTeam={c.authorPrimaryTeam} holdsPlayer={c.authorHoldsPlayer}>{c.author}</MemberName></Link></strong>
                     {c.authorId === post.authorId && <span className="tag yellow">작성자</span>}
                     <time dateTime={c.date} title={dateText(c.date)}>{relativeTime(c.date)}</time>
                   </div>

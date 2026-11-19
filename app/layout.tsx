@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PlatformProvider } from "@/components/kickx/provider";
 import { AppShell } from "@/components/kickx/shell";
+import { EngagementProvider } from "@/components/kickx/engagement-provider";
 import "./globals.css";
 export const metadata: Metadata = {
   title: { default: "KICK-X | Football Market", template: "%s | KICK-X" },
@@ -21,7 +22,7 @@ export default function RootLayout({
           }
         >
           <PlatformProvider>
-            <AppShell>{children}</AppShell>
+            <EngagementProvider><AppShell>{children}</AppShell></EngagementProvider>
           </PlatformProvider>
         </Suspense>
       </body>

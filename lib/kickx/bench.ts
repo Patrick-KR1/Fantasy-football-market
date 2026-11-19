@@ -2,10 +2,10 @@ import type { Holding, Player, Position } from './types';
 
 export const BENCH_DAYS = 7;
 export function tradeExecutionStatus(reason?: string | null) {
-  return reason === 'bench_expired' ? '벤치 자동 매각' : reason === 'bench_manual' ? '벤치 매각' : '체결';
+  return reason === 'draw' ? '선수 뽑기' : reason === 'bench_expired' ? '벤치 자동 매각' : reason === 'bench_manual' ? '벤치 매각' : '체결';
 }
 export function benchReason(reason: NonNullable<Holding['bench']>['reason']) {
-  return { transfer: '소속 구단 변경', position: '포지션 변경', transfer_position: '소속 구단·포지션 변경', formation: '포메이션 변경' }[reason];
+  return { transfer: '소속 구단 변경', position: '포지션 변경', transfer_position: '소속 구단·포지션 변경', formation: '포메이션 변경', draw: '선수 뽑기' }[reason];
 }
 export function benchTimeRemaining(expiresAt: string, now = Date.now()) {
   const remaining = Date.parse(expiresAt) - now;
