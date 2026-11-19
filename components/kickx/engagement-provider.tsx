@@ -37,7 +37,7 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
  // Cross midnight/Tuesday without requiring a new browser session.
  useEffect(()=>{
   if(!resource.data.resetsAt) return;
-  const timer=setTimeout(reloadEngagement,Math.max(1000,Math.min(2147483647,Date.parse(resource.data.resetsAt)-Date.now()+1000)));
+  const timer=setTimeout(()=>{if(document.visibilityState==='visible')reloadEngagement();},Math.max(1000,Math.min(2147483647,Date.parse(resource.data.resetsAt)-Date.now()+1000)));
   return ()=>clearTimeout(timer);
  },[resource.data.resetsAt,reloadEngagement]);
  const value = useMemo(()=>({state,ready:!!userId&&resource.status==='ready',error:resource.status==='error',busy,reload:resource.reload,act,track}),[state,resource.status,resource.reload,userId,busy,act,track]);

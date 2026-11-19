@@ -1,6 +1,6 @@
 "use client";
 import { useLoadout } from "./engagement-provider";
-import { SquadAppearanceControls } from "./shop";
+import { FramedPlayer } from "./player-frame";
 import { cosmeticTheme } from "@/lib/kickx/engagement";
 import { MatchNotificationToggle } from "./notifications";
 import { useId, useRef, useState, type CSSProperties } from "react";
@@ -183,7 +183,7 @@ export function Pitch({
                 : "";
               const body = p ? (
                 <>
-                  <span className={`squad-player-icon frame-${cosmeticTheme(appearance.frame)} ${appearance.faces ? "squad-face" : "squad-shirt"}`}>{appearance.faces ? <PlayerPortrait player={p} size="md" /> : <Jersey kit={kit(getTeam(p.team))} />}</span>
+                  {compact ? <Jersey kit={kit(getTeam(p.team))} /> : <FramedPlayer player={p} theme={cosmeticTheme(appearance.frame)} />}
                   <span
                     className="pitch-name"
                     title={p.name}
@@ -371,7 +371,7 @@ export function SquadScreen() {
       <PageHeading eyebrow="BUILD YOUR STARTING XI" title="내 스쿼드" />
       <MemberNotice />
       <MatchNotificationToggle />
-      <SquadAppearanceControls />
+      <div className="squad-appearance"><Link href="/shop">경기장·선수 테두리 꾸미기</Link></div>
       <div className="squad-layout automatic-squad">
         <section className="squad-board">
           <div className="squad-toolbar">

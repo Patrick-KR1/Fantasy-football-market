@@ -23,6 +23,8 @@ set local request.jwt.claim.sub='00000000-0000-0000-0000-000000000210';
 select public.kickx_open_wallet();select public.kickx_engagement();
 do $$declare a jsonb:=public.kickx_engagement();begin
  if a#>'{daily,items}'<>public.kickx_engagement()#>'{daily,items}' or jsonb_array_length(a#>'{daily,items}')<>3 then raise exception 'Daily assignment unstable';end if;
+ if a#>>'{daily,items,0,current}'<>'1' then raise exception 'Site visit did not automatically check attendance';end if;
+ if (select (x->>'price')::int from jsonb_array_elements(a->'catalog') x where x->>'id'='attendance-ticket')<>5000 then raise exception 'Recovery ticket price must be 5000';end if;
  perform pg_temp.eng_error('select * from kickx_private.mission_events','42501');
  perform pg_temp.eng_error($q$select kickx_private.mission_event(auth.uid(),'fixtures','forged')$q$,'42501');
  perform pg_temp.eng_error($q$select public.kickx_engagement_action('claim_daily')$q$,'MISSIONS_INCOMPLETE');
@@ -180,7 +182,7 @@ end $$;
 reset role;
 set local role anon;
 do $$begin
- if jsonb_array_length(public.kickx_shop_catalog()->'catalog')<>13 or (public.kickx_shop_catalog()-'catalog'-'poolSize')<>'{}'::jsonb then raise exception 'Public catalog missing or includes private fields';end if;
+ if jsonb_array_length(public.kickx_shop_catalog()->'catalog')<>17 or (public.kickx_shop_catalog()-'catalog'-'poolSize')<>'{}'::jsonb then raise exception 'Public catalog missing or includes private fields';end if;
  perform pg_temp.eng_error('select public.kickx_engagement()','42501');
  perform pg_temp.eng_error($q$select public.kickx_draw(gen_random_uuid())$q$,'42501');
  if public.kickx_nameplates(array['00000000-0000-0000-0000-000000000210'::uuid])->>'00000000-0000-0000-0000-000000000210'<>'nameplate-circuit' then raise exception 'Public plate read failed';end if;

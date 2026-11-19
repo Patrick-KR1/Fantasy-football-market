@@ -1,0 +1,90 @@
+/* Profile identity: avatar outside, primary club inside the equipped nameplate. */
+.member-plain-name { display:inline-flex;align-items:center;gap:5px;min-width:0; }
+.nameplate-sigil .club-crest { width:19px;height:19px;filter:drop-shadow(0 1px 1px #0008); }
+.kx-nameplate.is-preview .nameplate-sigil .club-crest { width:31px;height:31px; }
+.account-trigger,.account-trigger:hover,.account-trigger[aria-expanded="true"] { background:transparent;border:0;box-shadow:none;transform:none; }
+.account-trigger { gap:10px;padding:0;min-width:180px;height:auto;min-height:56px; }
+.account-trigger .account-avatar { width:42px;height:42px; }
+.account-trigger .account-text { display:grid;gap:6px;min-width:0;max-width:240px;text-align:left; }
+.account-trigger .account-text>strong { display:flex;overflow:visible;line-height:1.3; }
+.account-trigger .account-text>.num { display:block;font-size:13px;line-height:1.2; }
+.account-trigger .kx-nameplate { font-size:13px;box-shadow:0 0 9px color-mix(in srgb,var(--plate-a) 25%,transparent); }
+.account-trigger .account-chevron { width:14px;flex-shrink:0; }
+.mission-auto-attendance { font-size:10px;color:#7b866e;white-space:nowrap; }
+.main-nav { gap:0!important; }
+.main-nav a { padding-left:clamp(7px,.7vw,14px);padding-right:clamp(7px,.7vw,14px); }
+.squad-appearance>a { margin-left:0; }
+
+/* Premium frames share the same vector artwork in the shop and on the pitch. */
+.player-frame { --frame-light:#fff2c7;--frame-main:#f4cf5b;--frame-deep:#805425; }
+.player-frame .frame-ornament { position:absolute;inset:-50%;width:200%;height:200%;max-width:none;pointer-events:none;overflow:visible;z-index:3;filter:drop-shadow(0 0 3px var(--frame-main)); }
+.player-frame.frame-ornate { outline:none;box-shadow:0 0 9px color-mix(in srgb,var(--frame-main) 45%,transparent);margin-top:8px;margin-bottom:13px; }
+.player-frame.frame-ornate .portrait { position:relative;z-index:1; }
+.player-frame.frame-dragon { --frame-light:#ffe0a0;--frame-main:#ff753c;--frame-deep:#551b30; }
+.player-frame.frame-astral { --frame-light:#e4eeff;--frame-main:#b7a1ff;--frame-deep:#39366e; }
+.player-frame.frame-tempest { --frame-light:#efffff;--frame-main:#56f5e8;--frame-deep:#1b5269; }
+.preview-seraph { background:radial-gradient(ellipse at center,#6a572e,#181d24 75%); }
+.preview-dragon { background:radial-gradient(ellipse at center,#793740,#251324 75%); }
+.preview-astral { background:radial-gradient(circle at 22% 24%,#dcceff 0 1px,transparent 2px),radial-gradient(circle at 79% 68%,#b6f2ff 0 1px,transparent 2px),radial-gradient(ellipse at center,#514183,#171d34 75%); }
+.preview-tempest { background:radial-gradient(ellipse at center,#1e626e,#101d30 75%); }
+.frame-preview .player-frame.frame-ornate { margin:0; }
+.frame-orbit { transform-origin:80px 80px;animation:frame-orbit 22s linear infinite; }
+.frame-fire { animation:frame-glow 2.6s ease-in-out infinite; }
+.frame-bolt { animation:frame-glow 1.9s ease-in-out infinite; }
+@keyframes frame-orbit { to{transform:rotate(360deg);} }
+@keyframes frame-glow { 0%,100%{opacity:.7;}50%{opacity:1;} }
+
+/* Result order: portrait -> position/name -> club -> prominent player value. */
+.draw-result-player { gap:20px; }
+.draw-result-player>div.draw-player-identity { display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center; }
+.draw-player-identity h2 { font-size:30px;line-height:1.3;margin:0; }
+.draw-name-divider { color:#a3ab92;font-size:19px; }
+.draw-result-player>div.draw-player-club { display:flex;gap:8px;color:#667254;font-size:13px; }
+.draw-player-club .club-crest { width:25px;height:25px; }
+.draw-result-player>div.draw-player-value { display:grid;justify-content:center;gap:9px;margin-top:5px;width:100%;padding-top:22px;border-top:1px solid #d7ddc6; }
+.draw-player-value>span { font-size:12px;color:#7e896d; }
+.draw-player-value>strong { display:flex;align-items:baseline;justify-content:center;gap:8px;font-size:clamp(36px,4vw,56px);font-weight:950;line-height:1.1;letter-spacing:-1.7px;color:#26311d; }
+.draw-player-value small { font-size:20px;font-weight:800;letter-spacing:0;color:#8b8436; }
+@media(min-width:861px) and (max-width:1550px) {
+ .masthead-tagline { display:none; }
+ .masthead { grid-template-columns:auto minmax(0,1fr) auto; }
+ .main-nav { justify-content:center;min-width:0; }
+ .main-nav a { padding:0 9px;font-size:14px; }
+}
+@media(max-width:860px) {
+ .main-nav { justify-content:flex-start; }
+ .account-trigger { min-width:0;gap:7px; }
+ .account-trigger .account-text { max-width:150px;gap:4px; }
+ .account-trigger .account-avatar { width:32px;height:32px; }
+ .account-trigger .account-text>.num { font-size:11px; }
+ .account-trigger .kx-nameplate { font-size:11px; }
+ .account-trigger .nameplate-sigil .club-crest { width:17px;height:17px; }
+ .account-trigger .account-chevron { display:none; }
+}
+@media(min-width:861px) and (max-width:1100px) {
+ .masthead { grid-template-columns:1fr auto;grid-template-rows:76px auto;padding:0;gap:0; }
+ .masthead .wordmark { grid-column:1;grid-row:1;margin-left:var(--gutter); }
+ .masthead-account { grid-column:2;grid-row:1;padding-right:var(--gutter); }
+ .main-nav { grid-column:1 / -1;grid-row:2;height:48px;overflow-x:auto;justify-content:flex-start;border-top:var(--border-strong);padding:0 var(--gutter); }
+ .main-nav a::after { bottom:8px; }
+ .main-nav a[aria-current="page"]::before { display:none; }
+}
+@media(max-width:640px) {
+ .draw-player-identity h2 { font-size:24px; }
+ .draw-player-value>strong { font-size:45px; }
+ .draw-result-player { gap:17px; }
+ .kx-nameplate.is-preview .nameplate-sigil .club-crest { width:23px;height:23px; }
+ .player-frame .frame-ornament { filter:drop-shadow(0 0 2px var(--frame-main)); }
+}
+@media(max-width:480px) {
+ .masthead .wordmark { font-size:28px; }
+ .account-trigger .account-avatar { width:29px;height:29px; }
+ .account-trigger .account-text { max-width:116px; }
+ .masthead-account { gap:8px;min-width:0; }
+ .account-trigger .kx-nameplate { font-size:10px;gap:5px;padding-right:12px; }
+ .account-trigger .nameplate-sigil { width:20px;height:20px; }
+ .account-trigger .nameplate-sigil .club-crest { width:16px;height:16px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .frame-orbit,.frame-fire,.frame-bolt { animation:none; }
+}
