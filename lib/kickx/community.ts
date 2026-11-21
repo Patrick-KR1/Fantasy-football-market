@@ -3,9 +3,28 @@ import type { Transaction } from "./types";
 export type CommunityScope = "club" | "player";
 export const COMMUNITY_PATHS = { club: "/community/clubs", player: "/community/players" } as const;
 
+/** A squad attachment is a marker the server appends to the end of the body from the author's
+    saved squad. Hand-typed markers are removed by the server, so a marker always reflects the
+    author's own squad at the time of writing. */
+export type SquadAttachment = { formation: string; slots: string[] };
+const SQUAD_END = /\s*\[\[kickx-squad:([0-9]-[0-9](?:-[0-9]){1,3}):([A-Za-z0-9_.,-]{0,800})\]\]\s*$/u;
+const SQUAD_ANY = /\[\[kickx-squad:[^\]]{0,900}\]\]/gu;
+export function stripSquadMarkers(body: string) { return body.replace(SQUAD_ANY, "").trimEnd(); }
+export function splitSquad(body: string): { text: string; squad: SquadAttachment | null } {
+  const match = body.match(SQUAD_END);
+  const slots = match?.[2].split(",");
+  if (!match || match.index == null || slots?.length !== 11) return { text: stripSquadMarkers(body), squad: null };
+  return { text: stripSquadMarkers(body.slice(0, match.index)), squad: { formation: match[1], slots } };
+}
+export function squadMarker(formation: string, slots: readonly (string | null)[]) {
+  const ids = slots.map(id => id ?? "");
+  if (!/^[0-9]-[0-9](?:-[0-9]){1,3}$/u.test(formation) || ids.length !== 11 || ids.some(id => !/^[A-Za-z0-9_.-]{0,64}$/u.test(id))) return null;
+  return `\n\n[[kickx-squad:${formation}:${ids.join(",")}]]`;
+}
+
 /** Display-only fallback for legacy posts. New writes must provide an explicit title. */
 export function postTitle(title: string, body: string) {
-  return title.normalize("NFC").trim() || [...body.normalize("NFC").trim().replace(/\s+/gu, " ")].slice(0, POST_LIMITS.titleMax).join("");
+  return title.normalize("NFC").trim() || [...splitSquad(body).text.normalize("NFC").trim().replace(/\s+/gu, " ")].slice(0, POST_LIMITS.titleMax).join("");
 }
 export function postHeading(title: string, body: string) {
   return postTitle(title, body);

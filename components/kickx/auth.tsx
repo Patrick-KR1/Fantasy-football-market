@@ -18,6 +18,7 @@ import { AVATAR_ICONS, parseProfile, PROFILE_LIMITS, safeReturnPath } from "@/li
 import type { Profile } from "@/lib/kickx/types";
 import { DOMESTIC_LEAGUES, supportedTeams, canChangeSubteam, supportWindow } from '@/lib/kickx/support';
 import { CommunityActivityPanel } from './community-activity';
+import { MyCosmetics } from './my-cosmetics';
 import { CommunityNotificationSettings } from './notifications';
 
 function AuthVisual() {
@@ -192,9 +193,17 @@ export function OnboardingScreen() {
     </div>
   );
 }
+const MY_SECTIONS = [
+  { id: "all", label: "전체" }, { id: "summary", label: "자산·거래" }, { id: "cosmetics", label: "꾸미기" }, { id: "activity", label: "커뮤니티 활동" },
+  { id: "alerts", label: "알림 설정" }, { id: "profile", label: "프로필" }, { id: "account", label: "계정" },
+] as const;
+type MySection = (typeof MY_SECTIONS)[number]["id"];
 export function MyPageScreen() {
   const { data, mock, getTeam, notify } = usePlatform();
   const [busy, setBusy] = useState(false);
+  // Everything is shown by default; choosing a tab narrows the page to that one section.
+  const [section, setSection] = useState<MySection>("all");
+  const show = (id: MySection) => section === "all" || section === id;
   const profile = data.session?.profile, member = data.member?.financialReady === false ? null : data.member;
   const buys = member?.transactions.filter((t) => t.type === "buy") ?? [];
   const sells = member?.transactions.filter((t) => t.type === "sell") ?? [];
@@ -213,7 +222,7 @@ export function MyPageScreen() {
       <section className="my-hero" aria-label="내 프로필">
         <UserAvatar className="profile-avatar" avatar={profile?.avatar} seed={data.session?.userId ?? "guest"} label="프로필 아이콘" />
         <div className="my-hero-text">
-          <div className="my-hero-name"><h2><MemberNameplate userId={data.session?.userId}>{profile?.nickname || (data.session ? "프로필을 완성해 주세요" : "로그인이 필요합니다")}</MemberNameplate></h2><MockBadge compact /></div>
+          <div className="my-hero-name"><h2><MemberNameplate full userId={data.session?.userId}>{profile?.nickname || (data.session ? "프로필을 완성해 주세요" : "로그인이 필요합니다")}</MemberNameplate></h2><MockBadge compact /></div>
           <div className="profile-supported-clubs" aria-label="선택한 응원 구단">{supportedTeams(profile).length ? [...supportedTeams(profile)].sort((a, b) => Number(b === profile?.primaryTeam) - Number(a === profile?.primaryTeam)).map(id => {
             const club = clubIdentity(getTeam(id)), main = id === profile?.primaryTeam;
             // Main club as a solid badge in its colours; the other supported clubs as tinted chips.
@@ -231,11 +240,11 @@ export function MyPageScreen() {
           <Link className="button primary small my-hero-action" href="/login?next=/mypage">로그인</Link>
         )}
       </section>
-      <nav className="my-sections" aria-label="마이페이지 영역 바로가기">
-        <a href="#my-summary">자산·거래</a><a href="#my-activity">커뮤니티 활동</a><a href="#my-alerts">알림 설정</a><a href="#my-profile">프로필</a><a href="#my-account">계정</a>
+      <nav className="my-sections" aria-label="마이페이지 영역 선택">
+        {MY_SECTIONS.map((item) => <button key={item.id} type="button" aria-pressed={section === item.id} className={section === item.id ? "active" : ""} onClick={() => setSection(item.id)}>{item.label}</button>)}
       </nav>
       <div className="my-body">
-        <section id="my-summary" className="my-summary" aria-label="자산과 거래 요약">
+        {show("summary") && <section id="my-summary" className="my-summary" aria-label="자산과 거래 요약">
           <Link href="/portfolio" className="my-card">
             <span className="my-card-head">총자산<ArrowRight size={15} /></span>
             <strong className="num">{money(member?.totalAssets)}<small>P</small></strong>
@@ -248,11 +257,12 @@ export function MyPageScreen() {
             <span className="my-card-sub">{member?.transactions[0] ? `최근 ${member.transactions[0].playerName} · ${dateText(member.transactions[0].date)}` : "최근 거래 없음"}</span>
             <dl><div><dt>매입 {member ? buys.length : "—"}건</dt><dd className="num">{member ? `${money(buys.reduce((s, t) => s + t.net, 0))} P` : "—"}</dd></div><div><dt>매각 {member ? sells.length : "—"}건</dt><dd className="num">{member ? `${money(sells.reduce((s, t) => s + t.net, 0))} P` : "—"}</dd></div></dl>
           </Link>
-        </section>
-        <div id="my-activity" className="my-anchor"><CommunityActivityPanel key={`activity:${data.session?.userId || 'guest'}`} /></div>
-        <div id="my-alerts" className="my-anchor"><CommunityNotificationSettings /></div>
-        <div id="my-profile" className="my-anchor"><ProfileForm key={data.session?.userId || "guest"} /></div>
-        <section id="my-account" className="panel account-settings my-anchor">
+        </section>}
+        {show("cosmetics") && <div id="my-cosmetics" className="my-anchor"><MyCosmetics /></div>}
+        {show("activity") && <div id="my-activity" className="my-anchor"><CommunityActivityPanel key={`activity:${data.session?.userId || 'guest'}`} /></div>}
+        {show("alerts") && <div id="my-alerts" className="my-anchor"><CommunityNotificationSettings /></div>}
+        {show("profile") && <div id="my-profile" className="my-anchor"><ProfileForm key={data.session?.userId || "guest"} /></div>}
+        {show("account") && <section id="my-account" className="panel account-settings my-anchor">
           <SectionTitle title="계정 설정" />
           <div className="settings-row">
             <Mail size={20} />
@@ -263,7 +273,7 @@ export function MyPageScreen() {
             <ShieldCheck size={20} />
             <div><strong>가상 포인트 정책</strong><span>KICK-X는 실제 금전 거래·환전을 제공하지 않습니다.</span></div>
           </div>
-        </section>
+        </section>}
       </div>
     </>
   );

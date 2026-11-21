@@ -62,6 +62,6 @@ export function UserAvatar({ avatar, seed, className = "", label, style }: { ava
 }
 
 /** Permanent club identity is separate from the member's changeable profile icon. */
-export function MemberName({primaryTeam,holdsPlayer,userId,children}:{primaryTeam?:string|null;holdsPlayer?:boolean;userId?:string;children:ReactNode}){
- return <span className="member-name"><MemberNameplate userId={userId} primaryTeam={primaryTeam}>{children}</MemberNameplate>{holdsPlayer&&<small className="ownership-badge" title="현재 이 선수를 보유한 회원입니다">보유 인증</small>}</span>;
+export function MemberName({primaryTeam,holdsPlayer,userId,children,full=false}:{primaryTeam?:string|null;holdsPlayer?:boolean;userId?:string;children:ReactNode;full?:boolean}){
+ return <span className="member-name"><MemberNameplate full={full} userId={userId} primaryTeam={primaryTeam}>{children}</MemberNameplate>{holdsPlayer&&<small className="ownership-badge" title="현재 이 선수를 보유한 회원입니다">보유 인증</small>}</span>;
 }

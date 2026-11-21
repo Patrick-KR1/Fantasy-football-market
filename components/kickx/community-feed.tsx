@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { canPostToClub, supportedTeams } from "@/lib/kickx/support";
 import { Pagination } from "./pagination";
-import { LoaderCircle, Lock, Paperclip, Pencil, Search, Send, X } from "lucide-react";
+import { LoaderCircle, Lock, Paperclip, Pencil, Search, Send, Shirt, X } from "lucide-react";
 import type { Post } from "@/lib/kickx/types";
 import { dateText, money } from "@/lib/kickx/data";
 import { apiRequest } from "@/lib/kickx/client";
-import { COMMUNITY_PATHS, postTitle, type CommunityScope } from "@/lib/kickx/community";
+import { COMMUNITY_PATHS, postTitle, splitSquad, type CommunityScope } from "@/lib/kickx/community";
+import { SquadAttachToggle } from "./squad-attachment";
 import {usePostTradeAttachments} from "./post-trades";
 import { POST_LIMITS, validatePost } from "@/lib/kickx/validation";
 import { usePlatform, useResource } from "./provider";
@@ -26,7 +27,7 @@ function ComposerForm({ scope, target, targetName, onSaved, onClose }: { scope: 
   const { data, mock, notify, getTeam, getPlayer } = usePlatform();
   const selected = target ?? (scope === "club" ? data.session?.profile?.primaryTeam ?? "" : "");
   const [poll,setPoll]=useState<PollDraft|null>(null);
-  const [body, setBody] = useState(""), [title, setTitle] = useState(""), [transaction, setTransaction] = useState("");
+  const [body, setBody] = useState(""), [title, setTitle] = useState(""), [transaction, setTransaction] = useState(""), [squad, setSquad] = useState(false);
   const [advanced, setAdvanced] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const attachments=usePostTradeAttachments(scope,selected,advanced);
   const transactions=attachments.items;
@@ -43,7 +44,7 @@ function ComposerForm({ scope, target, targetName, onSaved, onClose }: { scope: 
     if (mock) { notify("예시 모드 · 실제로 저장되지 않습니다."); return; }
     lock.current = true; setBusy(true); setError(""); request.current ||= crypto.randomUUID();
     try {
-      await apiRequest<{ id: string }>("/api/kickx/community", "POST", { ...draft, title, poll, action: "createPost", requestId: request.current });
+      await apiRequest<{ id: string }>("/api/kickx/community", "POST", { ...draft, title, poll, squad, action: "createPost", requestId: request.current });
       notify("이야기를 게시했습니다."); onSaved();
     } catch (e) { setError(e instanceof Error ? e.message : "게시하지 못했습니다."); }
     finally { lock.current = false; setBusy(false); }
@@ -65,6 +66,7 @@ function ComposerForm({ scope, target, targetName, onSaved, onClose }: { scope: 
         {attachments.hasMore&&<button type="button" className="text-link" onClick={attachments.loadMore}>이전 거래 더 불러오기</button>}
         {(() => { const t = transactions.find(x => x.id === transaction); return t ? <div className="attached-trade compact"><span className="attached-label"><Paperclip size={14} />첨부 미리보기</span><div className="attached-row"><span className={`trade-type ${t.type}`}>{t.type === "buy" ? "매입" : "매각"}</span><strong>{t.playerName}</strong><span className="num">{money(t.price)} P</span><span className="muted">{dateText(t.date)}</span><button type="button" className="attachment-remove" aria-label="빠른 글 거래 첨부 취소" onClick={() => { changed(); setTransaction(""); }}><X size={14}/>첨부 취소</button></div></div> : null; })()}
       </div>}
+      <SquadAttachToggle checked={squad} onChange={v=>{changed();setSquad(v);}} disabled={busy}/>
       <PollEditor value={poll} onChange={value=>{changed();setPoll(value);}} disabled={busy}/>
       {error && <p className="field-error" role="alert">{error}</p>}
       <div className="feed-composer-foot"><span className="fine-print">내용 {POST_LIMITS.bodyMin}자 이상 · {scope === "club" ? "응원 구단에 게시" : "이 선수에 게시"}</span><button className="button primary small" disabled={busy || !title.trim() || !body.trim() || !selected}>{busy ? <LoaderCircle size={15} className="kx-spin" /> : <Send size={15} />}게시하기</button></div>
@@ -106,7 +108,7 @@ export function CommunityFeed({ scope, target, targetName, title = "게시글", 
           const clubStyle=club?{'--club':luminance(club.primary)>0.8?club.secondary:club.primary} as CSSProperties:undefined;
           return <tr key={post.id} data-scope={post.scope} className={club&&!target?'has-club':''} style={clubStyle}><td className="board-number num">{total-(shownPage-1)*SIZE-index}</td>
             <td className="board-subject">{!target&&<Link className="board-target" title={name} href={`${COMMUNITY_PATHS[scope]}/${post.target}`}>{scope==='club'&&<ClubCrest id={post.target} size="small"/>}<span>{name}</span></Link>}
-              <Link className="board-post-link" href={`/community/posts/${post.id}`}>{post.title||postTitle('',post.body)}{post.poll&&<>{" "}<span className="tag outline board-poll">투표</span></>}{post.transaction&&<Paperclip size={13} aria-label="거래 첨부"/>}{post.commentCount>0&&<b className="board-comment-count num">[{post.commentCount}]</b>}</Link>
+              <Link className="board-post-link" href={`/community/posts/${post.id}`}>{post.title||postTitle('',post.body)}{post.poll&&<>{" "}<span className="tag outline board-poll">투표</span></>}{post.transaction&&<Paperclip size={13} aria-label="거래 첨부"/>}{splitSquad(post.body??"").squad&&<Shirt size={13} className="board-squad-mark" aria-label="스쿼드 첨부"/>}{post.commentCount>0&&<b className="board-comment-count num">[{post.commentCount}]</b>}</Link>
               <span className="board-mobile-meta"><Link href={`/community/authors/${post.authorId}`}><MemberName userId={post.authorId} primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName></Link> · {dateText(post.date,false)} · 조회 {money(post.views)} · 추천 {money(post.likes)}</span>
             </td><td className="board-author"><Link className="board-author-link" href={`/community/authors/${post.authorId}`}><UserAvatar className="rank-avatar" avatar={post.authorId===data.session?.userId?data.session?.profile?.avatar:post.authorAvatar} seed={post.authorId}/><MemberName userId={post.authorId} primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName></Link></td><td className="board-date"><time dateTime={post.date}>{dateText(post.date,false)}</time></td><td className="board-views num">{money(post.views)}</td><td className="board-likes num">{money(post.likes)}</td></tr>;
         })}

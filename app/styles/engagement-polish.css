@@ -1,0 +1,140 @@
+/* Engagement design pass (2026-11-21). Loaded after engagement.css and engagement-refinements.css.
+   Presentation only: prices, ownership and draw results always come from the server. */
+
+/* ---------- Nameplates: the plate shape lives on its own layer so ornaments are never clipped ---------- */
+.kx-nameplate { background:none!important;clip-path:none!important;border:0!important;box-shadow:none!important;padding:3px 9px 3px 3px;margin-right:24px;border-radius:0;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--plate-a) 38%,transparent)); }
+.kx-nameplate:before { inset:4px 10px 4px 30px; }
+.nameplate-plate { position:absolute;inset:0;z-index:-2;border:1px solid var(--plate-a);border-radius:4px 16px 16px 4px;background:linear-gradient(100deg,#0d2c44 0%,#155f7e 38%,#7a2f8f 78%,#c442b8 100%);background-size:180% 100%;box-shadow:inset 0 0 0 1px #0006,inset 0 1px 0 #ffffff55;animation:plate-aurora 7s ease-in-out infinite alternate; }
+.nameplate-text { position:relative;font-weight:900;text-shadow:0 1px 2px #0b1020,0 0 6px #0b102099; }
+.nameplate-art { position:absolute;left:calc(100% - 4px);top:50%;width:30px;height:28px;transform:translateY(-50%);overflow:visible;pointer-events:none;z-index:-1; }
+.nameplate-sigil { position:relative;z-index:1; }
+
+.nameplate-arcane .nameplate-plate { border-radius:3px;background:repeating-linear-gradient(135deg,transparent 0 18px,#d9b9ff24 19px 20px),linear-gradient(90deg,#24123f,#4b2a66 60%,#9a3fcb);clip-path:polygon(0 12%,93% 0,100% 50%,93% 100%,0 88%);animation:none; }
+.nameplate-arcane .nameplate-sigil:after { content:"";position:absolute;left:50%;top:-8px;width:16px;height:9px;transform:translateX(-50%);background:linear-gradient(180deg,#fff3c4,#c99bff);clip-path:polygon(0 100%,8% 10%,30% 62%,50% 0,70% 62%,92% 10%,100% 100%); }
+.nameplate-circuit .nameplate-plate { border-radius:0;border-bottom-width:3px;background:repeating-linear-gradient(90deg,transparent 0 13px,#61ffff1c 14px 15px),linear-gradient(90deg,#071d30,#103b52 60%,#0c3046);clip-path:polygon(0 0,93% 0,100% 50%,93% 100%,0 100%);animation:none; }
+.nameplate-circuit .nameplate-plate:after { content:"";position:absolute;left:30px;right:12px;bottom:3px;height:1px;background:linear-gradient(90deg,transparent,#8dfff3 20%,transparent 40%) 0 0/250% 100%;animation:plate-current 2.4s linear infinite; }
+.nameplate-inferno .nameplate-plate { border-radius:0;background:repeating-linear-gradient(115deg,transparent 0 12px,#ffdca31f 13px 14px),linear-gradient(90deg,#6e1a30,#b31b40 62%,#e9404f);clip-path:polygon(7% 0,95% 0,100% 50%,94% 100%,0 100%,0 22%);animation:none; }
+.nameplate-inferno .nameplate-sigil:after { content:"";position:absolute;left:50%;top:-7px;width:12px;height:9px;transform:translateX(-50%);background:linear-gradient(0deg,#ff7a3c,#ffd27a);clip-path:polygon(50% 0,72% 45%,100% 30%,82% 100%,18% 100%,0 30%,28% 45%); }
+.nameplate-pulse { animation:plate-pulse 2.2s ease-in-out infinite; }
+.nameplate-flame { transform-origin:50% 100%;animation:plate-flame 1.6s ease-in-out infinite; }
+.kx-nameplate.is-preview { padding:5px 16px 5px 5px;margin-right:40px;transform:skewX(-6deg);box-shadow:none; }
+.kx-nameplate.is-preview .nameplate-plate { border-width:2px; }
+.kx-nameplate.is-preview .nameplate-art { width:52px;height:46px; }
+.kx-nameplate.is-preview .nameplate-sigil:after { top:-12px;width:24px;height:13px; }
+.board-author .kx-nameplate, .comment .kx-nameplate { margin-right:18px; }
+.board-author .kx-nameplate .nameplate-art, .comment .kx-nameplate .nameplate-art { width:22px;height:20px; }
+@keyframes plate-aurora { from{background-position:0 0;} to{background-position:100% 0;} }
+@keyframes plate-current { from{background-position:100% 0;} to{background-position:-150% 0;} }
+@keyframes plate-pulse { 0%,100%{opacity:.55;} 50%{opacity:1;} }
+@keyframes plate-flame { 0%,100%{transform:scaleY(1);} 50%{transform:scaleY(1.12) skewX(-3deg);} }
+
+/* ---------- Account: avatar, nameplate and points on one grid; points readable on any header image ---------- */
+.account-trigger { align-items:center; }
+.account-trigger .account-text { justify-items:start;gap:5px; }
+.account-trigger .account-text>.num { display:inline-flex;align-items:baseline;gap:2px;width:max-content;padding:2px 8px;border-radius:999px;background:var(--ink,#111);color:#fff;font-size:12px;font-weight:800;line-height:1.35; }
+.account-trigger .account-text>.num .unit { color:var(--yellow,#ffe03d);font-size:10px; }
+.account-trigger .account-text>strong { max-width:100%;min-width:0; }
+.account-trigger .kx-nameplate, .account-trigger .member-plain-name { max-width:calc(100% - 26px); }
+.account-trigger .member-plain-name { max-width:100%;overflow:hidden; }
+.account-trigger .member-plain-name, .account-trigger .nameplate-text { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nameplate-plate, .nameplate-circuit .nameplate-plate:after, .nameplate-pulse, .nameplate-flame { animation:none; }
+}
+
+/* ---------- Player frames: legacy three now share the vector ornament system ---------- */
+.player-frame.frame-laurel { --frame-light:#fff4c2;--frame-main:#e7c457;--frame-deep:#6f5a1d; }
+.player-frame.frame-circuit { --frame-light:#e4fffb;--frame-main:#4ee9de;--frame-deep:#0f3b4a; }
+.player-frame.frame-arcane { --frame-light:#f6e8ff;--frame-main:#c38dff;--frame-deep:#41225f; }
+.squad-face.frame-ornate:before, .squad-face.frame-ornate:after, .squad-player-icon.frame-ornate:before, .squad-player-icon.frame-ornate:after { content:none!important; }
+.squad-face.frame-ornate { outline:2px solid color-mix(in srgb,var(--frame-main) 80%,transparent)!important;outline-offset:1px;box-shadow:0 0 10px color-mix(in srgb,var(--frame-main) 45%,transparent)!important;filter:none!important; }
+.player-frame.frame-ornate { margin-top:7px;margin-bottom:9px; }
+.frame-trace { stroke-dasharray:60 14;animation:frame-trace 3.2s linear infinite; }
+.frame-runes { transform-origin:80px 80px;animation:frame-orbit 40s linear infinite reverse; }
+@keyframes frame-trace { to{stroke-dashoffset:-148;} }
+.preview-laurel .player-frame.frame-ornate, .preview-circuit .player-frame.frame-ornate, .preview-arcane .player-frame.frame-ornate { margin:0; }
+
+/* Phone pitch: four players share 390px, so faces and ornaments shrink together. */
+@media (max-width: 640px) {
+  .pitch:not(.compact) .squad-player-icon.squad-face { width:44px;height:44px; }
+  .pitch:not(.compact) .player-frame.frame-ornate { margin-top:5px;margin-bottom:6px; }
+}
+@media (max-width: 400px) {
+  .pitch:not(.compact) .squad-player-icon.squad-face { width:40px;height:40px; }
+}
+
+/* Olympus: light marble surface, but name labels stay dark pills with white text. */
+.pitch-theme-myth .pitch-name:not(.open) { color:#fff!important;background:rgba(43,36,20,.86); }
+.pitch-theme-myth .pitch-player.selected .pitch-name { color:var(--ink)!important;background:var(--yellow); }
+
+@media (prefers-reduced-motion: reduce) {
+  .frame-trace, .frame-runes { animation:none; }
+}
+
+/* ---------- Pitch scenery: corner objects under the player layer ---------- */
+.pitch-scenery { position:absolute;inset:0;z-index:0;pointer-events:none; }
+.pitch-scenery svg { position:absolute;width:clamp(22px,6.2%,52px);height:auto;aspect-ratio:1/2;overflow:visible;filter:drop-shadow(0 3px 4px #0005); }
+.pitch-scenery .scenery-tl { left:1.2%;top:2%; }
+.pitch-scenery .scenery-tr { right:1.2%;top:2%;transform:scaleX(-1); }
+.pitch-scenery .scenery-bl { left:1.2%;bottom:2%; }
+.pitch-scenery .scenery-br { right:1.2%;bottom:2%;transform:scaleX(-1); }
+.pitch[class*=pitch-theme-] .pitch-rows { z-index:2; }
+.pitch-preview .pitch-scenery svg { width:26px; }
+.pitch-preview .pitch-scenery .scenery-tl, .pitch-preview .pitch-scenery .scenery-tr { top:6px; }
+.pitch-preview .pitch-scenery .scenery-bl, .pitch-preview .pitch-scenery .scenery-br { bottom:6px; }
+.pitch-preview .pitch-scenery .scenery-tl, .pitch-preview .pitch-scenery .scenery-bl { left:8px; }
+.pitch-preview .pitch-scenery .scenery-tr, .pitch-preview .pitch-scenery .scenery-br { right:8px; }
+.scenery-myth svg { opacity:.92; }
+.scenery-spin { animation:scenery-spin 14s linear infinite; }
+.scenery-blink { animation:plate-pulse 2.4s ease-in-out infinite; }
+.scenery-glow { animation:frame-glow 2.2s ease-in-out infinite; }
+.scenery-ember { animation:scenery-ember 3s ease-in infinite; }
+@keyframes scenery-spin { to{transform:rotate(360deg);} }
+@keyframes scenery-ember { 0%{transform:translateY(0);opacity:1;} 100%{transform:translateY(-14px);opacity:0;} }
+@media (max-width: 640px) {
+  .pitch-scenery svg { width:20px; }
+  .pitch-scenery .scenery-tl, .pitch-scenery .scenery-bl { left:3px; }
+  .pitch-scenery .scenery-tr, .pitch-scenery .scenery-br { right:3px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scenery-spin, .scenery-blink, .scenery-glow, .scenery-ember { animation:none; }
+}
+
+/* ---------- Draw reveal: staged presentation of the result the server already saved ---------- */
+.draw-player-art { isolation:isolate; }
+.draw-player-art>.portrait { position:relative;z-index:1; }
+.draw-reveal-burst { position:absolute;inset:-34px;z-index:0;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,#ffe03d55 0 7deg,transparent 7deg 22deg);-webkit-mask:radial-gradient(circle,#000 38%,transparent 70%);mask:radial-gradient(circle,#000 38%,transparent 70%);opacity:.55; }
+.draw-result.is-revealing .draw-reveal-burst { animation:draw-burst 1.2s cubic-bezier(.2,.8,.2,1) both, draw-rays 18s linear 1.2s infinite; }
+.draw-result.is-revealing .draw-player-art>.portrait { animation:draw-pop .7s cubic-bezier(.2,1.4,.4,1) .15s both; }
+.draw-result.is-revealing .draw-player-identity { animation:draw-rise .45s ease-out .65s both; }
+.draw-result.is-revealing .draw-player-club { animation:draw-rise .45s ease-out .85s both; }
+.draw-result.is-revealing .draw-player-value { animation:draw-rise .5s ease-out 1.05s both; }
+.draw-result.is-revealing .draw-player-value>strong { animation:draw-value .7s cubic-bezier(.2,1.3,.4,1) 1.15s both; }
+.draw-result.is-revealing .draw-placement { animation:draw-rise .45s ease-out 1.35s both; }
+@keyframes draw-burst { 0%{transform:scale(.2) rotate(-40deg);opacity:0;} 60%{opacity:1;} 100%{transform:scale(1) rotate(0);opacity:.55;} }
+@keyframes draw-rays { to{transform:rotate(360deg);} }
+@keyframes draw-pop { 0%{transform:scale(.4);opacity:0;filter:brightness(2.2);} 100%{transform:scale(1);opacity:1;filter:none;} }
+@keyframes draw-rise { from{transform:translateY(12px);opacity:0;} to{transform:none;opacity:1;} }
+@keyframes draw-value { 0%{transform:scale(.7);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+.draw-player-value>strong { text-shadow:0 2px 0 #fff,0 8px 24px #c9b83a40; }
+
+.draw-settled.is-duplicate { background:#fffbe3;border-color:#e3cf6b; }
+.draw-settled-points { display:inline-flex;align-items:baseline;gap:3px;font-size:24px;font-weight:950;color:#26311d;white-space:nowrap; }
+.draw-settled-points small { font-size:13px;color:#8b8436; }
+@media (max-width: 640px) {
+  .draw-settled { flex-wrap:wrap; }
+  .draw-settled>div { flex:1 1 calc(100% - 40px); }
+  .draw-reveal-burst { inset:-22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .draw-result.is-revealing .draw-reveal-burst, .draw-result.is-revealing .draw-player-art>.portrait, .draw-result.is-revealing .draw-player-identity,
+  .draw-result.is-revealing .draw-player-club, .draw-result.is-revealing .draw-player-value, .draw-result.is-revealing .draw-player-value>strong,
+  .draw-result.is-revealing .draw-placement { animation:none; }
+}
+
+/* The rows grid carries an inline height:100%; with its top inset that pushed the goalkeeper's value
+   below the pitch edge. Let the insets define the height instead. */
+.pitch:not(.compact) > .pitch-rows { height:auto!important; }
+
+/* Plain (no nameplate) account name stays readable over the header photo. */
+.account-trigger .member-plain-name { padding:2px 8px 2px 3px;border-radius:999px;background:#fffffff0;box-shadow:0 0 0 1px #0000001a;color:var(--ink,#111); }

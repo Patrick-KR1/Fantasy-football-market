@@ -10,13 +10,15 @@ const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','
 let browser;
 try{
  for(let i=0;i<40;i++){try{if((await fetch(base)).ok)break;}catch{}if(i===39)throw Error('App did not start');await new Promise(r=>setTimeout(r,500));}
- browser=await chromium.launch();const context=await browser.newContext();
+ browser=await chromium.launch();const context=await browser.newContext();await context.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
  const empty=loadTs('../lib/kickx/data.ts').emptyPlatformData();
  const player={id:'notification-player',name:'알림 확인 선수',team:'notification-team',position:'FW',price:102000,change:2,performance:8,history:[],records:[]};
  const state={...empty,players:[player],teams:[{id:'notification-team',name:'응원 구단',leagueId:'bsd-1'}],leagues:[{id:'bsd-1',name:'Premier League'}],session:{userId:'notification-member',role:'member',profile:{nickname:'알림 확인',team:'notification-team'}},member:{financialReady:false,holdings:[],transactions:[],watchlist:[],assetHistory:[],squad:null}};
  let summary={hasUnread:true,matchNotifications:true};
  const mutations=[],reads=[],errors=[];
  const items=Array.from({length:21},(_,i)=>({id:String(30-i),kind:i%2?'match':'price',playerId:player.id,playerName:player.name,teamId:player.team,fixtureId:'notification-fixture',homeName:'홈 구단',awayName:'원정 구단',startsAt:'2026-11-04T10:00:00Z',priceBefore:100000,priceAfter:102000,createdAt:'2026-11-03T10:00:00Z',readAt:null}));
+ // Engagement (missions/shop) is outside this test; an empty payload keeps the page settled.
+ await context.route(/\/api\/kickx\/(engagement|shop|nameplates)/,route=>route.fulfill({json:route.request().url().includes('nameplates')?{}:{status:'ready',data:{}}}));
  await context.route(/\/api\/kickx$/,route=>route.fulfill({json:{status:'ready',data:state}}));
  await context.route(/\/api\/kickx\/players\?/,route=>{const p=new URL(route.request().url()).searchParams;return route.fulfill({json:{status:'ready',data:{items:[player],total:1,page:1,size:Number(p.get('size')||4)}}});});
  await context.route(/\/api\/kickx\/community\?/,route=>route.fulfill({json:{status:'ready',data:{items:[],total:0,page:1,size:20}}}));

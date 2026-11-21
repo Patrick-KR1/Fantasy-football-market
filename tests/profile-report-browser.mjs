@@ -25,7 +25,7 @@ try{
   const missing={status:'missing',facts,text:null,generatedAt:null,canGenerate:true};
   let reportGets=0,reportPosts=0,release,hang=false;
   const generated=new Promise(r=>{release=r;});
-  const c=await browser.newContext({viewport:{width,height:950},timezoneId:'Asia/Seoul'});
+  const c=await browser.newContext({viewport:{width,height:950},timezoneId:'Asia/Seoul'});await c.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await c.route('https://sports.bzzoiro.com/img/player/900000*/**',route=>{
    const size=route.request().url().includes('9000001')?150:480;
    return route.fulfill({contentType:'image/svg+xml',body:`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 150 150"><rect width="150" height="150" fill="#eee"/><circle cx="75" cy="52" r="31" fill="#bbb"/><path d="M17 150v-8a58 58 0 0 1 116 0v8" fill="#444"/></svg>`});

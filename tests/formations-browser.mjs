@@ -22,7 +22,7 @@ try {
     const oldStart=new Date(Date.now()-86400000).toISOString();
     state.member.holdings.push({id:'old-bench',playerId:'old-bench',playerName:'기존 벤치 선수',cost:50000,value:70000,bench:{price:70000,reason:'transfer',startedAt:oldStart,expiresAt:new Date(Date.now()+6*86400000).toISOString()}});
     let changes=0,moves=0,quotes=0;
-    const context=await browser.newContext({viewport:{width,height:960},timezoneId:'Asia/Seoul'});
+    const context=await browser.newContext({viewport:{width,height:960},timezoneId:'Asia/Seoul'});await context.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
     await context.route(/^https:\/\//,r=>r.abort());
     await context.route('**/api/**',async route=>{
       const req=route.request(),url=new URL(req.url()),path=url.pathname;
@@ -69,8 +69,8 @@ try {
     const box=await checkbox.evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height,minHeight:getComputedStyle(el).minHeight,padding:getComputedStyle(el).padding,outline:getComputedStyle(el).outlineStyle}));
     assert.equal(box.width,18);assert.equal(box.height,18);assert.equal(box.minHeight,'18px');assert.equal(box.padding,'0px');assert.equal(box.outline,'solid');
     report.layouts.push({width,checkbox:box});
-    assert.match(await dialog.innerText(),/재배치할 수 없습니다/);
-    assert.match(await dialog.innerText(),/7일 안에 직접 매각/);
+    assert.match(await dialog.innerText(),/벤치도 현재 시세를 반영합니다/);
+    assert.match(await dialog.innerText(),/7일 안에 빈 포지션으로 복귀하거나 매각/);
     assert.doesNotMatch(await dialog.innerText(),/14일/);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     if(width===390)await page.screenshot({path:`${out}/modal-390.png`,fullPage:true});
@@ -80,7 +80,7 @@ try {
     assert.equal(await page.locator('.squad-bench').getByRole('button',{name:/배치/}).count(),0);
     await page.getByRole('button',{name:'선수 배치',exact:true}).click();
     await page.getByRole('button',{name:/^5번 MF 자리/}).click();await page.getByRole('button',{name:/^6번 MF 자리/}).click();
-    await page.waitForFunction(()=>document.querySelector('.pitch-player[aria-label^="6번"]')?.textContent.includes('선수5'));
+    await page.waitForFunction(()=>/선수 ?5/.test(document.querySelector('.pitch-player[aria-label^="6번"]')?.textContent??''));
     assert.equal(moves,1);assert.equal(await page.locator('.pitch-player.filled').count(),9);
     await page.getByRole('button',{name:'배치 완료',exact:true}).click();
     await page.getByRole('textbox',{name:'스쿼드 선수 검색'}).fill('영입대상');

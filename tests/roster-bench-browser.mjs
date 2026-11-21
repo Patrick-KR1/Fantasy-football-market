@@ -20,7 +20,7 @@ try {
       { id: 'active-player', name: '주전 테스트 선수', position: 'GK', price: 50000, team: 'new-club' },
     ].map(p => ({ ...p, change: 0, performance: 8, history: [], records: [], analysis: null }));
     const state = { ...emptyPlatformData(), players, leagues: [{ id: 'bsd-1', name: 'Premier League' }], teams: [{ id: 'new-club', name: '현재 소속 구단', leagueId: 'bsd-1' }], session: { userId: 'member', role: 'member', profile: { nickname: '벤치 테스트', team: 'new-club', teams: ['new-club'], primaryTeam: 'new-club' } }, member: { financialReady: true, points: 1000000, totalAssets: 1170000, playerAssets: 170000, profit: 70000, returnRate: 2, holdings: [{ id: 'bench-player', playerId: 'bench-player', playerName: players[0].name, cost: 50000, value: 120000, profit: 70000, returnRate: 140, quantity: 1, bench: benchState }, { id: 'active-player', playerId: 'active-player', cost: 50000, value: 50000, profit: 0, returnRate: 0, quantity: 1 }], ownedPlayers: players, transactions: [], watchlist: [], assetHistory: [], squad: { formationId: '4-3-3', slots: ['active-player', ...Array(10).fill(null)], revision: 1, value: 50000 } } };
-    const c = await browser.newContext({ viewport: { width, height: 960 }, timezoneId: 'Asia/Seoul' });
+    const c = await browser.newContext({ viewport: { width, height: 960 }, timezoneId: 'Asia/Seoul' });await c.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
     await c.route(/^https:\/\//, r => r.abort());
     const originalMember = structuredClone(state.member);
     let quotes = 0, submissions = 0, restores = 0;

@@ -505,6 +505,9 @@ export function PriceChart({ points, label = "선수 가치" }: { points: Series
   return (
     <div className={`chart-wrap ${rising ? "rising" : "falling"}`}>
       <div className="chart-inner">
+        {/* The plot box matches the SVG exactly, so the hover dot and tooltip share its coordinates
+            (the value axis sits in chart-inner's right padding, outside this box). */}
+        <div className="chart-plot">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
@@ -544,6 +547,7 @@ export function PriceChart({ points, label = "선수 가치" }: { points: Series
             </span>
           </>
         )}
+        </div>
         <div className="chart-axis" aria-hidden="true">
           {ticks.map((v, i) => <span key={i} className="num">{money(v)}</span>)}
         </div>

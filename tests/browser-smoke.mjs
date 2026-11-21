@@ -46,7 +46,7 @@ try {
   }
   await mkdir("test-artifacts",{recursive:true});
   browser = await chromium.launch();
-  const context=await browser.newContext();
+  const context=await browser.newContext();await context.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await context.route(/^https:\/\//,route=>route.abort());
   const page=await context.newPage();
   page.on("pageerror",error=>errors.push(error.message));
@@ -99,7 +99,7 @@ try {
   await context.close();
 
   // UI-only injected responses: these records never ship in application data or SQL seeds.
-  const mock=await browser.newContext({viewport:{width:1440,height:1000}});
+  const mock=await browser.newContext({viewport:{width:1440,height:1000}});await mock.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await mock.route(/^https:\/\//,route=>route.abort());
   await mock.route(/\/api\/kickx\/notifications(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:{hasUnread:false,matchNotifications:true,commentNotifications:true,replyNotifications:true,items:[],hasMore:false}}}));
   await mock.route(/\/api\/kickx\/community\/activity(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:{author:null,items:[],total:0,page:1,size:20,postCount:0,commentCount:0}}}));
@@ -114,7 +114,7 @@ try {
   // Public page requests must start before a deliberately blocked dashboard.
   // This tests ordering, rather than asserting a machine-dependent time limit.
   for(const detail of [false,true]) {
-    const concurrent=await browser.newContext();
+    const concurrent=await browser.newContext();await concurrent.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
     await concurrent.route(/^https:\/\//,route=>route.abort());
     let release;
     const gate=new Promise(resolve=>{release=resolve;});
@@ -598,7 +598,7 @@ try {
   assert.ok((await mockPage.locator('body').innerText()).includes('주전은 최대 11명이며'));
   report.checks.push('Report rules explain neutral match-based returns, positional baselines and 11-player holding quotas');
   await mock.close();
-  const marketContext=await browser.newContext();
+  const marketContext=await browser.newContext();await marketContext.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await marketContext.route(/^https:\/\//,route=>route.abort());
   await marketContext.route(/\/api\/kickx\/notifications(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:{hasUnread:false,matchNotifications:true,commentNotifications:true,replyNotifications:true,items:[],hasMore:false}}}));
   const marketPage=await marketContext.newPage();marketPage.on('pageerror',error=>errors.push(error.message));

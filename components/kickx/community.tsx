@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowRight, LoaderCircle, Lock, MessageCircle, Paperclip, Pencil, X } from "lucide-react";
+import { splitSquad } from "@/lib/kickx/community";
+import { SquadAttachToggle } from "./squad-attachment";
 import { dateText, money } from "@/lib/kickx/data";
 import { clubIdentity, luminance } from "@/lib/kickx/club-identity";
 import { POST_LIMITS, validatePost, type PostField } from "@/lib/kickx/validation";
@@ -79,7 +81,7 @@ export function CommunityScreen({ scope }: { scope: "club" | "player" }) {
   </>;
 }
 export {PostDetail} from "./community-detail";
-type DraftState = { scope: "club" | "player"; target: string; title: string; body: string; transaction: string };
+type DraftState = { scope: "club" | "player"; target: string; title: string; body: string; transaction: string; squad: boolean };
 const FIELD_ORDER: PostField[] = ["target", "title", "body", "transaction"];
 const FIELD_LABEL: Record<PostField, string> = { scope: "게시판 종류", target: "대상", title: "제목", body: "내용", transaction: "거래 첨부" };
 function Counter({ value, min, max }: { value: string; min: number; max: number }) {
@@ -109,8 +111,9 @@ function PostEditor() {
     scope: initialScope,
     target: existing?.target ?? sp.get("target") ?? (initialScope === "club" ? myTeam ?? "" : ""),
     title: existing?.title ?? "",
-    body: existing?.body ?? "",
+    body: existing ? splitSquad(existing.body).text : "",
     transaction: existing?.transaction?.id ?? "",
+    squad: existing ? !!splitSquad(existing.body).squad : false,
   };
   const [touched, setTouched] = useState<Partial<Record<PostField, boolean>>>({});
   const [attempted, setAttempted] = useState(false);
@@ -245,6 +248,7 @@ function PostEditor() {
             </div>
           )}
         </div>
+        <SquadAttachToggle checked={value.squad} onChange={squad => update({ squad })} disabled={phase !== "edit"} />
         {!isEdit?<PollEditor value={poll} onChange={value=>{requestId.current="";setPoll(value);}} disabled={phase!=="edit"}/>:existing?.poll?<p className="fine-print">이 게시글의 투표는 질문·선택지를 변경할 수 없습니다.</p>:null}
         {serverNote && (
           <div className="data-notice" role="alert">

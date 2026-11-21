@@ -21,7 +21,7 @@ async function setup({watchCount=13}={}){
  state.member.watchlist=state.players.slice(0,watchCount).map(p=>p.id);
  state.players.push(...Array.from({length:103-state.players.length},(_,i)=>({...state.players[0],id:'test-extra-'+i,name:'테스트 선수 '+i})));
  const requests=[];
- const c=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Asia/Seoul'});
+ const c=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Asia/Seoul'});await c.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
  await c.route('**/api/**',async route=>{
   const req=route.request(),u=new URL(req.url()),path=u.pathname;
   if(path==='/api/kickx/watchlist'&&req.method()==='PUT'){

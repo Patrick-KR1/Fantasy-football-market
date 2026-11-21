@@ -24,7 +24,7 @@ try{
   let profileWrites=0,payload=null;
   const post={id:'primary-poll-post',scope:'club',target:sub.id,targetName:sub.name,author:'다른 회원',authorId:'another-member',authorPrimaryTeam:sub.id,title:'다음 경기 예상 투표',body:'다음 경기 결과에 대해 함께 의견을 나눠 봅시다.',date:new Date().toISOString(),likes:0,views:1,commentCount:0,transaction:null,poll:{question:'다음 경기 결과는?',options:['승리','무승부','패배'],endsAt:new Date(Date.now()+86400000).toISOString(),counts:[2,1,0],total:3,myVote:null,closed:false}};
   state.posts=[{...post,id:'sidebar-player-post',scope:'player',target:player.id,authorHoldsPlayer:true}];
-  const c=await browser.newContext({viewport:{width,height:900},timezoneId:'Asia/Seoul'});
+  const c=await browser.newContext({viewport:{width,height:900},timezoneId:'Asia/Seoul'});await c.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await c.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url()),path=u.pathname;
    if(path==='/api/kickx')return route.fulfill({json:{status:'ready',data:state}});
    if(path==='/api/kickx/profile'){const input=req.postDataJSON();profileWrites++;state.session.profile={...input,createdAt:new Date().toISOString()};return route.fulfill({json:{profile:state.session.profile}});}

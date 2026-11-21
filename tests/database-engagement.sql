@@ -182,7 +182,7 @@ end $$;
 reset role;
 set local role anon;
 do $$begin
- if jsonb_array_length(public.kickx_shop_catalog()->'catalog')<>17 or (public.kickx_shop_catalog()-'catalog'-'poolSize')<>'{}'::jsonb then raise exception 'Public catalog missing or includes private fields';end if;
+ if jsonb_array_length(public.kickx_shop_catalog()->'catalog')<>41 or (public.kickx_shop_catalog()-'catalog'-'poolSize')<>'{}'::jsonb then raise exception 'Public catalog missing or includes private fields';end if;
  perform pg_temp.eng_error('select public.kickx_engagement()','42501');
  perform pg_temp.eng_error($q$select public.kickx_draw(gen_random_uuid())$q$,'42501');
  if public.kickx_nameplates(array['00000000-0000-0000-0000-000000000210'::uuid])->>'00000000-0000-0000-0000-000000000210'<>'nameplate-circuit' then raise exception 'Public plate read failed';end if;

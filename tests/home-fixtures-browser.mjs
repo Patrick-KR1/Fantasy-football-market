@@ -13,7 +13,7 @@ try{
  for(let i=0;i<60;i++){try{if((await fetch(base)).ok)break;}catch{}if(i===59)throw Error('App did not start');await new Promise(r=>setTimeout(r,500));}
  await mkdir(out,{recursive:true});browser=await chromium.launch();
  for(const width of report.widths){
-  const c=await browser.newContext({viewport:{width,height:1000}}),p=await c.newPage();p.on('pageerror',e=>report.errors.push(e.message));
+  const c=await browser.newContext({viewport:{width,height:1000}});await c.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});const p=await c.newPage();p.on('pageerror',e=>report.errors.push(e.message));
   const make=(id,home,away)=>({id,leagueId:'bsd-1',home,away,status:'NS',startsAt:new Date(Date.now()+86400000).toISOString(),homeScore:null,awayScore:null});
   const global=make('global','other','visitor'),main=make('main-match','main','visitor'),sub=make('sub-match','visitor','sub');
   const state={...emptyPlatformData(),leagues:[{id:'bsd-1',name:'Premier League'}],teams:[{id:'main',name:'본진 구단',leagueId:'bsd-1'},{id:'sub',name:'서브 구단',leagueId:'bsd-1'},{id:'other',name:'무관한 구단',leagueId:'bsd-1'},{id:'visitor',name:'상대 구단',leagueId:'bsd-1'}],fixtures:[global],session:{userId:'current-user',role:'member',profile:{nickname:'경기 테스트',primaryTeam:'main',team:'main',teams:['sub']}},member:null};

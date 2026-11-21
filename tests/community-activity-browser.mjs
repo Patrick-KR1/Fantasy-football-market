@@ -22,7 +22,7 @@ async function setup(width) {
   const summary = { hasUnread: true, matchNotifications: true, commentNotifications: true, replyNotifications: true };
   const views = [], mutations = [], reads = [];
   let failRefresh = false;
-  const c = await browser.newContext({ viewport: { width, height: 900 }, timezoneId: 'Asia/Seoul' });
+  const c = await browser.newContext({ viewport: { width, height: 900 }, timezoneId: 'Asia/Seoul' });await c.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await c.route(/^https:\/\//, route => route.abort());
   await c.route('**/api/**', async route => {
     const req = route.request(), url = new URL(req.url()), path = url.pathname;

@@ -3,7 +3,8 @@ import { asObject, checkDatabase, identity, migrationMissing } from "@/server/ki
 import { createRequestClient } from "@/server/kickx/supabase";
 import { getSupabaseConfig } from "@/server/kickx/config";
 import { validatePost } from "@/lib/kickx/validation";
-import { parseCommunityQuery } from "@/lib/kickx/community";
+import { parseCommunityQuery, squadMarker, stripSquadMarkers } from "@/lib/kickx/community";
+import { POST_LIMITS } from "@/lib/kickx/validation";
 export async function GET(request:Request){try{
  const p=new URL(request.url).searchParams;const postId=p.get("postId");
  const unavailable={status:"not-configured",data:postId?{post:null,comments:[]}:{items:[],total:0,page:1,size:20}};
@@ -21,6 +22,8 @@ export async function POST(request:Request){try{
  if(action==="createPost"||action==="editPost"){
   for(const field of ["scope","target","title","body","transaction"])if(typeof input[field]!=="string")throw new HttpError(400,"글 내용을 확인해 주세요.");
   input.title=String(input.title).normalize("NFC").trim();
+  input.body=stripSquadMarkers(String(input.body));
+  const attachSquad=input.squad===true;delete input.squad;
   if(action==="editPost"){
    const current=await client.rpc("kickx_post_detail",{p_id:identity(input.postId,true),p_page:1});checkDatabase(current.error);
    if(!current.data?.post)throw new HttpError(404,"게시글을 찾을 수 없습니다.");
@@ -35,6 +38,14 @@ export async function POST(request:Request){try{
   }
   const errors=validatePost(input as unknown as Parameters<typeof validatePost>[0],{myTeam:profile.data?.team_id??null,myTeams:profile.data?.team_ids,primaryTeam:profile.data?.primary_team_id??null,targets:target.data?[target.data.id]:[],transactions:ownTrades});
   if(Object.keys(errors).length)throw new HttpError(400,Object.values(errors).join(" "));
+  if(attachSquad){
+   // The snapshot is read from the author's own saved squad, never taken from the request.
+   const squad=await client.from("squads").select("formation_id,slots").eq("user_id",user.id).maybeSingle();checkDatabase(squad.error);
+   const marker=squad.data?squadMarker(String(squad.data.formation_id),(squad.data.slots??[]) as (string|null)[]):null;
+   if(!marker)throw new HttpError(400,"첨부할 스쿼드가 없습니다. 스쿼드를 먼저 구성해 주세요.");
+   if([...String(input.body)+marker].length>POST_LIMITS.bodyMax)throw new HttpError(400,"스쿼드를 첨부하려면 내용을 조금 줄여 주세요.");
+   input.body=String(input.body)+marker;
+  }
  }
  const {data,error}=await client.rpc("kickx_community_write",{p_action:action,p_input:{...input,category:"자유"}});checkDatabase(error);return json(data);
 }catch(error){return failure(error);}}

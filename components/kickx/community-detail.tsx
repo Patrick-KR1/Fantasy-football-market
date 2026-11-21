@@ -10,7 +10,8 @@ import { ChevronLeft, ChevronRight, CornerDownRight, Flag, Heart, Lock, MessageC
 import type { Comment, Post } from "@/lib/kickx/types";
 import { apiRequest } from "@/lib/kickx/client";
 import { dateText, money, relativeTime } from "@/lib/kickx/data";
-import {postHeading} from "@/lib/kickx/community";
+import {postHeading, splitSquad} from "@/lib/kickx/community";
+import { SquadAttachmentCard } from "./squad-attachment";
 import { createViewRecorder, viewDay } from '@/lib/kickx/community-views';
 import { supportsTeam,canPostToClub } from '@/lib/kickx/support';
 import { usePlatform, useResource } from "./provider";
@@ -136,7 +137,7 @@ function PostDetailContent({ postId, focusComment }: { postId: string; focusComm
         <div className="article-author">
           <Link href={`/community/authors/${post.authorId}`} aria-label={`${post.author} 활동 보기`}><UserAvatar className="rank-avatar" avatar={owner ? data.session?.profile?.avatar : post.authorAvatar} seed={post.authorId} /></Link>
           <div>
-            <strong><Link href={`/community/authors/${post.authorId}`}><MemberName userId={post.authorId} primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName></Link></strong>
+            <strong><Link href={`/community/authors/${post.authorId}`}><MemberName full userId={post.authorId} primaryTeam={post.authorPrimaryTeam} holdsPlayer={post.authorHoldsPlayer}>{post.author}</MemberName></Link></strong>
             <span>{dateText(post.date)} · 조회 {money(post.views)}</span>
           </div>
           {owner && (
@@ -146,7 +147,8 @@ function PostDetailContent({ postId, focusComment }: { postId: string; focusComm
             </div>
           )}
         </div>
-        <div className="article-body">{post.body}</div>
+        <div className="article-body">{splitSquad(post.body).text}</div>
+        {(() => { const squad = splitSquad(post.body).squad; return squad ? <SquadAttachmentCard squad={squad} author={post.author} /> : null; })()}
         {post.transaction && (
           <div className="attached-trade">
             <span className="attached-label"><Paperclip size={14} />작성자의 거래 첨부</span>

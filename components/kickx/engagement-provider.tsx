@@ -11,7 +11,13 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
  // Identity in the URL prevents another account's inventory appearing for one render.
  const resource = useResource(userId ? `/api/kickx/engagement?member=${encodeURIComponent(userId)}` : null, emptyEngagement, 60000);
  const preview = useResource(userId ? null : '/api/kickx/shop',emptyShop);
- const state=useMemo(()=>userId?resource.data:{...resource.data,catalog:preview.data.catalog,draw:{...resource.data.draw,poolSize:preview.data.poolSize}},[userId,resource.data,preview.data]);
+ // A partial or unexpected payload must never crash every page that shows a name or a pitch,
+ // so missing parts fall back to the empty defaults.
+ const state=useMemo(()=>{
+  const base=emptyEngagement(),data=(resource.data??{}) as Partial<Engagement>;
+  const merged:Engagement={...base,...data,daily:{...base.daily,...data.daily},weekly:{...base.weekly,...data.weekly},attendance:data.attendance??[],catalog:data.catalog??[],inventory:data.inventory??{},loadout:{...base.loadout,...data.loadout},unclaimedDaily:data.unclaimedDaily??[],draw:{...base.draw,...data.draw,pending:data.draw?.pending??[],history:data.draw?.history??[]}};
+  return userId?merged:{...merged,catalog:preview.data?.catalog??[],draw:{...merged.draw,poolSize:preview.data?.poolSize}};
+ },[userId,resource.data,preview.data]);
  const {setData:setEngagement,reload:reloadEngagement}=resource;
  const [busy, setBusy] = useState(false), lock = useRef(false);
  const currentUser = useRef(userId); currentUser.current = userId;

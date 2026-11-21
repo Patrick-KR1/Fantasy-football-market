@@ -1,6 +1,8 @@
 "use client";
 import { useLoadout } from "./engagement-provider";
 import { FramedPlayer } from "./player-frame";
+import { PitchScenery } from "./pitch-scenery";
+import { PriceReveal } from "./price-reveal";
 import { cosmeticTheme } from "@/lib/kickx/engagement";
 import { MatchNotificationToggle } from "./notifications";
 import { useId, useRef, useState, type CSSProperties } from "react";
@@ -159,6 +161,7 @@ export function Pitch({
       data-lines={rows.length}
     >
       <PitchMarkings />
+      {!compact && <PitchScenery theme={cosmeticTheme(appearance.pitch)} />}
       <div
         className="pitch-rows"
         style={{
@@ -369,6 +372,7 @@ export function SquadScreen() {
   return (
     <>
       <PageHeading eyebrow="BUILD YOUR STARTING XI" title="내 스쿼드" />
+      {member && <PriceReveal playerIds={member.holdings.map((h) => h.playerId)} />}
       <MemberNotice />
       <MatchNotificationToggle />
       <div className="squad-appearance"><Link href="/shop">경기장·선수 테두리 꾸미기</Link></div>

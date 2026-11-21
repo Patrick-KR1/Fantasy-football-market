@@ -12,7 +12,9 @@ import { useEngagement } from './engagement-provider';
 import { EngagementNotice } from './missions';
 import { ClubCrest, Modal, PageHeading, PlayerPortrait, PositionBadge } from './ui';
 const emptyPlayer=()=>({player:null as Player|null});
-function Placement({receipt,onDone}:{receipt:DrawReceipt;onDone:(r:DrawReceipt)=>void}) {
+/** fresh: the result was just drawn in this tab, so it is revealed in stages. A result restored
+    after a refresh is shown at once. Either way the content is the server's saved result. */
+function Placement({receipt,onDone,fresh=false}:{receipt:DrawReceipt;onDone:(r:DrawReceipt)=>void;fresh?:boolean}) {
  const {data,getPlayer,getTeam,notify,reload:reloadPlatform}=usePlatform(),{reload}=useEngagement();
  const {data:detail,status}=useResource(`/api/kickx/players/${encodeURIComponent(receipt.player_id)}`,emptyPlayer);
  const player=detail.player??getPlayer(receipt.player_id);
@@ -32,8 +34,8 @@ function Placement({receipt,onDone}:{receipt:DrawReceipt;onDone:(r:DrawReceipt)=
   catch(e){notify(e instanceof Error?e.message:'선수 배치를 저장하지 못했습니다.','error');reload();reloadPlatform();}
   finally{lock.current=false;setBusy(false);}
  }
- return <section className="draw-result"><div className="draw-result-player">
-   <div className="draw-player-art">{player?<PlayerPortrait player={player} size="lg"/>:<span className="cosmetic-player-placeholder">✦</span>}</div>
+ return <section className={`draw-result ${fresh?'is-revealing':''}`}><div className="draw-result-player">
+   <div className="draw-player-art"><span className="draw-reveal-burst" aria-hidden="true"/>{player?<PlayerPortrait player={player} size="lg"/>:<span className="cosmetic-player-placeholder">✦</span>}</div>
    <div className="draw-player-identity">{position&&<><PositionBadge position={position}/><span className="draw-name-divider" aria-hidden="true">—</span></>}<h2>{receipt.player_name}</h2></div>
    <div className="draw-player-club">{player?.team&&<ClubCrest id={player.team} size="small"/>}<span>{team?.name??'구단 정보 확인 중'}</span></div>
    <div className="draw-player-value"><span>선수 가치</span><strong className="num">{money(player?.price??receipt.price_at_draw)}<small>P</small></strong></div>
@@ -65,8 +67,8 @@ export function DrawScreen() {
   <PageHeading eyebrow="ONE TICKET. A NEW POSSIBILITY." title="선수 뽑기" description="하루 한 번, 나만의 스쿼드에 새로운 선수를 영입하세요." action={<Link className="button secondary" href="/missions">미션 보상 모으기</Link>}/>
   <EngagementNotice/>
   {!pending&&<div className="draw-stage"><div className="draw-stage-copy"><span className="eng-kicker">DAILY PLAYER DRAW</span><h2>오늘의<br/><em>새로운 영입.</em></h2><p>5대 리그 선수 중 무작위 1명을 영입합니다.</p><div className="draw-price"><strong className="num">100,000 <small>P</small></strong><span>하루 1회 · 한국 시간 00:00 초기화</span></div><button className="button draw-open" disabled={!canDraw||busy} onClick={()=>setConfirm(true)}><Shuffle size={21}/>{busy?'추첨 중…':!ready?(data.session?'정보 확인 중…':'로그인 후 이용'):state.draw.remaining===0?'오늘의 뽑기 완료':(data.member?.points??0)<100000?'포인트가 부족합니다':'선수 뽑기'}</button><span className="draw-wallet"><Wallet size={15}/>보유 <strong className="num">{money(data.member?.points)} P</strong></span></div><div className="draw-pack" aria-hidden="true"><div className="draw-pack-shadow"/><div className="draw-pack-card"><span>KICK-X</span><Sparkles size={54}/><strong>WHO’S<br/>NEXT?</strong><small>PLAYER DRAW / 01</small></div><span className="draw-pack-orbit orbit-one"/><span className="draw-pack-orbit orbit-two"/><span className="draw-pack-dot"/></div></div>}
-  {pending&&<Placement key={pending.id} receipt={pending} onDone={r=>setReceipt(r)}/>}
-  {!pending&&receipt&&<div className="draw-settled" role="status"><Check size={22}/><div><strong>{receipt.player_name}</strong><p>{receipt.status==='duplicate'?`이미 보유한 선수입니다. ${money(receipt.compensation)} P로 전환했습니다.`:'선수 배치를 완료했습니다. 스쿼드에서 확인하세요.'}</p></div><Link className="button secondary small" href="/squad">스쿼드 확인</Link></div>}
+  {pending&&<Placement key={pending.id} receipt={pending} fresh={receipt?.id===pending.id} onDone={r=>setReceipt(r)}/>}
+  {!pending&&receipt&&<div className={`draw-settled ${receipt.status==='duplicate'?'is-duplicate':''}`} role="status">{receipt.status==='duplicate'?<Wallet size={22}/>:<Check size={22}/>}<div><strong>{receipt.player_name}</strong><p>{receipt.status==='duplicate'?'이미 보유한 선수라 포인트로 전환했습니다.':'선수 배치를 완료했습니다. 스쿼드에서 확인하세요.'}</p></div>{receipt.status==='duplicate'&&<strong className="draw-settled-points num">+{money(receipt.compensation)} <small>P</small></strong>}<Link className="button secondary small" href="/squad">스쿼드 확인</Link></div>}
   <div className="draw-policies"><article><Shuffle size={22}/><h3>5대 리그 선수 영입</h3><p>가격 산정이 완료된 5대 리그 선수 중 1명을 무작위로 영입합니다. 스쿼드가 가득 찼다면 벤치로 보낼 선수를 선택하세요.</p></article><article><Clock3 size={22}/><h3>하루 한 번의 영입</h3><p>매일 한국 시간 00:00에 구매 제한이 초기화됩니다. 미배치 결과가 남아 있으면 배치를 먼저 완료해 주세요.</p></article><article><Wallet size={22}/><h3>보유 선수 중복 시 포인트 전환</h3><p>뽑기 당시 시세에서 매각 수수료 {((data.policy?.sellFeeBps??200)/100).toFixed(0)}%를 제외한 포인트를 받습니다. 실제 선수 매각 미션에는 포함되지 않습니다.</p></article></div>
   {!!state.draw.history.length&&<section className="draw-history"><header><h2>최근 뽑기 기록</h2><span className="muted">최근 20회</span></header><div className="table-wrap"><table><thead><tr><th>날짜</th><th>선수</th><th>당시 가치</th><th>결과</th></tr></thead><tbody>{state.draw.history.map(r=><tr key={r.id}><td className="num">{r.day}</td><td><Link href={`/players/${encodeURIComponent(r.player_id)}`}>{r.player_name}</Link></td><td className="num">{money(r.price_at_draw)} P</td><td>{r.status==='duplicate'?`${money(r.compensation)} P 전환`:r.status==='pending'?'배치 대기':r.bench_player?'벤치 선택 완료':'선발 영입'}</td></tr>)}</tbody></table></div></section>}
   {confirm&&<Modal title="선수를 뽑을까요?" eyebrow="DAILY PLAYER DRAW" onClose={()=>{if(!busy)setConfirm(false);}}><div className="draw-confirm"><Sparkles size={38}/><p>100,000 P를 사용해 선수 1명을 무작위로 뽑습니다.</p><p className="fine-print">결과는 서버에 저장됩니다. 창을 닫거나 새로고침해도 선수가 다시 추첨되지 않습니다.</p><button className="button" disabled={busy||!canDraw} onClick={()=>void draw()}>{busy?'선수를 추첨하고 있습니다…':'100,000 P로 뽑기'}</button></div></Modal>}
