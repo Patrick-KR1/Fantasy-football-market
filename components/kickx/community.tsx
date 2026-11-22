@@ -125,7 +125,7 @@ function PostEditor() {
   const targets = value.scope === "club" ? data.teams : selectedPlayer.player ? [selectedPlayer.player] : [];
   const attachments = usePostTradeAttachments(value.scope,value.target,true);
   const transactions = [...new Map([...attachments.items,...(existing?.transaction ? [existing.transaction] : [])].filter(t=>value.scope==='club'||t.playerId===value.target).map(t=>[t.id,t])).values()];
-  const clubTargets = useTeamOptions(null).filter((o) => o.value===myTeam);
+  const clubTargets = useTeamOptions(null).filter((o) => !!myTeam && !!o.value && (o.value===myTeam || myTeams.includes(o.value)));
   const errors = validatePost(value, {
     myTeam, myTeams, primaryTeam:data.session?.profile?.primaryTeam??null,
     targets: targets.map((t) => t.id),
@@ -208,7 +208,7 @@ function PostEditor() {
               <label htmlFor="post-target">대상 구단 <span className="req" aria-hidden="true">*</span></label>
               <Select id="post-target" invalid={!!visible("target")} describedBy="post-target-hint" onBlur={blur("target")}
                 disabled={isEdit || phase !== "edit" || !myTeam} value={value.target} onChange={target => update({ target, transaction: "" })} placeholder="구단 선택" options={clubTargets}/>
-              <small id="post-target-hint">메인 응원 구단에만 게시글을 작성할 수 있습니다. {!myTeam&&<Link className="text-link" href="/mypage#my-profile">메인 응원 구단 설정 →</Link>}</small>
+              <small id="post-target-hint">내 응원 구단에 게시글을 작성할 수 있습니다. {!myTeam&&<Link className="text-link" href="/mypage#my-profile">메인 응원 구단 설정 →</Link>}</small>
             </> : <div id="post-target" className={`post-fixed-target${value.target ? "" : " missing"}`} tabIndex={-1}>{(() => { const target = getPlayer(value.target); return target ? <PlayerPortrait player={target} size="sm" /> : <span className="post-fixed-icon" aria-hidden="true"><MessageCircle size={18} /></span>; })()}<span className="post-fixed-text"><small>게시 대상</small><strong>{targetName ? `${targetName} 커뮤니티` : "선수 상세페이지에서 글쓰기를 시작해 주세요."}</strong>{value.target ? <small>이 선수에 대한 게시글을 작성합니다.</small> : <Link className="text-link" href="/market">선수 시장으로 이동 →</Link>}</span>{value.target && <span className="post-fixed-lock"><Lock size={12} />고정</span>}</div>}
             {fieldError("target")}
           </div>

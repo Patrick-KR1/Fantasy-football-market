@@ -1,8 +1,9 @@
 "use client";
-import { useLoadout } from "./engagement-provider";
+import { useLoadout, usePlayerFrames } from "./engagement-provider";
 import { FramedPlayer } from "./player-frame";
 import { PitchScenery } from "./pitch-scenery";
 import { PriceReveal } from "./price-reveal";
+import { PlayerFrameSelect } from "./player-frame-select";
 import { cosmeticTheme } from "@/lib/kickx/engagement";
 import { MatchNotificationToggle } from "./notifications";
 import { useId, useRef, useState, type CSSProperties } from "react";
@@ -141,6 +142,8 @@ export function Pitch({
   selected,
   onSelect,
   targets,
+  look,
+  hideValues = false,
 }: {
   slots: (string | null)[];
   formation: string | null;
@@ -149,9 +152,15 @@ export function Pitch({
   onSelect?: (i: number) => void;
   /** Placement mode: slots the selected starter may move to (same position). */
   targets?: number[];
+  /** Fixed look (e.g. a squad attached to a post): pitch theme, default frame and per-player frames. */
+  look?: { pitch?: string | null; frame?: string | null; frames?: Record<string, string> };
+  /** Hide current values (a snapshot is about the line-up, not today's prices). */
+  hideValues?: boolean;
 }) {
   const { getPlayer, getTeam } = usePlatform();
-  const appearance = useLoadout();
+  const loadout = useLoadout(), ownFrames = usePlayerFrames();
+  const appearance = look ? { pitch: look.pitch ?? null, frame: look.frame ?? null } : loadout;
+  const frames = look ? look.frames ?? {} : ownFrames;
   const rule = formation ? formationRule(formation) : undefined;
   const positions = (rule ?? SQUAD_FORMATION).positions;
   const rows = [...(rule ?? SQUAD_FORMATION).rows].reverse();
@@ -186,7 +195,7 @@ export function Pitch({
                 : "";
               const body = p ? (
                 <>
-                  {compact ? <Jersey kit={kit(getTeam(p.team))} /> : <FramedPlayer player={p} theme={cosmeticTheme(appearance.frame)} />}
+                  {compact ? <Jersey kit={kit(getTeam(p.team))} /> : <FramedPlayer player={p} theme={cosmeticTheme(frames[p.id] ?? appearance.frame)} />}
                   <span
                     className="pitch-name"
                     title={p.name}
@@ -220,7 +229,7 @@ export function Pitch({
                   >
                     {compact ? displayName : p.name}
                   </span>
-                  {!compact && (
+                  {!compact && !hideValues && (
                     <span className="pitch-value num">{money(p.price)}</span>
                   )}
                 </>
@@ -557,6 +566,7 @@ export function SquadScreen() {
                   <>
                     <strong>{selectedPlayer.name}</strong>
                     <span className="num">{money(selectedPlayer.price)} P</span>
+                    {!placement && <PlayerFrameSelect playerId={selectedPlayer.id} />}
                   </>
                 ) : (
                   <strong>

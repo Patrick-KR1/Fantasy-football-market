@@ -40,7 +40,7 @@ export function MatchReportDialog({ playerId, record, onClose }: { playerId: str
           <div><span>Performance</span><strong className="num">{score(facts.score)}<small>점</small></strong><small>{facts.minutes}분 출전 · {facts.scoreStatus === "provisional" ? "확인 기록 기준" : "산정 완료"}</small></div>
           <div><span>이번 경기 가치 변동</span><strong><Change value={facts.changePercent} /></strong><small>{money(facts.priceBefore)} P → {money(facts.priceAfter)} P</small></div>
         </div>
-        <div className="report-price-reason"><strong>이번 경기 가격 반영 기준</strong>{matchPriceExplanation(facts)}</div>
+        <div className="report-price-reason"><strong>이번 경기 가격 반영 근거</strong>{matchPriceExplanation(facts).split("\n").map((line,i)=><p key={i}>{line}</p>)}</div>
         {text && <section className="report-section">
           <h3><Sparkles size={16} />AI 경기력 설명</h3>
           <div className="report-explanation">{reportSentences(text.performance).map((sentence,i)=><p key={i}>{sentence}</p>)}</div>

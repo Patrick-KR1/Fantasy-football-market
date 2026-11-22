@@ -7,12 +7,14 @@ export type DrawReceipt = { id: string; day: string; player_id: string; player_n
 export type Engagement = {
  day: string; resetsAt: string;
  daily: { items: Mission[]; cleared: boolean; claimed: boolean; reward: number };
- weekly: { week: string; endsAt: string; international: boolean; items: Mission[]; claimed: boolean; reward: number };
+ weekly: { week: string; endsAt: string; international: boolean; items: Mission[]; claimed: boolean; reward: number; itemReward?: number; claimedItems?: string[] };
  attendance: { day: string; recovered: boolean }[];
  catalog: ShopItem[]; inventory: Record<string, number>; loadout: Loadout; unclaimedDaily: string[];
  draw: { price: number; poolSize?: number; remaining: number; pending: DrawReceipt[]; history: DrawReceipt[] };
+ /** Frame chosen for one player (player id → frame item id); others use loadout.frame. */
+ playerFrames?: Record<string, string>;
 };
-export const emptyEngagement = (): Engagement => ({ day: '', resetsAt: '', daily: { items: [], cleared: false, claimed: false, reward: 1000 }, weekly: { week: '', endsAt: '', international: false, items: [], claimed: false, reward: 10000 }, attendance: [], catalog: [], inventory: {}, loadout: { faces: true }, unclaimedDaily: [], draw: { price: 100000, remaining: 0, pending: [], history: [] } });
+export const emptyEngagement = (): Engagement => ({ day: '', resetsAt: '', daily: { items: [], cleared: false, claimed: false, reward: 1000 }, weekly: { week: '', endsAt: '', international: false, items: [], claimed: false, reward: 4000, itemReward: 1000, claimedItems: [] }, attendance: [], catalog: [], inventory: {}, loadout: { faces: true }, unclaimedDaily: [], draw: { price: 100000, remaining: 0, pending: [], history: [] } });
 export const MISSION_LABELS: Record<string, string> = {
  attendance: '출석 체크', ai_report: '선수 AI 리포트 조회', player_post: '선수 커뮤니티 글 작성', club_post: '구단 커뮤니티 글 작성', fixtures: '경기 일정 확인', watch: '관심 선수 등록',
  appearances: '보유 스쿼드 선수 중 주간 출전 7명', high_score: '보유 선수 Performance 10점 이상 1명', sell: '선수 1명 매각', daily_clear: '일일 미션 5일 모두 클리어', community: '커뮤니티 글·댓글 참여 10회', price: '선수 시세 조회',

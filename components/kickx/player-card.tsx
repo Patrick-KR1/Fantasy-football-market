@@ -3,14 +3,15 @@ import Link from "next/link";
 import { type CSSProperties } from "react";
 import { usePlayerPhoto } from './player-photo';
 import { money, score } from "@/lib/kickx/data";
-import type { Player } from "@/lib/kickx/types";
+import type { Player, SeriesPoint } from "@/lib/kickx/types";
+import { TrendSparkline } from "./trends";
 import { usePlatform } from "./provider";
-import { Change, ClubCrest, LeagueMark, Sparkline, useClub, WatchButton } from "./ui";
+import { Change, ClubCrest, LeagueMark, useClub, WatchButton } from "./ui";
 
 const POSITION_NAME = { GK: "골키퍼", DF: "수비수", MF: "미드필더", FW: "공격수" } as const;
 
 /** Collectible-style player card: club-coloured stage, name plate and honest stats. */
-export function PlayerCard({ player, variant = "grid", rank }: { player: Player; variant?: "grid" | "feature"; rank?: number }) {
+export function PlayerCard({ player, variant = "grid", rank, trend }: { player: Player; variant?: "grid" | "feature"; rank?: number; trend?: SeriesPoint[] }) {
   const { data, getLeague } = usePlatform();
   const { team, identity } = useClub(player.team);
   const { photo, smallSource, sourcePixels, onLoad, onError } = usePlayerPhoto(player.photo);
@@ -57,7 +58,7 @@ export function PlayerCard({ player, variant = "grid", rank }: { player: Player;
         {valued ? (
           <>
             <div className="pcard-value"><span>현재 가치</span><strong className="num">{money(player.price)}<small>P</small></strong></div>
-            <div className="pcard-change"><Change value={player.change} /><Sparkline values={player.history.slice(-14).map((v) => v.value)} down={(player.change ?? 0) < 0} /></div>
+            <div className="pcard-change"><Change value={player.change} /><TrendSparkline player={player} series={trend} /></div>
           </>
         ) : (
           <div className="pcard-pending" title="Performance 계산이 연결되면 선수 가치가 표시됩니다.">

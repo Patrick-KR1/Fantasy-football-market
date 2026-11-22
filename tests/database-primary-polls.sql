@@ -35,7 +35,11 @@ select public.kickx_community_write('vote',jsonb_build_object('postId',current_s
 select pg_temp.primary_assert(public.kickx_post_detail(current_setting('kickx.primary.post')::uuid)#>>'{post,poll,total}'='1','Duplicate vote counted');
 select pg_temp.primary_assert(public.kickx_post_detail(current_setting('kickx.primary.post')::uuid)#>>'{post,poll,myVote}'='2','Vote did not change');
 select pg_temp.primary_error($q$select * from public.community_poll_votes$q$,'42501');
-select pg_temp.primary_error($q$select public.kickx_community_write('createPost',jsonb_build_object('scope','club','target','main-b','title','불가 글','body','서브팀은 게시글 작성이 불가능합니다.','transaction','','requestId',gen_random_uuid()))$q$,'FAN_REQUIRED');
+-- Supported subteams accept posts; clubs the member does not support do not.
+reset role;
+select pg_temp.primary_assert(public.kickx_can_write_lounge('00000000-0000-0000-0000-000000000502','club','main-b'),'Subteam posting denied');
+select pg_temp.primary_assert(not public.kickx_can_write_lounge('00000000-0000-0000-0000-000000000502','club','main-d'),'Unsupported club posting allowed');
+set local role authenticated;
 select public.kickx_community_write('comment',jsonb_build_object('postId','00000000-0000-0000-0001-000000000501','body','서브팀 댓글은 작성할 수 있습니다.','requestId',gen_random_uuid()));
 select public.kickx_community_write('vote','{"postId":"00000000-0000-0000-0001-000000000501","option":0}');
 set local request.jwt.claim.sub='00000000-0000-0000-0000-000000000503';

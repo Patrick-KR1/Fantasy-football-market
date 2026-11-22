@@ -143,7 +143,7 @@ export function PriceReveal({ playerIds, preview = false }: { playerIds: string[
                 {(up || down) && <span className="price-reveal-arrows" aria-hidden="true">
                   {Array.from({ length: 7 }, (_, i) => <i key={i} style={{ "--i": i } as CSSProperties}>{up ? "▲" : "▼"}</i>)}
                 </span>}
-                <div className="price-reveal-face"><FramedPlayer player={player} theme={cosmeticTheme(state.loadout?.frame)} preview /></div>
+                <div className="price-reveal-face"><FramedPlayer player={player} theme={cosmeticTheme(state.playerFrames?.[player.id] ?? state.loadout?.frame)} preview /></div>
                 <div className="price-reveal-id">{player.position && <PositionBadge position={player.position} />}<h2>{player.name}</h2></div>
                 <div className="price-reveal-club">{player.team && <ClubCrest id={player.team} size="small" />}<span>{team?.name ?? "구단 정보 없음"}</span></div>
                 <div className="price-reveal-value">

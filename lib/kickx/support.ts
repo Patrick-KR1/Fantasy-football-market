@@ -7,8 +7,9 @@ export function supportedTeams(profile?: Pick<Profile,'team'|'teams'> | null): s
 export function supportsTeam(profile: Pick<Profile,'team'|'teams'> | null | undefined, team: string) {
   return supportedTeams(profile).includes(team);
 }
+/** Members with a confirmed primary club may post in any of their supported clubs. */
 export function canPostToClub(profile:Profile|null|undefined,team?:string) {
- return !!profile?.primaryTeam && (!team || profile.primaryTeam===team);
+ return !!profile?.primaryTeam && (!team || team===profile.primaryTeam || supportedTeams(profile).includes(team));
 }
 /** The server enforces the same KST calendar and once-per-league budget. */
 export function supportWindow(at:number=Date.now()):string|null {

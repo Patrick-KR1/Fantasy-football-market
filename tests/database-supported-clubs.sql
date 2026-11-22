@@ -20,12 +20,13 @@ select pg_temp.support_error($q$select public.kickx_save_profile('{"nickname":"F
 select pg_temp.support_error($q$select public.kickx_save_profile('{"nickname":"Five Fans","primaryTeam":"support-a","teams":["support-a","support-outside"]}')$q$,'ONE_CLUB_PER_LEAGUE');
 select pg_temp.support_error($q$select public.kickx_save_profile('{"nickname":"Five Fans","primaryTeam":"support-a","teams":["support-a","support-a"]}')$q$,'INVALID_SUPPORTED_CLUBS');
 select pg_temp.support_error($q$select public.kickx_save_profile('{"nickname":"Five Fans","primaryTeam":"support-a","teams":["support-a","missing"]}')$q$,'ONE_CLUB_PER_LEAGUE');
--- Subteams can participate but only the explicitly confirmed primary can author posts.
-select pg_temp.support_error($q$select public.kickx_community_write('createPost',jsonb_build_object('scope','club','target','support-e','title','서브팀 게시글','body','서브팀에는 글을 작성할 수 없습니다.','transaction','','requestId',gen_random_uuid()))$q$,'FAN_REQUIRED');
+-- With a confirmed primary club, every supported club (primary or subteam) accepts posts.
+select pg_temp.support_error($q$select public.kickx_community_write('createPost',jsonb_build_object('scope','club','target','support-rival','title','미응원 구단 글','body','응원하지 않는 구단에는 글을 작성할 수 없습니다.','transaction','','requestId',gen_random_uuid()))$q$,'FAN_REQUIRED');
 select public.kickx_community_write('createPost',jsonb_build_object('scope','club','target','support-a','title','본진 구단 이야기','body','본진 구단에 게시글을 작성합니다.','transaction','','requestId',gen_random_uuid()));
 reset role;
 do $$begin
- if public.kickx_can_write_lounge('00000000-0000-0000-0000-000000000071','club','support-e') then raise exception 'Subteam authored a post';end if;
+ if not public.kickx_can_write_lounge('00000000-0000-0000-0000-000000000071','club','support-e') then raise exception 'Subteam posting denied';end if;
+ if public.kickx_can_write_lounge('00000000-0000-0000-0000-000000000071','club','support-rival') then raise exception 'Unsupported club authored a post';end if;
  if not public.kickx_can_write_lounge('00000000-0000-0000-0000-000000000071','club','support-a') then raise exception 'Primary posting denied';end if;
 end $$;
 insert into public.fixtures(id,league_id,home_team_id,away_team_id,starts_at,status) values('support-domestic','bsd-1','support-a','support-rival',now(),'NS'),('support-cup','club-test-cup','support-a','support-outside',now(),'NS');

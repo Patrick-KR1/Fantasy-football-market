@@ -24,7 +24,7 @@ select public.kickx_open_wallet();select public.kickx_engagement();
 do $$declare a jsonb:=public.kickx_engagement();begin
  if a#>'{daily,items}'<>public.kickx_engagement()#>'{daily,items}' or jsonb_array_length(a#>'{daily,items}')<>3 then raise exception 'Daily assignment unstable';end if;
  if a#>>'{daily,items,0,current}'<>'1' then raise exception 'Site visit did not automatically check attendance';end if;
- if (select (x->>'price')::int from jsonb_array_elements(a->'catalog') x where x->>'id'='attendance-ticket')<>5000 then raise exception 'Recovery ticket price must be 5000';end if;
+ if (select (x->>'price')::int from jsonb_array_elements(a->'catalog') x where x->>'id'='attendance-ticket')<>2500 then raise exception 'Recovery ticket price must be 5000';end if;
  perform pg_temp.eng_error('select * from kickx_private.mission_events','42501');
  perform pg_temp.eng_error($q$select kickx_private.mission_event(auth.uid(),'fixtures','forged')$q$,'42501');
  perform pg_temp.eng_error($q$select public.kickx_engagement_action('claim_daily')$q$,'MISSIONS_INCOMPLETE');
@@ -126,9 +126,15 @@ insert into kickx_private.mission_days(user_id,day,choices,cleared_at) select '0
 insert into kickx_private.mission_events(user_id,day,kind,target) select '00000000-0000-0000-0000-000000000211','2026-11-23','comment','weekly-'||n from generate_series(1,10)n;
 insert into kickx_private.mission_events(user_id,day,kind,target) values('00000000-0000-0000-0000-000000000211','2026-11-23','sell','manual-test');
 set local role authenticated;
-do $$declare before bigint:=(select balance from public.wallets);begin
+do $$declare before bigint:=(select balance from public.wallets);e jsonb;begin
+ -- Each completed weekly mission pays 1,000P once; clearing all pays 4,000P once (10,000P in total).
+ e:=public.kickx_engagement_action('claim_weekly_item','{"mission":"sell"}');perform public.kickx_engagement_action('claim_weekly_item','{"mission":"sell"}');
+ if (select balance from public.wallets)<>before+1000 then raise exception 'Weekly item reward duplicated';end if;
+ if not (e#>'{weekly,claimedItems}' ? 'sell') or (e#>>'{weekly,itemReward}')::int<>1000 or (e#>>'{weekly,reward}')::int<>4000 then raise exception 'Weekly item claim not reported: %',e->'weekly';end if;
  perform public.kickx_engagement_action('claim_weekly');perform public.kickx_engagement_action('claim_weekly');
- if (select balance from public.wallets)<>before+10000 then raise exception 'Weekly reward duplicated';end if;
+ if (select balance from public.wallets)<>before+5000 then raise exception 'Weekly reward duplicated';end if;
+ begin perform public.kickx_engagement_action('claim_weekly_item','{"mission":"not-a-mission"}');raise exception 'Unknown mission claimed';
+ exception when others then if sqlerrm<>'MISSIONS_INCOMPLETE' then raise;end if;end;
 end $$;
 set local request.jwt.claim.sub='00000000-0000-0000-0000-000000000212';
 do $$begin
@@ -186,6 +192,19 @@ do $$begin
  perform pg_temp.eng_error('select public.kickx_engagement()','42501');
  perform pg_temp.eng_error($q$select public.kickx_draw(gen_random_uuid())$q$,'42501');
  if public.kickx_nameplates(array['00000000-0000-0000-0000-000000000210'::uuid])->>'00000000-0000-0000-0000-000000000210'<>'nameplate-circuit' then raise exception 'Public plate read failed';end if;
+end $$;
+reset role;
+-- Per-player frames: owned frames only, on held players only, and clearing restores the default.
+insert into kickx_private.cosmetic_inventory(user_id,item_id,quantity) values('00000000-0000-0000-0000-000000000211','frame-gold',1) on conflict do nothing;
+set local request.jwt.claim.sub='00000000-0000-0000-0000-000000000211';
+set local role authenticated;
+do $$declare pid text:=(select player_id from public.holdings order by player_id limit 1);r jsonb;begin
+ if pid is null then raise exception 'Fixture player missing';end if;
+ r:=public.kickx_set_player_frame(pid,'frame-gold');
+ if r->>pid<>'frame-gold' or public.kickx_player_frames()->>pid<>'frame-gold' then raise exception 'Player frame not saved: %',r;end if;
+ perform pg_temp.eng_error(format('select public.kickx_set_player_frame(%L,%L)',pid,'frame-legend'),'ITEM_NOT_OWNED');
+ perform pg_temp.eng_error($q$select public.kickx_set_player_frame('not-held-player','frame-gold')$q$,'PLAYER_NOT_OWNED');
+ if public.kickx_set_player_frame(pid,null)?pid then raise exception 'Player frame not cleared';end if;
 end $$;
 reset role;
 rollback;

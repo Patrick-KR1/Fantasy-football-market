@@ -47,10 +47,14 @@ export function matchPriceExplanation(facts:ReportFacts):string{
  const unit=facts.priceUnit??facts.priceBefore;
  const rawDelta=(score-reference)/Math.max(Math.abs(reference),1)*sensitivity*exposure*unit;
  const raw=rawDelta/facts.priceBefore;
- const basis=score===reference?`포지션 기준 ${reference.toFixed(2)}점과 같아 가격 유지 대상입니다.`:`포지션 기준 ${reference.toFixed(2)}점보다 ${Math.abs(score-reference).toFixed(2)}점 ${score>reference?'높아 상승':'낮아 하락'} 대상입니다.`;
- const time=facts.minutes<60?` ${facts.minutes}분 출전으로 변동폭의 ${Math.round(exposure*100)}%를 반영합니다.`:'';
- const limit=Math.abs(raw)>.1?' 경기당 최대 변동률 10%를 적용합니다.':'';
- const bound=direction==='유지'&&raw!==0?' 최소 가격 또는 포인트 반올림으로 실제 가격은 유지됐습니다.':'';
- const points=facts.priceUnit!=null?` 제한 전 증감은 ${rawDelta>=0?'+':''}${Math.round(rawDelta).toLocaleString('ko-KR')}P이며 현재 가격과 무관한 기준 단위로 계산합니다.`:'';
- return `${basis}${time}${points}${limit}${bound}`;
+ // One short sentence per line; the screen shows them as separate lines.
+ const lines=[
+  score===reference?`이번 경기 점수 ${score.toFixed(2)}점은 포지션 기준 ${reference.toFixed(2)}점과 같아 가격 유지로 반영됩니다.`
+   :`이번 경기 점수 ${score.toFixed(2)}점은 포지션 기준 ${reference.toFixed(2)}점보다 ${Math.abs(score-reference).toFixed(2)}점 ${score>reference?'높아 상승':'낮아 하락'}으로 반영됩니다.`,
+  facts.minutes<60?`${facts.minutes}분 출전이라 변동폭의 ${Math.round(exposure*100)}%를 반영합니다.`:'',
+  facts.priceUnit!=null?`계산된 변동은 ${rawDelta>=0?'+':''}${Math.round(rawDelta).toLocaleString('ko-KR')}P입니다.`:'',
+  Math.abs(raw)>.1?'경기당 최대 변동률 10%를 넘어 10%까지만 적용했습니다.':'',
+  direction==='유지'&&raw!==0?'최소 가격 또는 포인트 반올림으로 실제 가격은 유지됐습니다.':'',
+ ];
+ return lines.filter(Boolean).join('\n');
 }

@@ -69,11 +69,13 @@ const length = (value: string) => [...value.normalize("NFC").trim()].length;
 export function validatePost(draft: PostDraft, rules: PostRules): Partial<Record<PostField, string>> {
   const errors: Partial<Record<PostField, string>> = {};
   if (draft.scope !== "club" && draft.scope !== "player") errors.scope = "게시판 종류를 선택해 주세요.";
-  const teams = 'primaryTeam' in rules ? (rules.primaryTeam?[rules.primaryTeam]:[]) : rules.myTeams ?? (rules.myTeam ? [rules.myTeam] : []);
+  // Any supported club accepts posts once the member has confirmed a primary club.
+  const supported = rules.myTeams ?? (rules.myTeam ? [rules.myTeam] : []);
+  const teams = 'primaryTeam' in rules ? (rules.primaryTeam ? [...new Set([rules.primaryTeam, ...supported])] : []) : supported;
   if (draft.scope === "club" && !teams.length) errors.target = "메인 응원 구단을 설정해야 구단 게시글을 작성할 수 있습니다.";
   else if (!draft.target) errors.target = draft.scope === "club" ? "구단을 선택해 주세요." : "선수를 선택해 주세요.";
   else if (!rules.targets.includes(draft.target)) errors.target = "선택할 수 없는 대상입니다. 다시 선택해 주세요.";
-  else if (draft.scope === "club" && !teams.includes(draft.target)) errors.target = "게시글은 메인 응원 구단에만 작성할 수 있습니다. 서브팀에서는 댓글과 투표에 참여할 수 있습니다.";
+  else if (draft.scope === "club" && !teams.includes(draft.target)) errors.target = "게시글은 내 응원 구단에만 작성할 수 있습니다.";
   const title = length(draft.title);
   if (!title) errors.title = "제목을 입력해 주세요.";
   else if (title < POST_LIMITS.titleMin) errors.title = `제목은 ${POST_LIMITS.titleMin}자 이상 입력해 주세요.`;

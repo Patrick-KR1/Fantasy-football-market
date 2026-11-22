@@ -1,4 +1,5 @@
 "use client";
+import { TrendSparkline, useTrends } from "./trends";
 import { Select } from "./select";
 import { POSITION_OPTIONS, useTeamOptions } from "./options";
 import Link from "next/link";
@@ -12,7 +13,7 @@ import type { Fixture, Player } from "@/lib/kickx/types";
 import { clubIdentity } from "@/lib/kickx/club-identity";
 import { usePlatform, useResource } from "./provider";
 import { useCatalogPage } from "./catalog";
-import { Change, DataEmpty, Modal, PlayerIdentity, PlayerPortrait, PositionBadge, Sparkline, TeamBadge, WatchButton } from "./ui";
+import { Change, DataEmpty, Modal, PlayerIdentity, PlayerPortrait, PositionBadge, TeamBadge, WatchButton } from "./ui";
 import { Pitch } from "./squad";
 import { PlaybookArt } from "./playbook-art";
 
@@ -201,6 +202,7 @@ export function HomeScreen() {
   const total=remote.enabled ? remote.data.total : results.length;
   const current=remote.enabled ? page : Math.min(page,Math.max(1,Math.ceil(total/pageSize)));
   const visible=remote.enabled ? (remote.status === "ready" ? remote.data.items : []) : results.slice((current-1)*pageSize,current*pageSize);
+  const trends = useTrends(visible);
   // Value columns only when any visible player has a computed value; otherwise show real imported stats.
   const valued = !visible.length || visible.some(p => p.price != null);
   const known = data.players.filter(p => p.change != null);
@@ -279,7 +281,7 @@ export function HomeScreen() {
                       <>
                         <td className="numeric strong yb-price">{money(player.price)}<span className="unit">P</span><span className="only-sm"><Change value={player.change} /></span></td>
                         <td className="numeric hide-sm"><Change value={player.change} /></td>
-                        <td className="hide-md"><Sparkline values={player.history.map(point => point.value)} down={(player.change ?? 0) < 0} /></td>
+                        <td className="hide-md"><TrendSparkline player={player} series={trends[player.id]} /></td>
                         <td className="numeric hide-sm">{score(player.performance)}</td>
                       </>
                     ) : (

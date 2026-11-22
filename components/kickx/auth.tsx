@@ -149,7 +149,7 @@ function ProfileForm({ onboarding = false }: { onboarding?: boolean }) {
         <p className="primary-warning">메인 응원 구단은 한 번 확정하면 영구적으로 변경·해제할 수 없습니다. 공식 엠블럼이 닉네임 앞에 표시되며, 이 구단에서 게시글을 작성할 수 있습니다.</p>
       </fieldset>
       <fieldset className="supported-club-fields" disabled={busy}><legend>응원 구단 <small>{teams.length} / 5</small></legend>
-        <p id="team-help">메인 응원 구단을 포함해 리그별 1개씩 최대 5개입니다. 서브팀은 댓글·투표에 참여할 수 있습니다. 가입 후 1시간 동안 변경할 수 있고, 이후에는 2월·9월 1~7일에 리그별 한 번씩 변경할 수 있습니다. 구단 해제도 변경에 포함됩니다.</p>
+        <p id="team-help">메인 응원 구단을 포함해 리그별 1개씩 최대 5개입니다. 서브팀에서도 게시글·댓글·투표에 참여할 수 있습니다. 가입 후 1시간 동안 변경할 수 있고, 이후에는 2월·9월 1~7일에 리그별 한 번씩 변경할 수 있습니다. 구단 해제도 변경에 포함됩니다.</p>
         {leagues.map(league=>{const picked=teams.find(id=>data.teams.find(t=>t.id===id)?.leagueId===league.id)??'';return <div className={`supported-club-field${picked?' picked':''}`} key={league.id}><label htmlFor={`profile-team-${league.id}`}><LeagueMark league={league} size="sm"/><span>{league.name}</span><small>{league.id===primaryLeague?'메인 응원 구단 · 변경 불가':picked?'서브팀':'미선택'}</small></label>
           <Select id={`profile-team-${league.id}`} label={`${league.name} 응원 구단`} describedBy="team-help" value={picked} disabled={busy || !data.teams.length || league.id===primaryLeague || !canChangeSubteam(profile,league.id)}
             onChange={id=>setDraftTeams([...teams.filter(team=>data.teams.find(t=>t.id===team)?.leagueId!==league.id),...(id?[id]:[])])}

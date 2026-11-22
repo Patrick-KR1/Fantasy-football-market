@@ -1,4 +1,5 @@
 "use client";
+import { TrendSparkline, useTrends } from "./trends";
 import { useMissionView } from "./engagement-provider";
 import {MemberName} from "./avatar";
 import {CommunityFeed} from "./community-feed";
@@ -29,7 +30,6 @@ import {
   PositionBadge,
   PriceChart,
   SectionTitle,
-  Sparkline,
   Tabs,
   TradeButton,
   TradeNotice,
@@ -184,6 +184,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
     if (correctingPage) setPage(current);
   }, [correctingPage, current]);
   const visible=remote.enabled ? (status === "ready" ? remote.data.items : []) : results.slice((current-1)*pageSize,current*pageSize);
+  const trends = useTrends(visible);
   const filtered = !!q || league !== "all" || team !== "all" || pos !== "전체" || tab !== "전체 선수";
   const reset = () => {
     setQ("");
@@ -272,7 +273,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
           </span>
         </div>
         {view === "grid" && visible.length > 0 ? (
-          <div className="player-grid">{visible.map((p) => <PlayerCard key={p.id} player={p} />)}</div>
+          <div className="player-grid">{visible.map((p) => <PlayerCard key={p.id} player={p} trend={trends[p.id]} />)}</div>
         ) : view === "list" && visible.length > 0 ? (
           <div className="table-scroll">
             <table className="data-table market-table">
@@ -298,7 +299,7 @@ export function PlayerList({ market = false }: { market?: boolean }) {
                       <td className="hide-sm"><PositionBadge position={p.position} /></td>
                       <td className="numeric strong">{p.price != null ? <>{money(p.price)}<span className="unit">P</span><span className="only-sm"><Change value={p.change} /></span></> : <span className="value-pending">산정 전</span>}</td>
                       <td className="numeric hide-sm"><Change value={p.change} /></td>
-                      <td className="hide-md"><Sparkline values={p.history.map((v) => v.value)} down={(p.change ?? 0) < 0} /></td>
+                      <td className="hide-md"><TrendSparkline player={p} series={trends[p.id]} /></td>
                       <td className="numeric hide-sm">{score(p.performance)}</td>
                       <td className="numeric hide-sm">{money(p.goals)}</td>
                       <td className="numeric hide-sm">{money(p.assists)}</td>

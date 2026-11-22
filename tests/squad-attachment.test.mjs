@@ -26,3 +26,16 @@ test("hand-typed or misplaced markers are stripped and never read as an attachme
   const short = "본문입니다 열자 이상\n\n[[kickx-squad:4-3-3:a,b,c]]";
   assert.equal(community.splitSquad(short).squad, null);
 });
+
+test("the look recorded at posting time round-trips and rejects unknown items", () => {
+  const frames = slots.map((id, i) => id ? (i % 2 ? "frame-gold" : "frame-legend") : null);
+  const marker = community.squadMarker("4-3-3", slots, { pitch: "pitch-cosmos", frames });
+  const { squad } = community.splitSquad("룩 포함 스쿼드 공유" + marker);
+  assert.equal(squad.look.pitch, "pitch-cosmos");
+  assert.deepEqual(squad.look.frames, frames);
+  const odd = community.squadMarker("4-3-3", slots, { pitch: "<script>", frames: ["x;y", ...frames.slice(1)] });
+  const parsed = community.splitSquad("이상한 꾸미기 값 확인" + odd).squad;
+  assert.equal(parsed.look.pitch, null);
+  assert.equal(parsed.look.frames[0], null);
+  assert.equal(community.splitSquad("예전 첨부 형식도 읽기" + community.squadMarker("4-3-3", slots)).squad.look, undefined);
+});

@@ -15,7 +15,7 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
  // so missing parts fall back to the empty defaults.
  const state=useMemo(()=>{
   const base=emptyEngagement(),data=(resource.data??{}) as Partial<Engagement>;
-  const merged:Engagement={...base,...data,daily:{...base.daily,...data.daily},weekly:{...base.weekly,...data.weekly},attendance:data.attendance??[],catalog:data.catalog??[],inventory:data.inventory??{},loadout:{...base.loadout,...data.loadout},unclaimedDaily:data.unclaimedDaily??[],draw:{...base.draw,...data.draw,pending:data.draw?.pending??[],history:data.draw?.history??[]}};
+  const merged:Engagement={...base,...data,daily:{...base.daily,...data.daily},weekly:{...base.weekly,...data.weekly,claimedItems:data.weekly?.claimedItems??[]},attendance:data.attendance??[],catalog:data.catalog??[],inventory:data.inventory??{},loadout:{...base.loadout,...data.loadout},unclaimedDaily:data.unclaimedDaily??[],playerFrames:data.playerFrames??{},draw:{...base.draw,...data.draw,pending:data.draw?.pending??[],history:data.draw?.history??[]}};
   return userId?merged:{...merged,catalog:preview.data?.catalog??[],draw:{...merged.draw,poolSize:preview.data?.poolSize}};
  },[userId,resource.data,preview.data]);
  const {setData:setEngagement,reload:reloadEngagement}=resource;
@@ -55,3 +55,4 @@ export function useMissionView(kind: string, target: string | null, enabled = tr
  useEffect(()=>{if(enabled&&target)track(kind,target);},[kind,target,enabled,track]);
 }
 export function useLoadout(): Loadout { return useEngagement().state.loadout; }
+export function usePlayerFrames(): Record<string, string> { return useEngagement().state.playerFrames ?? {}; }

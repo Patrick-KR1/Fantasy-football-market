@@ -272,3 +272,27 @@
   .account-trigger .member-plain-name .primary-name-crest .club-crest { width:15px;height:15px; }
   .account-trigger .account-text>.num { font-size:11px;padding:1px 7px; }
 }
+
+/* 2026-11-22: squad snapshots use faces, the author's pitch theme and frames; values hidden. */
+.squad-snapshot { max-width:460px; }
+.squad-snapshot .pitch { width:100%;border-radius:8px; }
+.squad-snapshot .pitch .squad-player-icon.squad-face { width:38px;height:38px; }
+.squad-snapshot .pitch .player-frame.frame-ornate { margin-top:4px;margin-bottom:5px; }
+.squad-snapshot .pitch .pitch-name { font-size:9px!important;padding:1px 4px; }
+.squad-snapshot .pitch-scenery svg { width:18px; }
+@media (max-width: 640px) { .squad-snapshot .pitch .squad-player-icon.squad-face { width:32px;height:32px; } }
+.mission-claim { min-height:30px;padding:0 10px;font-size:12px;white-space:nowrap; }
+.player-frame-select { display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:800;color:var(--text-2); }
+.player-frame-select select { min-height:30px;max-width:180px;padding:0 8px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);font-size:12px;font-weight:700;color:var(--ink); }
+.player-frame-select select:focus-visible { outline:2px solid var(--ink);outline-offset:1px; }
+.report-price-reason strong { margin-bottom:4px; }
+.report-price-reason p { margin:0;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere; }
+.report-price-reason p + p { margin-top:2px; }
+/* Draw placement: each choice shows the player's current value on the right. */
+.draw-choices>button>span:nth-last-child(2) { display:flex;flex-direction:column;gap:6px;flex:1;min-width:0; }
+.draw-choices>button>span.draw-choice-value { display:block;margin-left:auto;flex-shrink:0;font-size:14px;font-weight:900;color:var(--ink);white-space:nowrap; }
+.draw-choices>button:disabled .draw-choice-value { color:var(--text-2); }
+.weekly-reward-text { font-size:13px;line-height:1.5; }
+.weekly-reward-text b { font-size:16px;font-weight:900;color:var(--ink); }
+.player-frame-select > span { white-space:nowrap; }
+.player-frame-select select { min-width:0;flex:1; }

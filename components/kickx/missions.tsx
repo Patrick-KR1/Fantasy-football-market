@@ -12,14 +12,15 @@ export function EngagementNotice() {
  if(!data.session?.profile)return <MemberNotice/>;
  return !ready?<div className="eng-notice" role="status">{error?'미션·상점 정보를 불러오지 못했습니다.':'미션·상점 정보를 불러오는 중…'}{error&&<button className="button secondary small" onClick={reload}>다시 시도</button>}</div>:null;
 }
-function MissionRow({mission,weekly=false}:{mission:Mission;weekly?:boolean}) {
+/** Weekly rows carry their own 1,000P claim; the reward amount comes from the server state. */
+function MissionRow({mission,weekly=false,claim}:{mission:Mission;weekly?:boolean;claim?:{reward:number;claimed:boolean;disabled:boolean;onClaim:()=>void}}) {
  const complete=mission.current>=mission.target;
  const label=mission.id==='attendance'&&weekly?'주간 출석 7일':MISSION_LABELS[mission.id]??mission.id;
  return <li className={`mission-row ${complete?'is-complete':''}`}>
   <span className="mission-check" aria-hidden="true">{complete?<Check size={17}/>:<span/>}</span>
   <div className="mission-info"><strong>{label}</strong><div className="mission-progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={mission.target} aria-valuenow={Math.min(mission.current,mission.target)}><i style={{width:`${Math.min(100,mission.current/mission.target*100)}%`}}/></div></div>
   <span className="mission-count num">{Math.min(mission.current,mission.target)}<small> / {mission.target}</small></span>
-  {complete?<span className="mission-done">완료</span>:mission.id==='attendance'&&!weekly?<span className="mission-auto-attendance">방문 시 자동</span>:MISSION_LINKS[mission.id]?<Link className="mission-go" href={MISSION_LINKS[mission.id]} aria-label={`${label} 하러 가기`}><ArrowUpRight size={18}/></Link>:<span className="mission-go"/>}
+  {complete&&claim?(claim.claimed?<span className="mission-done">수령 완료</span>:<button type="button" className="button small mission-claim" disabled={claim.disabled} onClick={claim.onClaim}>+{money(claim.reward)} P</button>):complete?<span className="mission-done">완료</span>:mission.id==='attendance'&&!weekly?<span className="mission-auto-attendance">방문 시 자동</span>:MISSION_LINKS[mission.id]?<Link className="mission-go" href={MISSION_LINKS[mission.id]} aria-label={`${label} 하러 가기`}><ArrowUpRight size={18}/></Link>:<span className="mission-go"/>}
  </li>;
 }
 export function MissionsScreen() {
@@ -31,7 +32,7 @@ export function MissionsScreen() {
  return <>
   <PageHeading eyebrow="SMALL STEPS. BIG REWARDS." title="미션" description="매일 세 가지, 매주 여섯 가지. 축구를 즐기며 포인트를 모으세요." action={<Link className="button secondary" href="/shop">포인트 상점 <ArrowUpRight size={16}/></Link>}/>
   <EngagementNotice/>
-  <div className="eng-hero mission-hero"><div><span className="eng-kicker">YOUR NEXT KICK</span><h2>오늘의 참여가<br/><em>다음 영입으로.</em></h2><p>사이트에 방문하면 자동 출석, 나머지는 무작위 두 가지.<br/>모든 미션을 끝내면 보상이 열립니다.</p></div><div className="mission-hero-rewards"><div><span>일일 올 클리어</span><strong className="num">1,000<small>P</small></strong></div><span className="mission-hero-plus">+</span><div><span>주간 올 클리어</span><strong className="num">10,000<small>P</small></strong></div></div></div>
+  <div className="eng-hero mission-hero"><div><span className="eng-kicker">YOUR NEXT KICK</span><h2>오늘의 참여가<br/><em>다음 영입으로.</em></h2><p>사이트에 방문하면 자동 출석, 나머지는 무작위 두 가지.<br/>모든 미션을 끝내면 보상이 열립니다.</p></div><div className="mission-hero-rewards"><div><span>일일 올 클리어</span><strong className="num">1,000<small>P</small></strong></div><span className="mission-hero-plus">+</span><div><span>주간 미션당 · 올 클리어</span><strong className="num">{money(state.weekly.itemReward??1000)}<small>P</small> · {money(state.weekly.reward)}<small>P</small></strong></div></div></div>
   <div className="missions-grid">
    <section className="mission-panel"><header><div><span className="eng-kicker">DAILY CHALLENGE</span><h2>일일 미션</h2></div><span className="eng-reset">매일 00:00 초기화 · 한국 시간</span></header>
     <ul>{state.daily.items.map(m=><MissionRow key={m.id} mission={m}/>)}</ul>
@@ -39,8 +40,8 @@ export function MissionsScreen() {
    </section>
    <section className="mission-panel weekly"><header><div><span className="eng-kicker">WEEKLY CHALLENGE</span><h2>주간 미션 <small className="eng-mode">{state.weekly.international?'A매치 주간':'정규리그 주간'}</small></h2></div><span className="eng-reset">매주 화요일 00:00 초기화 · 한국 시간</span></header>
     {ready&&<p className="mission-mode-note">{state.weekly.international?'금~월 5대 정규리그 경기가 없어 경기 기반 미션을 조회 미션으로 대체했습니다.':'금~월 5대 정규리그 경기가 있어 출전·Performance 미션을 진행합니다.'}</p>}
-    <ul>{state.weekly.items.map(m=><MissionRow key={m.id} mission={m} weekly/>)}</ul>
-    <footer><div><Gift size={21}/><span>모두 완료하면 <strong className="num">10,000 P</strong></span></div><button className="button" disabled={!ready||busy||!weeklyComplete||state.weekly.claimed} onClick={()=>void action('claim_weekly')}>{state.weekly.claimed?'보상 수령 완료':'보상 받기'}</button></footer>
+    <ul>{state.weekly.items.map(m=><MissionRow key={m.id} mission={m} weekly claim={{reward:state.weekly.itemReward??1000,claimed:(state.weekly.claimedItems??[]).includes(m.id),disabled:!ready||busy,onClaim:()=>void action('claim_weekly_item',{mission:m.id})}}/>)}</ul>
+    <footer><div><Gift size={21}/><span className="weekly-reward-text">미션별 <b className="num">{money(state.weekly.itemReward??1000)} P</b> · 올 클리어 <b className="num">+{money(state.weekly.reward)} P</b></span></div><button className="button" disabled={!ready||busy||!weeklyComplete||state.weekly.claimed} onClick={()=>void action('claim_weekly')}>{state.weekly.claimed?'보상 수령 완료':'올 클리어 보상 받기'}</button></footer>
    </section>
   </div>
   <section className="attendance-panel"><header><div><CalendarCheck size={24}/><div><h2>이번 주 출석</h2><p>화요일부터 월요일까지, 일곱 칸을 채우세요.</p></div></div><Link href="/shop?category=ticket" className="button secondary small"><RotateCcw size={15}/>복구권 {money(tickets)}장</Link></header>

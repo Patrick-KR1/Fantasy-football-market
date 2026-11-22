@@ -41,7 +41,12 @@ export async function POST(request:Request){try{
   if(attachSquad){
    // The snapshot is read from the author's own saved squad, never taken from the request.
    const squad=await client.from("squads").select("formation_id,slots").eq("user_id",user.id).maybeSingle();checkDatabase(squad.error);
-   const marker=squad.data?squadMarker(String(squad.data.formation_id),(squad.data.slots??[]) as (string|null)[]):null;
+   // The look (pitch theme and each starter's frame) is read from the author's own cosmetics too.
+   const slots=(squad.data?.slots??[]) as (string|null)[];
+   const [state,own]=await Promise.all([client.rpc("kickx_engagement"),client.rpc("kickx_player_frames")]);
+   const loadout=(!state.error&&state.data&&typeof state.data==="object"?(state.data as {loadout?:{pitch?:string|null;frame?:string|null}}).loadout:null)??{};
+   const perPlayer=(!own.error&&own.data&&typeof own.data==="object"?own.data:{}) as Record<string,string>;
+   const marker=squad.data?squadMarker(String(squad.data.formation_id),slots,{pitch:loadout.pitch??null,frames:slots.map(id=>id?perPlayer[id]??loadout.frame??null:null)}):null;
    if(!marker)throw new HttpError(400,"첨부할 스쿼드가 없습니다. 스쿼드를 먼저 구성해 주세요.");
    if([...String(input.body)+marker].length>POST_LIMITS.bodyMax)throw new HttpError(400,"스쿼드를 첨부하려면 내용을 조금 줄여 주세요.");
    input.body=String(input.body)+marker;
