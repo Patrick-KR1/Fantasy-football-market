@@ -61,9 +61,11 @@ try{
   assert.equal(month.endpointX,month.viewBoxWidth);assert.equal(month.endDotLeft,'100%');
   const legacy=width===1920?await coverage(line,true):null;
   const pathBefore=await line.getAttribute('d');
+  assert.match(pathBefore,/^M [\d.-]+ [\d.-]+(?: L [\d.-]+ [\d.-]+)+$/,'Recorded values must use straight segments');
   await chart.getByRole('button',{name:'1주',exact:true}).click();
   await page.waitForFunction(before=>document.querySelector('.pf-chart .chart-line')?.getAttribute('d')!==before,pathBefore);
   const week=await coverage(line);assert.equal(week.painted,week.samples,`Incomplete week stroke at ${width}`);assert(week.tailPainted);
+  assert(!/[CQSA]/i.test(await line.getAttribute('d')),'Week chart must not smooth recorded values');
   const plot=chart.locator('.chart-plot'),bounds=await plot.boundingBox();
   await plot.hover({position:{x:bounds.width-2,y:bounds.height/2}});
   assert.match(await chart.locator('.chart-tooltip strong').innerText(),/1,233,000/);

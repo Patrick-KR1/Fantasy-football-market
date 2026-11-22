@@ -456,30 +456,16 @@ export function Tabs({
 }
 
 /* ---------- Charts ---------- */
-/** Monotone cubic curve through the points (no overshoot: never draws a value the data does not have). */
-function smoothPath(xy: readonly (readonly [number, number])[]) {
-  const n = xy.length;
-  if (n < 3) return xy.map(([x, y], i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
-  const dx = xy.slice(1).map((p, i) => p[0] - xy[i][0]), slope = xy.slice(1).map((p, i) => (p[1] - xy[i][1]) / (dx[i] || 1));
-  const t = xy.map((_, i) => i === 0 ? slope[0] : i === n - 1 ? slope[n - 2] : slope[i - 1] * slope[i] <= 0 ? 0 : (slope[i - 1] + slope[i]) / 2);
-  for (let i = 0; i < n - 1; i++) {
-    if (slope[i] === 0) { t[i] = 0; t[i + 1] = 0; continue; }
-    const a = t[i] / slope[i], b = t[i + 1] / slope[i], h = a * a + b * b;
-    if (h > 9) { const k = 3 / Math.sqrt(h); t[i] = k * a * slope[i]; t[i + 1] = k * b * slope[i]; }
-  }
-  let d = `M ${xy[0][0].toFixed(1)} ${xy[0][1].toFixed(1)}`;
-  for (let i = 0; i < n - 1; i++) {
-    const [x0, y0] = xy[i], [x1, y1] = xy[i + 1], h = dx[i] / 3;
-    d += ` C ${(x0 + h).toFixed(1)} ${(y0 + t[i] * h).toFixed(1)} ${(x1 - h).toFixed(1)} ${(y1 - t[i + 1] * h).toFixed(1)} ${x1.toFixed(1)} ${y1.toFixed(1)}`;
-  }
-  return d;
+/** Connect recorded values directly so changes remain visible without curve smoothing. */
+function linePath(xy: readonly (readonly [number, number])[]) {
+  return xy.map(([x, y], i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
 }
 export function Sparkline({ values, down = false }: { values: number[]; down?: boolean }) {
   if (values.length < 2 || values.some((v) => !Number.isFinite(v))) return <span className="muted">—</span>;
   const min = Math.min(...values),
     range = Math.max(...values) - min || 1;
   const xy = values.map((v, i) => [(i / (values.length - 1)) * 120, 30 - ((v - min) / range) * 26] as const);
-  const line = smoothPath(xy);
+  const line = linePath(xy);
   const baseY = xy[0][1], [endX, endY] = xy[xy.length - 1];
   // Same language as PriceChart: start-value baseline, soft area, line, end dot.
   return (
@@ -516,7 +502,7 @@ export function PriceChart({ points, label = "선수 가치" }: { points: Series
     span ? ((Date.parse(p.at) - first) / span) * W : (i / (valid.length - 1)) * W,
     top + (1 - (p.value - min) / range) * (H - top - bottom),
   ]);
-  const path = smoothPath(coords as [number, number][]);
+  const path = linePath(coords as [number, number][]);
   const rising = values[values.length - 1] >= values[0];
   const selected = hover == null ? null : Math.min(hover, valid.length - 1);
   const ticks = [0, 1, 2, 3].map((i) => max - (range * i) / 3);
