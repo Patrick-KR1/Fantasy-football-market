@@ -551,7 +551,7 @@ export function PriceChart({ points, label = "선수 가치" }: { points: Series
           })}
           <line x1="0" x2={W} y1={coords[0][1]} y2={coords[0][1]} className="chart-base" vectorEffect="non-scaling-stroke" />
           <path d={`${path} L${W} ${H} L0 ${H} Z`} fill={`url(#${uid})`} className="chart-area" />
-          <path d={path} pathLength={1} className="chart-line" fill="none" vectorEffect="non-scaling-stroke" />
+          <path d={path} className="chart-line" fill="none" vectorEffect="non-scaling-stroke" />
           {selected !== null && (
             <line x1={coords[selected][0]} x2={coords[selected][0]} y1={top} y2={H - bottom} className="chart-cross" vectorEffect="non-scaling-stroke" />
           )}
