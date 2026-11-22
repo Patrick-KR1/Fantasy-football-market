@@ -7,7 +7,7 @@ import { cosmeticTheme } from "@/lib/kickx/engagement";
 import { MatchNotificationToggle } from "./notifications";
 import { useId, useRef, useState, type CSSProperties } from "react";
 import { clubIdentity, luminance } from "@/lib/kickx/club-identity";
-import { Plus, Search, X } from "lucide-react";
+import { Play, Plus, Search, X } from "lucide-react";
 import { money, score } from "@/lib/kickx/data";
 import { apiRequest } from "@/lib/kickx/client";
 import { benchExpired, benchReason } from "@/lib/kickx/bench";
@@ -277,6 +277,7 @@ export function SquadScreen() {
   const [position, setPosition] = useState<Position | null>(null);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [revealReplay, setRevealReplay] = useState(0);
   const [showFormation, setShowFormation] = useState(false),
     [placement, setPlacement] = useState(false),
     [placing, setPlacing] = useState(false);
@@ -372,7 +373,13 @@ export function SquadScreen() {
   return (
     <>
       <PageHeading eyebrow="BUILD YOUR STARTING XI" title="내 스쿼드" />
-      {member && <PriceReveal playerIds={member.holdings.map((h) => h.playerId)} />}
+      {member && (
+        <PriceReveal
+          key={`${data.session?.userId}:${revealReplay}`}
+          playerIds={member.holdings.map((h) => h.playerId)}
+          preview={revealReplay > 0}
+        />
+      )}
       <MemberNotice />
       <MatchNotificationToggle />
       <div className="squad-appearance"><Link href="/shop">경기장·선수 테두리 꾸미기</Link></div>
@@ -385,6 +392,16 @@ export function SquadScreen() {
                   ? `${data.session.profile.nickname} FC`
                   : "내 스쿼드"}
               </strong>
+              <button
+                type="button"
+                className="button secondary small squad-reveal-test"
+                disabled={!data.session || !member?.holdings.length}
+                title="주전·벤치 전체 선수의 마지막 가치 변동을 다시 봅니다."
+                onClick={() => setRevealReplay((request) => request + 1)}
+              >
+                <Play size={13} aria-hidden="true" />
+                가치 변동 테스트
+              </button>
               <span className="tag outline">자동 반영</span>
             </div>
             <div className="squad-count">

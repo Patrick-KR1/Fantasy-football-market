@@ -86,14 +86,20 @@
 .squad-attachment .pitch { width:100%;border-radius:8px; }
 .board-squad-mark { margin-left:5px;vertical-align:-2px;color:var(--text-2); }
 
-/* #7 Squad price reveal: dimmed page, one large card per player whose price moved since last visit. */
+/* #7 Squad price reveal: up to six simultaneous cards, each with its own movement colour. */
 .price-reveal { --tone:#16a34a;--tone-2:#bbf7d0;position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px; }
-.price-reveal.is-down { --tone:#dc2626;--tone-2:#fecaca; }
+.price-reveal-card.is-down { --tone:#dc2626;--tone-2:#fecaca; }
+.price-reveal-card.is-flat { --tone:#64748b;--tone-2:#e2e8f0; }
 .price-reveal-backdrop { position:absolute;inset:0;background:rgba(8,10,8,.72);backdrop-filter:blur(3px);animation:reveal-fade .35s ease-out both; }
-.price-reveal-stage { position:relative;display:grid;justify-items:center;gap:14px;width:min(360px,100%);perspective:900px; }
-.price-reveal-kicker { display:flex;gap:10px;align-items:center;color:#fff;font-size:12px;font-weight:900;letter-spacing:1.5px; }
+.price-reveal-stage { position:relative;display:grid;grid-template-rows:auto minmax(0,1fr) auto;justify-items:center;gap:12px;width:min(1080px,100%);max-height:calc(100dvh - 40px);min-height:0; }
+.price-reveal-stage[data-count="1"] { width:min(360px,100%); }
+.price-reveal-stage[data-count="2"] { width:min(720px,100%); }
+.price-reveal-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;width:100%;min-height:0;padding:10px;overflow-y:auto;overscroll-behavior:contain;perspective:1200px; }
+.price-reveal-stage[data-count="1"] .price-reveal-grid { grid-template-columns:minmax(0,1fr); }
+.price-reveal-stage[data-count="2"] .price-reveal-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.price-reveal-kicker { display:flex;flex-wrap:wrap;justify-content:center;gap:8px 10px;align-items:center;color:#fff;font-size:12px;font-weight:900;letter-spacing:1px;text-align:center; }
 .price-reveal-kicker span { padding:2px 8px;border-radius:999px;background:#ffffff22;letter-spacing:0; }
-.price-reveal-card { position:relative;isolation:isolate;overflow:hidden;display:grid;justify-items:center;gap:10px;width:100%;padding:30px 22px 24px;border-radius:18px;text-align:center;color:#fff;
+.price-reveal-card { position:relative;isolation:isolate;overflow:hidden;display:grid;align-content:start;justify-items:center;gap:7px;min-width:0;width:100%;padding:16px 14px;border-radius:16px;text-align:center;color:#fff;
   background:radial-gradient(ellipse at 50% 22%,color-mix(in srgb,var(--tone) 55%,transparent),transparent 62%),linear-gradient(165deg,#1b2119,#0d100c 70%);
   border:2px solid color-mix(in srgb,var(--tone) 70%,#fff);box-shadow:0 0 0 6px #ffffff10,0 24px 60px #000a,0 0 50px color-mix(in srgb,var(--tone) 45%,transparent);
   animation:reveal-flip .8s cubic-bezier(.2,1.2,.35,1) both; }
@@ -102,32 +108,52 @@
 .price-reveal-arrows { position:absolute;inset:0;z-index:-1;pointer-events:none; }
 .price-reveal-arrows i { position:absolute;left:calc(8% + var(--i) * 13%);bottom:-24px;font-style:normal;font-size:calc(14px + var(--i) * 1.5px);color:var(--tone-2);opacity:0;animation:reveal-rise 2.4s ease-in calc(.5s + var(--i) * .22s) infinite; }
 .is-down .price-reveal-arrows i { bottom:auto;top:-24px;animation-name:reveal-fall; }
-.price-reveal-face { margin:6px 0 4px;animation:draw-pop .7s cubic-bezier(.2,1.4,.4,1) .35s both; }
-.price-reveal-face .squad-face { width:118px!important;height:118px!important; }
-.price-reveal-face .player-frame.frame-ornate { margin:22px 0; }
-.price-reveal-id { display:flex;align-items:center;gap:8px;animation:draw-rise .4s ease-out .6s both; }
-.price-reveal-id h2 { font-size:24px;line-height:1.25;color:#fff; }
-.price-reveal-club { display:flex;align-items:center;gap:7px;font-size:13px;color:#d7dccf;animation:draw-rise .4s ease-out .72s both; }
-.price-reveal-club .club-crest { width:22px;height:22px; }
-.price-reveal-value { display:grid;justify-items:center;gap:6px;width:100%;margin-top:6px;padding-top:16px;border-top:1px solid #ffffff22;animation:draw-rise .45s ease-out .85s both; }
+.price-reveal-face { margin:3px 0;animation:draw-pop .7s cubic-bezier(.2,1.4,.4,1) .35s both; }
+.price-reveal-face .squad-face { width:84px!important;height:84px!important; }
+.price-reveal-face .player-frame.frame-ornate { margin:6px 0; }
+.price-reveal-id { display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;animation:draw-rise .4s ease-out .6s both; }
+.price-reveal-id h2 { font-size:20px;line-height:1.25;color:#fff;overflow-wrap:anywhere; }
+.price-reveal-id .tag { flex-shrink:0; }
+.price-reveal-club { display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;font-size:12px;color:#d7dccf;animation:draw-rise .4s ease-out .72s both; }
+.price-reveal-club span { overflow-wrap:anywhere; }
+.price-reveal-club .club-crest { flex-shrink:0;width:18px;height:18px; }
+.price-reveal-value { display:grid;justify-items:center;gap:5px;width:100%;margin-top:3px;padding-top:10px;border-top:1px solid #ffffff22;animation:draw-rise .45s ease-out .85s both; }
 .price-reveal-value>span { display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;letter-spacing:1px;color:var(--tone-2); }
-.price-reveal-value>strong { display:flex;align-items:baseline;gap:6px;font-size:44px;font-weight:950;letter-spacing:-1.5px;line-height:1.05;color:#fff;text-shadow:0 0 24px color-mix(in srgb,var(--tone) 60%,transparent);animation:draw-value .7s cubic-bezier(.2,1.3,.4,1) .95s both; }
-.price-reveal-value>strong small { font-size:18px;color:var(--yellow,#ffe03d); }
-.price-reveal-value .change { padding:4px 12px;border-radius:999px;background:color-mix(in srgb,var(--tone) 25%,#000);font-size:17px;animation:reveal-pulse 1.6s ease-in-out 1.3s infinite; }
+.price-reveal-value>strong { display:flex;align-items:baseline;gap:4px;font-size:36px;font-weight:950;letter-spacing:-1.5px;line-height:1.05;color:#fff;text-shadow:0 0 24px color-mix(in srgb,var(--tone) 60%,transparent);animation:draw-value .7s cubic-bezier(.2,1.3,.4,1) .95s both; }
+.price-reveal-value>strong small { font-size:15px;color:var(--yellow,#ffe03d); }
+.price-reveal-value .change { padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--tone) 25%,#000);font-size:15px;animation:reveal-pulse 1.6s ease-in-out 1.3s infinite; }
 .price-reveal .change.up, .price-reveal .change.down { color:var(--tone-2); }
-.price-reveal-actions { display:flex;gap:8px;justify-content:center;animation:draw-rise .4s ease-out 1.1s both; }
+.price-reveal-actions { display:flex;align-items:center;gap:12px;justify-content:center; }
+.price-reveal-pagination { color:#fff;font-size:12px;font-weight:800;white-space:nowrap; }
 .price-reveal-actions .button.secondary { background:#ffffff14;border-color:#ffffff55;color:#fff; }
 .price-reveal-actions .button:not(.secondary) { background:var(--yellow,#ffe03d);color:var(--ink,#111);border-color:var(--yellow,#ffe03d); }
+.squad-team .squad-reveal-test { min-height:30px;padding:5px 8px;gap:4px;font-size:11px;white-space:nowrap;border-color:#1116;background:#ffffff80; }
 @keyframes reveal-fade { from{opacity:0;} }
 @keyframes reveal-flip { 0%{transform:rotateY(-90deg) scale(.6);opacity:0;} 60%{opacity:1;} 100%{transform:none;} }
 @keyframes reveal-sheen { from{background-position:120% 0;} to{background-position:-130% 0;} }
 @keyframes reveal-rise { 0%{transform:translateY(0);opacity:0;} 15%{opacity:.9;} 100%{transform:translateY(-460px);opacity:0;} }
 @keyframes reveal-fall { 0%{transform:translateY(0);opacity:0;} 15%{opacity:.9;} 100%{transform:translateY(460px);opacity:0;} }
 @keyframes reveal-pulse { 0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--tone) 50%,transparent);} 50%{box-shadow:0 0 0 8px transparent;} }
-@media (max-width: 400px) {
-  .price-reveal-card { padding:24px 16px 20px; }
-  .price-reveal-face .squad-face { width:96px!important;height:96px!important; }
-  .price-reveal-value>strong { font-size:36px; }
+@media (max-width: 640px) {
+  .price-reveal { padding:12px; }
+  .price-reveal-stage { gap:8px;max-height:calc(100dvh - 24px); }
+  .price-reveal-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:6px; }
+  .price-reveal-card { gap:5px;padding:10px 8px;border-radius:12px;box-shadow:0 0 0 3px #ffffff10,0 10px 24px #0006; }
+  .price-reveal-face .squad-face { width:58px!important;height:58px!important; }
+  .price-reveal-face .player-frame.frame-ornate { margin:4px 0; }
+  .price-reveal-id { gap:4px; }
+  .price-reveal-id h2 { font-size:15px; }
+  .price-reveal-id .tag { font-size:9px;padding:0 4px; }
+  .price-reveal-club { font-size:10px;gap:4px; }
+  .price-reveal-club .club-crest { width:14px;height:14px; }
+  .price-reveal-value { gap:4px;margin-top:0;padding-top:7px; }
+  .price-reveal-value>span { font-size:10px;letter-spacing:0;gap:4px; }
+  .price-reveal-value>strong { font-size:26px;letter-spacing:-1px; }
+  .price-reveal-value>strong small { font-size:12px; }
+  .price-reveal-value .change { font-size:12px; }
+  .price-reveal-actions { gap:8px; }
+  .price-reveal-actions .button { padding:8px;gap:4px; }
+  .price-reveal-pagination { font-size:11px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .price-reveal *, .price-reveal-backdrop { animation:none!important; }
