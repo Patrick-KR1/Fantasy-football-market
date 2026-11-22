@@ -61,7 +61,7 @@ async function setup(width) {
   const p = await c.newPage(); p.on('pageerror', e => report.errors.push(e.message));
   return { c, p, state, views, mutations, reads, summary, fail: value => { failRefresh = value; } };
 }
-async function goto(page, path) { await page.goto(base + path, { waitUntil: 'domcontentloaded' }); await page.locator('.masthead-account .account-avatar').waitFor(); }
+async function goto(page, path) { await page.goto(base + path, { waitUntil: 'domcontentloaded' }); await page.locator('.masthead-account .account-trigger').waitFor(); }
 async function fits(page, label) { assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), label + ' has page-level overflow'); }
 try {
   for (let i = 0; i < 40; i++) { try { if ((await fetch(base)).ok) break; } catch {} if (i === 39) throw Error('App did not start'); await new Promise(r => setTimeout(r, 500)); }
@@ -85,8 +85,9 @@ try {
     await p.screenshot({ path: out + '/mypage-' + width + '.png', fullPage: true });
     await goto(p, '/community/posts/' + postId); await p.locator('.article-body').waitFor();
     await p.waitForTimeout(100); assert.equal(views.length, 1);
-    assert.equal(await p.locator('.article-author .avatar-glyph path').first().getAttribute('d'), 'M6 2.5h12v6a6 6 0 0 1-12 0Z');
-    assert.equal(await p.locator('#comment-' + parentId + ' .avatar-glyph circle').first().getAttribute('cx'), '9.2');
+    // Profile icons were removed; the name itself (plate or plain name with the club emblem) identifies the author.
+    assert.equal(await p.locator('.article-author .user-avatar, .article-author .club-mark').count(), 0);
+    assert.equal(await p.locator('#comment-' + parentId + ' .member-name:visible').count(), 1);
     await p.getByRole('button', { name: '공감 0', exact: true }).click(); await p.getByRole('button', { name: '공감 1', exact: true }).waitFor();
     assert.equal(views.length, 1);
     await p.getByRole('textbox', { name: '댓글 내용', exact: true }).fill('새로고침 중에도 작성 내용 유지');
@@ -100,7 +101,7 @@ try {
     assert.ok((await inbox.locator('li a').getAttribute('href')).includes('?comment=' + replyId));
     await inbox.locator('li a').click(); await p.locator('#comment-' + replyId).waitFor();
     await p.waitForFunction(() => document.querySelector('.comment-pages .num')?.textContent === '2 / 2'); assert.equal(views.length, 1);
-    await goto(p, '/community/authors/' + b); await p.getByRole('heading', { name: '아주긴닉네임으로작은화면에서도확인', exact: true }).waitFor(); await fits(p, '/community/authors ' + width);
+    await goto(p, '/community/authors/' + b); await p.getByRole('heading', { name: '아주긴닉네임…', exact: true }).waitFor(); assert.equal(await p.locator('h2 [title="아주긴닉네임으로작은화면에서도확인"]:visible').count(), 1); await fits(p, '/community/authors ' + width);
     await p.screenshot({ path: out + '/author-' + width + '.png', fullPage: true });
     assert.ok(mutations.some(m => m.commentNotifications === false));
     for (const path of ['/', '/market', '/squad', '/portfolio', '/transactions', '/ranking', '/fixtures', '/players/' + state.players[0].id, '/community/clubs']) {

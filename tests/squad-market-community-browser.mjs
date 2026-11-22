@@ -47,7 +47,7 @@ async function setup(width){
  const p=await c.newPage();p.on('pageerror',e=>report.errors.push(e.message));p.on('dialog',d=>d.accept());
  return {c,p,state,queries,posts,quotesIssued:()=>quotesIssued};
 }
-async function go(p,path){await p.goto(base+path,{waitUntil:'domcontentloaded'});await p.locator('.masthead-account .account-avatar').waitFor();}
+async function go(p,path){await p.goto(base+path,{waitUntil:'domcontentloaded'});await p.locator('.masthead-account .account-trigger').waitFor();}
 async function fits(p,label){assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),label);}
 try{
  for(let i=0;i<40;i++){try{if((await fetch(base)).ok)break;}catch{}if(i===39)throw Error('App did not start');await new Promise(r=>setTimeout(r,500));}

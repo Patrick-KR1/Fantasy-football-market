@@ -1,20 +1,14 @@
 "use client";
 import Link from 'next/link';
-import { UserAvatar, MemberName } from "./avatar";
+import { MemberName } from "./avatar";
 import { Select } from "./select";
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { Medal } from "lucide-react";
-import { clubIdentity, luminance } from "@/lib/kickx/club-identity";
 import { dateText, money } from "@/lib/kickx/data";
 import { usePlatform } from "./provider";
 import { Change, DataEmpty, PageHeading, Tabs, TeamBadge } from "./ui";
 import { supportedTeams } from '@/lib/kickx/support';
 const MEDALS = ["GOLD", "SILVER", "BRONZE"];
-/** Avatar tinted with the supporter's club colour (presentation only). */
-function avatarStyle(team: Parameters<typeof clubIdentity>[0]) {
-  const id = clubIdentity(team);
-  return id ? ({ "--avatar-bg": id.primary, "--avatar-ink": luminance(id.primary) > 0.45 ? "#111110" : "#FFFFFF" } as CSSProperties) : undefined;
-}
 export function RankingScreen() {
   const { data, getTeam } = usePlatform();
   const [period, setPeriod] = useState("주간"),
@@ -59,7 +53,6 @@ export function RankingScreen() {
         </ol>
       )}
       <div className="my-rank">
-        <UserAvatar className="my-rank-avatar" avatar={data.session?.profile?.avatar} seed={data.session?.userId ?? "guest"} />
         <div className="my-rank-text">
           <span>나의 {period} 순위</span>
           <strong><MemberName userId={data.session?.userId} primaryTeam={data.session?.profile?.primaryTeam}>{data.session?.profile?.nickname || (data.session ? "내 계정" : "로그인 후 확인")}</MemberName></strong>
@@ -90,7 +83,6 @@ export function RankingScreen() {
                   <td className={`rank-index num ${r.rank <= 3 ? "top" : ""}`}>{r.rank}</td>
                   <td>
                     <div className="rank-user">
-                      <UserAvatar className="rank-avatar" avatar={r.userId === data.session?.userId ? data.session?.profile?.avatar : r.avatar} seed={r.userId} style={avatarStyle(getTeam(r.team))} />
                       <strong><Link href={`/community/authors/${r.userId}`}><MemberName userId={r.userId} primaryTeam={r.userId===data.session?.userId?data.session?.profile?.primaryTeam:r.primaryTeam}>{r.nickname}</MemberName></Link></strong>
                       {r.userId === data.session?.userId && <span className="tag yellow">나</span>}
                     </div>

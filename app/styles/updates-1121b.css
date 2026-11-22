@@ -296,3 +296,110 @@
 .weekly-reward-text b { font-size:16px;font-weight:900;color:var(--ink); }
 .player-frame-select > span { white-space:nowrap; }
 .player-frame-select select { min-width:0;flex:1; }
+.shop-squad-link { display:flex;justify-content:flex-end;margin:18px 0 10px; }
+
+/* 2026-11-22 (2): profile icons removed. The member's main club emblem takes the icon's place. */
+.club-mark, .my-rank-avatar.club-mark, .rank-avatar.club-mark, .profile-avatar.club-mark, .author-avatar.club-mark { display:inline-grid;place-items:center;flex-shrink:0;background:none!important;border:0!important;border-radius:0;color:inherit; }
+.club-mark .club-crest { width:100%;height:100%; }
+.club-mark { padding:0!important;aspect-ratio:1; }
+.club-mark-none svg { width:80%;height:80%;fill:var(--surface-2,#eeeee8);stroke:var(--line-2,#c9c9c0);stroke-width:1.5; }
+.board-author-link .club-mark { width:26px;height:26px; }
+.article-author .club-mark { width:44px;height:44px; }
+.comment .club-mark { width:32px;height:32px; }
+.rank-user .club-mark { width:32px;height:32px; }
+.my-rank-avatar.club-mark { width:48px;height:48px; }
+.my-hero .profile-avatar.club-mark { width:76px;height:76px; }
+.activity-heading .author-avatar.club-mark { width:56px;height:56px; }
+.feed-composer .club-mark, .feed-composer-trigger .club-mark { width:32px;height:32px; }
+/* Community nameplates read as long banners. */
+.board-author .kx-nameplate { min-width:150px; }
+.article-author .kx-nameplate { min-width:220px;font-size:15px;min-height:32px; }
+.comment .kx-nameplate { min-width:170px; }
+.rank-user .kx-nameplate { min-width:170px; }
+.activity-heading .kx-nameplate { min-width:240px; }
+.kx-nameplate .nameplate-sigil:empty { display:none; }
+.kx-nameplate:has(.nameplate-sigil:empty) { padding-left:12px; }
+@media (max-width: 640px) {
+  .article-author .kx-nameplate, .activity-heading .kx-nameplate { min-width:0; }
+  .board-author .kx-nameplate, .comment .kx-nameplate, .rank-user .kx-nameplate { min-width:0; }
+}
+
+/* Header: no profile icon; a larger nameplate and points. */
+.account-trigger { gap:0; }
+.account-trigger .account-text { gap:6px; }
+.account-trigger .kx-nameplate { font-size:16px;min-height:38px;gap:9px; }
+.account-trigger .nameplate-sigil { width:32px;height:32px; }
+.account-trigger .nameplate-sigil .club-crest { width:26px;height:26px; }
+.account-trigger .nameplate-art { width:38px;height:36px; }
+.account-trigger .member-plain-name { font-size:15px;padding:3px 10px 3px 4px; }
+.account-trigger .member-plain-name .primary-name-crest .club-crest { width:24px;height:24px; }
+.account-trigger .account-text>.num { font-size:14.5px;padding:3px 11px; }
+.account-trigger .account-text>.num .unit { font-size:12px; }
+@media (max-width: 860px) {
+  .account-trigger .kx-nameplate { font-size:13.5px;min-height:32px; }
+  .account-trigger .nameplate-sigil { width:27px;height:27px; }
+  .account-trigger .nameplate-sigil .club-crest { width:22px;height:22px; }
+  .account-trigger .account-text>.num { font-size:12.5px; }
+}
+@media (max-width: 480px) {
+  .account-trigger .kx-nameplate { font-size:12px;min-height:28px; }
+  .account-trigger .nameplate-sigil { width:23px;height:23px; }
+  .account-trigger .nameplate-sigil .club-crest { width:19px;height:19px; }
+  .account-trigger .member-plain-name { font-size:12px; }
+  .account-trigger .account-text>.num { font-size:11.5px;padding:2px 8px; }
+}
+
+/* Nickname colour follows the plate: white on dark plates, near-black on the light ones. */
+.kx-nameplate { --plate-ink:#ffffff;--plate-ink-shadow:0 1px 2px #0b1020,0 0 6px #0b102099; }
+.kx-nameplate .nameplate-text { color:var(--plate-ink)!important;text-shadow:var(--plate-ink-shadow); }
+.nameplate-glacier { --plate-ink:#0c2433;--plate-ink-shadow:0 1px 0 #ffffffaa; }
+.nameplate-glacier .nameplate-plate { background:linear-gradient(115deg,transparent 0 60%,#ffffff66 61% 63%,transparent 64%),linear-gradient(90deg,#e9f9ff,#bfe9fa 55%,#86cfee); }
+.nameplate-sakura { --plate-ink:#3a0f24;--plate-ink-shadow:0 1px 0 #ffffffaa; }
+.nameplate-sakura .nameplate-plate { background:radial-gradient(circle at 80% 30%,#ffffff80 0 3px,transparent 4px),radial-gradient(circle at 60% 75%,#ffffff70 0 2px,transparent 3px),linear-gradient(90deg,#fff0f6,#ffd0e3 55%,#f7a8c9); }
+.nameplate-jungle { --plate-ink:#ffffff; }
+
+/* Charts: smooth curves; the point marker is HTML so it stays round, and it eases between points. */
+.spark-end { stroke:currentColor;stroke-width:5;stroke-linecap:round;fill:none; }
+.chart-dot { transition:left .18s ease-out,top .18s ease-out,transform .18s ease-out; }
+.chart-dot.is-end { transform:scale(.85); }
+.chart-plot svg { touch-action:pan-y; }
+@media (prefers-reduced-motion: reduce) { .chart-dot { transition:none; } }
+.club-mark, .rank-avatar.club-mark, .my-rank-avatar.club-mark, .profile-avatar.club-mark, .author-avatar.club-mark { box-shadow:none!important;outline:0!important; }
+.club-mark > * { width:100%!important;height:100%!important;max-width:none!important; }
+.club-mark-none > svg { width:78%!important;height:78%!important; }
+
+/* 2026-11-22 (4): every nameplate uses the header design and size: emblem inside the plate, white
+   outline, same type size, natural width (7+ character names shortened). Shop previews keep their own. */
+.kx-nameplate:not(.is-preview) { font-size:16px!important;min-height:38px!important;min-width:0!important;gap:9px!important;padding:3px 11px 3px 3px!important;margin-right:24px!important;transform:none!important;
+  filter:drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 2px 6px #0006)!important; }
+.kx-nameplate:not(.is-preview) .nameplate-sigil { display:grid!important;width:32px!important;height:32px!important; }
+.kx-nameplate:not(.is-preview) .nameplate-sigil .club-crest { width:26px!important;height:26px!important; }
+.kx-nameplate:not(.is-preview) .nameplate-art { width:38px!important;height:36px!important; }
+.member-plain-name { font-size:15px!important;padding:3px 10px 3px 4px!important;border-radius:999px;background:#fffffff0;box-shadow:0 0 0 1px #0000001a;color:var(--ink,#111);font-weight:800; }
+.member-plain-name .primary-name-crest .club-crest { width:24px!important;height:24px!important; }
+.community-board-table th:nth-child(3) { width:240px; }
+.board-author-link { gap:0; }
+@media (max-width: 860px) {
+  .kx-nameplate:not(.is-preview) { font-size:13.5px!important;min-height:32px!important; }
+  .kx-nameplate:not(.is-preview) .nameplate-sigil { width:27px!important;height:27px!important; }
+  .kx-nameplate:not(.is-preview) .nameplate-sigil .club-crest { width:22px!important;height:22px!important; }
+  .kx-nameplate:not(.is-preview) .nameplate-art { width:26px!important;height:24px!important; }
+}
+@media (max-width: 480px) {
+  .kx-nameplate:not(.is-preview) { font-size:12px!important;min-height:28px!important;padding-right:8px!important;margin-right:18px!important; }
+  .kx-nameplate:not(.is-preview) .nameplate-sigil { width:23px!important;height:23px!important; }
+  .kx-nameplate:not(.is-preview) .nameplate-sigil .club-crest { width:19px!important;height:19px!important; }
+  .kx-nameplate:not(.is-preview) .nameplate-art { width:22px!important;height:20px!important; }
+  .member-plain-name { font-size:12px!important; }
+  .member-plain-name .primary-name-crest .club-crest { width:18px!important;height:18px!important; }
+}
+@media (max-width: 360px) {
+  .kx-nameplate:not(.is-preview) .nameplate-art { display:none; }
+  .kx-nameplate:not(.is-preview) { margin-right:2px!important;font-size:10.5px!important; }
+}
+/* My page header without the icon column. */
+.my-hero { grid-template-columns:minmax(0,1fr) auto auto; }
+@media (max-width: 1100px) { .my-hero { grid-template-columns:minmax(0,1fr) auto; } }
+@media (max-width: 640px) { .my-hero { grid-template-columns:minmax(0,1fr); } }
+.board-author .member-name, .board-author-link>span, .community-board-table td.board-author { overflow:visible!important; }
+.board-author .member-name { padding:2px 2px 2px 1px; }

@@ -50,11 +50,9 @@ try{
   });
   const p=await c.newPage();p.on('pageerror',e=>errors.push(e.message));
   await p.goto(base+'/mypage',{waitUntil:'networkidle'});assert.match(await p.locator('.topbar-market:visible').first().innerText(),/상승[\s\S]*하락[\s\S]*미출전\s*3/);
-  const picker=p.locator('.avatar-picker'),trophy=picker.getByRole('radio',{name:'트로피',exact:true});await trophy.click();
-  assert.equal(await trophy.innerText(),'');assert.equal(await picker.getByRole('radio',{name:'기본 아이콘',exact:true}).innerText(),'');
-  const clubName=state.teams.find(t=>t.id===state.session.profile.team).name;assert.ok(await picker.getByText(clubName,{exact:true}).isVisible());
-  await p.getByRole('button',{name:'변경사항 저장',exact:true}).click();await p.getByText('프로필을 저장했습니다.',{exact:true}).waitFor();assert.equal(state.session.profile.avatar,'icon:trophy');
-  await p.reload({waitUntil:'networkidle'});assert.equal(await trophy.getAttribute('aria-checked'),'true');
+  // Profile icons were removed: no picker and no icon in the header or the profile summary.
+  assert.equal(await p.locator('.avatar-picker').count(),0);assert.equal(await p.locator('.masthead-account .account-avatar').count(),0);
+  assert.equal(await p.locator('.my-hero .profile-avatar').count(),0);
   await p.screenshot({path:`test-artifacts/profile-icons-${width}.png`,fullPage:true});
   await p.goto(base+'/market',{waitUntil:'networkidle'});
   const small=p.locator('.player-grid .pcard').filter({has:p.getByRole('heading',{name:player.name,exact:true})});

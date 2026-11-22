@@ -13,7 +13,10 @@ export async function POST(request: Request) {
     jar.set("kickx-auth-next", safeReturnPath(input?.next), { httpOnly: true, sameSite: "lax", secure: callback.protocol === "https:", path: "/auth", maxAge: 600 });
     const client = await createRequestClient({ freshAuth: true });
     const { data, error } = await client.auth.signInWithOAuth({
-      provider: "google", options: { redirectTo: callback.toString(), skipBrowserRedirect: true },
+      provider: "google",
+      // Always show Google's account chooser, so after logging out a different Google account can sign in
+      // instead of the browser's current Google session being reused automatically.
+      options: { redirectTo: callback.toString(), skipBrowserRedirect: true, queryParams: { prompt: "select_account" } },
     });
     if (error || !data.url) throw new HttpError(502, "Google 로그인을 시작하지 못했습니다. 다시 시도해 주세요.");
     return json({ url: data.url });

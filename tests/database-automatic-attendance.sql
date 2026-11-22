@@ -27,6 +27,11 @@ do $$declare s jsonb:=public.kickx_engagement();begin
 end $$;
 reset role;
 create or replace function kickx_private.mission_today() returns date language sql stable set search_path='' as $$select date '2026-11-24'$$;
+-- Weekly missions turn over at Tuesday 09:00 KST: 08:00 still belongs to the previous week.
+create or replace function kickx_private.mission_now() returns timestamp language sql stable set search_path='' as $$select timestamp '2026-11-24 08:00'$$;
+do $$begin if kickx_private.mission_week_now()<>date '2026-11-17' then raise exception 'Tuesday 08:00 already reset the week';end if;
+ if kickx_private.weekly_progress('00000000-0000-0000-0000-000000000230','2026-11-17')->>'endsAt'<>'2026-11-24T00:00:00+00:00' then raise exception 'Week end must be Tuesday 09:00 KST: %',kickx_private.weekly_progress('00000000-0000-0000-0000-000000000230','2026-11-17')->>'endsAt';end if;end $$;
+create or replace function kickx_private.mission_now() returns timestamp language sql stable set search_path='' as $$select timestamp '2026-11-24 10:00'$$;
 set local role authenticated;
 set local request.jwt.claim.sub='00000000-0000-0000-0000-000000000230';
 do $$declare s jsonb:=public.kickx_engagement();begin

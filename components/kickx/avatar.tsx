@@ -61,7 +61,13 @@ export function UserAvatar({ avatar, seed, className = "", label, style }: { ava
   return <span className={`user-avatar ${tone} ${className}`} style={style} {...a11y}><AvatarGlyph icon={icon} /></span>;
 }
 
-/** Permanent club identity is separate from the member's changeable profile icon. */
-export function MemberName({primaryTeam,holdsPlayer,userId,children,full=false}:{primaryTeam?:string|null;holdsPlayer?:boolean;userId?:string;children:ReactNode;full?:boolean}){
- return <span className="member-name"><MemberNameplate full={full} userId={userId} primaryTeam={primaryTeam}>{children}</MemberNameplate>{holdsPlayer&&<small className="ownership-badge" title="현재 이 선수를 보유한 회원입니다">보유 인증</small>}</span>;
+/** The member's main club emblem, shown where the (removed) profile icon used to be. */
+export function ClubMark({ team, className = "", label }: { team?: string | null; className?: string; label?: string }) {
+  const a11y = label ? { role: "img", "aria-label": label } : { "aria-hidden": true as const };
+  return <span className={`club-mark ${team ? "" : "club-mark-none"} ${className}`} {...a11y}>{team ? <ClubCrest id={team} size="small" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v7c0 5-3.6 8-8 9.5C7.6 19 4 16 4 11Z" /></svg>}</span>;
+}
+
+/** crest=false when a ClubMark already sits next to the name, so the emblem is not shown twice. */
+export function MemberName({primaryTeam,holdsPlayer,userId,children,full=false,crest=true}:{primaryTeam?:string|null;holdsPlayer?:boolean;userId?:string;children:ReactNode;full?:boolean;crest?:boolean}){
+ return <span className="member-name"><MemberNameplate full={full} crest={crest} userId={userId} primaryTeam={primaryTeam}>{children}</MemberNameplate>{holdsPlayer&&<small className="ownership-badge" title="현재 이 선수를 보유한 회원입니다">보유 인증</small>}</span>;
 }

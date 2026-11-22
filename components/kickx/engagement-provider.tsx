@@ -15,7 +15,7 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
  // so missing parts fall back to the empty defaults.
  const state=useMemo(()=>{
   const base=emptyEngagement(),data=(resource.data??{}) as Partial<Engagement>;
-  const merged:Engagement={...base,...data,daily:{...base.daily,...data.daily},weekly:{...base.weekly,...data.weekly,claimedItems:data.weekly?.claimedItems??[]},attendance:data.attendance??[],catalog:data.catalog??[],inventory:data.inventory??{},loadout:{...base.loadout,...data.loadout},unclaimedDaily:data.unclaimedDaily??[],playerFrames:data.playerFrames??{},draw:{...base.draw,...data.draw,pending:data.draw?.pending??[],history:data.draw?.history??[]}};
+  const merged:Engagement={...base,...data,daily:{...base.daily,...data.daily},weekly:{...base.weekly,...data.weekly,claimedItems:data.weekly?.claimedItems??[]},attendance:data.attendance??[],catalog:data.catalog??[],inventory:data.inventory??{},loadout:{...base.loadout,...data.loadout},unclaimedDaily:data.unclaimedDaily??[],playerFrames:data.playerFrames??{},playerFramesReady:data.playerFramesReady!==false&&data.playerFrames!==undefined,draw:{...base.draw,...data.draw,pending:data.draw?.pending??[],history:data.draw?.history??[]}};
   return userId?merged:{...merged,catalog:preview.data?.catalog??[],draw:{...merged.draw,poolSize:preview.data?.poolSize}};
  },[userId,resource.data,preview.data]);
  const {setData:setEngagement,reload:reloadEngagement}=resource;
@@ -41,11 +41,13 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
   void apiRequest('/api/kickx/engagement','POST',{action:'view',input:{kind,target}}).then(()=>{if(currentUser.current===userId)reloadEngagement();}).catch(()=>tracked.current.delete(key));
  },[userId,reloadEngagement,resource.data.day]);
  // Cross midnight/Tuesday without requiring a new browser session.
+ // The day turns over at 00:00 and the week at Tuesday 09:00 (KST); refresh at whichever comes first.
+ const nextReset=[resource.data.resetsAt,resource.data.weekly?.endsAt].map(v=>v?Date.parse(v):NaN).filter(v=>Number.isFinite(v)&&v>0).sort((a,b)=>a-b).find(v=>v>Date.now()-1000);
  useEffect(()=>{
-  if(!resource.data.resetsAt) return;
-  const timer=setTimeout(()=>{if(document.visibilityState==='visible')reloadEngagement();},Math.max(1000,Math.min(2147483647,Date.parse(resource.data.resetsAt)-Date.now()+1000)));
+  if(!nextReset) return;
+  const timer=setTimeout(()=>{if(document.visibilityState==='visible')reloadEngagement();},Math.max(1000,Math.min(2147483647,nextReset-Date.now()+1000)));
   return ()=>clearTimeout(timer);
- },[resource.data.resetsAt,reloadEngagement]);
+ },[nextReset,reloadEngagement]);
  const value = useMemo(()=>({state,ready:!!userId&&resource.status==='ready',error:resource.status==='error',busy,reload:resource.reload,act,track}),[state,resource.status,resource.reload,userId,busy,act,track]);
  return <Context.Provider value={value}>{children}</Context.Provider>;
 }

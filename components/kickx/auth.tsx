@@ -1,12 +1,11 @@
 "use client";
 import { MemberNameplate } from "./nameplate";
-import { AVATAR_LABELS, UserAvatar } from "./avatar";
 import { Select } from "./select";
 import { useTeamOptions } from "./options";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, LoaderCircle, LogOut, Mail, Save, ShieldCheck, Shuffle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, LoaderCircle, LogOut, Mail, Save, ShieldCheck } from "lucide-react";
 import { usePlatform } from "./provider";
 import { Logo } from "./shell";
 import { PlaybookArt } from "./playbook-art";
@@ -14,7 +13,7 @@ import { Change, DataNotice, LeagueMark, MemberNotice, MockBadge, PageHeading, S
 import { apiRequest } from "@/lib/kickx/client";
 import { clubIdentity, luminance } from "@/lib/kickx/club-identity";
 import { dateText, money } from "@/lib/kickx/data";
-import { AVATAR_ICONS, parseProfile, PROFILE_LIMITS, safeReturnPath } from "@/lib/kickx/validation";
+import { parseProfile, PROFILE_LIMITS, safeReturnPath } from "@/lib/kickx/validation";
 import type { Profile } from "@/lib/kickx/types";
 import { DOMESTIC_LEAGUES, supportedTeams, canChangeSubteam, supportWindow } from '@/lib/kickx/support';
 import { CommunityActivityPanel } from './community-activity';
@@ -157,14 +156,6 @@ function ProfileForm({ onboarding = false }: { onboarding?: boolean }) {
           {league.id!==primaryLeague&&!canChangeSubteam(profile,league.id)&&<small className="subteam-lock-note">{supportWindow()&&profile?.supportChangeWindow===supportWindow()&&profile.supportChangedLeagues?.includes(league.id)?"이번 주간 변경 완료":"다음 변경: 2월·9월 1~7일"}</small>}
         </div>;})}
       </fieldset>
-      <fieldset className="avatar-picker" disabled={busy}><legend>프로필 아이콘</legend>
-        <p id="avatar-help">커뮤니티와 랭킹에 표시됩니다. 응원 구단 엠블럼도 고를 수 있습니다.</p>
-        <div role="radiogroup" aria-describedby="avatar-help">
-          {AVATAR_ICONS.map(icon => { const value = `icon:${icon}`; return <button type="button" role="radio" aria-label={AVATAR_LABELS[icon]} aria-checked={avatar === value} key={icon} className={avatar === value ? "active" : ""} onClick={() => setDraftAvatar(value)}><UserAvatar className="avatar-option" avatar={value} seed={icon} /></button>; })}
-          {teams.map(id => { const value = `club:${id}`; return <button type="button" role="radio" aria-checked={avatar === value} key={value} className={avatar === value ? "active" : ""} onClick={() => setDraftAvatar(value)}><UserAvatar className="avatar-option" avatar={value} seed={id} /><span>{data.teams.find(t => t.id === id)?.name ?? "응원 구단"}</span></button>; })}
-          <button type="button" role="radio" aria-label="기본 아이콘" title="기본 · 회원마다 자동으로 정해지는 아이콘" aria-checked={avatar === null} className={`avatar-auto-option ${avatar === null ? "active" : ""}`} onClick={() => setDraftAvatar(null)}><span className="avatar-option avatar-auto" aria-hidden="true"><Shuffle size={18} /></span></button>
-        </div>
-      </fieldset>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="form-actions">
         {canSave && dirty && !busy && <p className="fine-print">저장하지 않은 변경 사항이 있습니다.</p>}
@@ -220,9 +211,8 @@ export function MyPageScreen() {
       <MemberNotice />
       {/* Account header, then a sticky jump bar so phones can move between long sections. */}
       <section className="my-hero" aria-label="내 프로필">
-        <UserAvatar className="profile-avatar" avatar={profile?.avatar} seed={data.session?.userId ?? "guest"} label="프로필 아이콘" />
         <div className="my-hero-text">
-          <div className="my-hero-name"><h2><MemberNameplate full userId={data.session?.userId}>{profile?.nickname || (data.session ? "프로필을 완성해 주세요" : "로그인이 필요합니다")}</MemberNameplate></h2><MockBadge compact /></div>
+          <div className="my-hero-name"><h2><MemberNameplate userId={data.session?.userId}>{profile?.nickname || (data.session ? "프로필을 완성해 주세요" : "로그인이 필요합니다")}</MemberNameplate></h2><MockBadge compact /></div>
           <div className="profile-supported-clubs" aria-label="선택한 응원 구단">{supportedTeams(profile).length ? [...supportedTeams(profile)].sort((a, b) => Number(b === profile?.primaryTeam) - Number(a === profile?.primaryTeam)).map(id => {
             const club = clubIdentity(getTeam(id)), main = id === profile?.primaryTeam;
             // Main club as a solid badge in its colours; the other supported clubs as tinted chips.

@@ -10,7 +10,7 @@ export function PlayerFrameSelect({ playerId }: { playerId: string }) {
   const { notify } = usePlatform(), { state, ready, busy, act } = useEngagement();
   const id = useId();
   const owned = (state.catalog ?? []).filter((item) => item.category === "frame" && (state.inventory?.[item.id] ?? 0) > 0);
-  if (!ready || !owned.length) return null;
+  if (!ready || !owned.length || !state.playerFramesReady) return null;
   const current = state.playerFrames?.[playerId] ?? "";
   const fallback = owned.find((item) => item.id === state.loadout?.frame)?.name ?? "기본 테두리";
   async function change(itemId: string) {

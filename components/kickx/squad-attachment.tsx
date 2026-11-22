@@ -27,7 +27,7 @@ export function SquadAttachmentCard({ squad, author }: { squad: SquadAttachment;
   const rule = formationRule(squad.formation);
   return (
     <figure className="squad-attachment">
-      <figcaption><Shirt size={15} /><strong>{author ? `${author}님의 스쿼드` : "작성자의 스쿼드"}</strong><span>{rule?.name ?? squad.formation} · 작성 당시</span></figcaption>
+      <figcaption><Shirt size={15} /><strong>{author ? `${author}님의 스쿼드` : "작성자의 스쿼드"}</strong><span>{rule?.name ?? squad.formation}</span></figcaption>
       {/* Faces with the author's pitch theme and frames as they were when posting. Older attachments
           without a recorded look fall back to the default pitch and frame. */}
       <div className="squad-snapshot">

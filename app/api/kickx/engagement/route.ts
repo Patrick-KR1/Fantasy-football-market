@@ -6,7 +6,7 @@ async function withPlayerFrames(client: Client, data: unknown) {
  if (!data || typeof data !== 'object' || Array.isArray(data) || !('loadout' in data)) return data;
  const f = await client.rpc('kickx_player_frames');
  if (f.error && !migrationMissing(f.error)) checkDatabase(f.error);
- return { ...data, playerFrames: f.error ? {} : f.data ?? {} };
+ return { ...data, playerFrames: f.error ? {} : f.data ?? {}, playerFramesReady: !f.error };
 }
 export async function GET() {
  try { const { client } = await authenticatedClient(); const r = await client.rpc('kickx_engagement'); checkDatabase(r.error); return json({ status: 'ready', data: await withPlayerFrames(client, r.data) }); }

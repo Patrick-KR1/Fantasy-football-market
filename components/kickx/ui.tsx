@@ -456,20 +456,39 @@ export function Tabs({
 }
 
 /* ---------- Charts ---------- */
+/** Monotone cubic curve through the points (no overshoot: never draws a value the data does not have). */
+function smoothPath(xy: readonly (readonly [number, number])[]) {
+  const n = xy.length;
+  if (n < 3) return xy.map(([x, y], i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  const dx = xy.slice(1).map((p, i) => p[0] - xy[i][0]), slope = xy.slice(1).map((p, i) => (p[1] - xy[i][1]) / (dx[i] || 1));
+  const t = xy.map((_, i) => i === 0 ? slope[0] : i === n - 1 ? slope[n - 2] : slope[i - 1] * slope[i] <= 0 ? 0 : (slope[i - 1] + slope[i]) / 2);
+  for (let i = 0; i < n - 1; i++) {
+    if (slope[i] === 0) { t[i] = 0; t[i + 1] = 0; continue; }
+    const a = t[i] / slope[i], b = t[i + 1] / slope[i], h = a * a + b * b;
+    if (h > 9) { const k = 3 / Math.sqrt(h); t[i] = k * a * slope[i]; t[i + 1] = k * b * slope[i]; }
+  }
+  let d = `M ${xy[0][0].toFixed(1)} ${xy[0][1].toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const [x0, y0] = xy[i], [x1, y1] = xy[i + 1], h = dx[i] / 3;
+    d += ` C ${(x0 + h).toFixed(1)} ${(y0 + t[i] * h).toFixed(1)} ${(x1 - h).toFixed(1)} ${(y1 - t[i + 1] * h).toFixed(1)} ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+  }
+  return d;
+}
 export function Sparkline({ values, down = false }: { values: number[]; down?: boolean }) {
   if (values.length < 2 || values.some((v) => !Number.isFinite(v))) return <span className="muted">—</span>;
   const min = Math.min(...values),
     range = Math.max(...values) - min || 1;
   const xy = values.map((v, i) => [(i / (values.length - 1)) * 120, 30 - ((v - min) / range) * 26] as const);
-  const points = xy.map(([x, y]) => `${x},${y}`).join(" ");
-  const baseY = xy[0][1];
+  const line = smoothPath(xy);
+  const baseY = xy[0][1], [endX, endY] = xy[xy.length - 1];
   // Same language as PriceChart: start-value baseline, soft area, line, end dot.
   return (
     <svg className={`sparkline ${down ? "negative" : ""}`} viewBox="0 0 120 34" preserveAspectRatio="none" role="img" aria-label={`가격 추이 ${down ? "하락" : "상승"}`}>
       <line className="spark-base" x1="0" x2="120" y1={baseY} y2={baseY} vectorEffect="non-scaling-stroke" />
-      <polygon className="spark-area" points={`0,34 ${points} 120,34`} />
-      <polyline className="spark-line" fill="none" points={points} vectorEffect="non-scaling-stroke" />
-      <circle className="spark-end" cx={xy[xy.length - 1][0]} cy={xy[xy.length - 1][1]} r="2.6" vectorEffect="non-scaling-stroke" />
+      <path className="spark-area" d={`${line} L 120 34 L 0 34 Z`} />
+      <path className="spark-line" fill="none" d={line} vectorEffect="non-scaling-stroke" />
+      {/* A zero-length round-capped stroke stays a circle however the SVG is stretched. */}
+      <line className="spark-end" x1={endX} y1={endY} x2={endX} y2={endY} vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
@@ -497,7 +516,7 @@ export function PriceChart({ points, label = "선수 가치" }: { points: Series
     span ? ((Date.parse(p.at) - first) / span) * W : (i / (valid.length - 1)) * W,
     top + (1 - (p.value - min) / range) * (H - top - bottom),
   ]);
-  const path = coords.map(([x, y], i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  const path = smoothPath(coords as [number, number][]);
   const rising = values[values.length - 1] >= values[0];
   const selected = hover == null ? null : Math.min(hover, valid.length - 1);
   const ticks = [0, 1, 2, 3].map((i) => max - (range * i) / 3);
@@ -513,8 +532,8 @@ export function PriceChart({ points, label = "선수 가치" }: { points: Series
           preserveAspectRatio="none"
           role="img"
           aria-label={`${label} 추이: ${dateText(valid[0].at, false)} ${money(values[0])} P에서 ${dateText(valid[valid.length - 1].at, false)} ${money(values[values.length - 1])} P (${delta >= 0 ? "+" : ""}${money(delta)} P)`}
-          onMouseLeave={() => setHover(null)}
-          onMouseMove={(e) => {
+          onPointerLeave={() => setHover(null)}
+          onPointerMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * W;
             setHover(coords.reduce((best, c, i) => (Math.abs(c[0] - x) < Math.abs(coords[best][0] - x) ? i : best), 0));
@@ -533,14 +552,15 @@ export function PriceChart({ points, label = "선수 가치" }: { points: Series
           <line x1="0" x2={W} y1={coords[0][1]} y2={coords[0][1]} className="chart-base" vectorEffect="non-scaling-stroke" />
           <path d={`${path} L${W} ${H} L0 ${H} Z`} fill={`url(#${uid})`} className="chart-area" />
           <path d={path} pathLength={1} className="chart-line" fill="none" vectorEffect="non-scaling-stroke" />
-          {selected === null && <circle cx={coords[coords.length - 1][0]} cy={coords[coords.length - 1][1]} r="4" className="chart-end" />}
           {selected !== null && (
             <line x1={coords[selected][0]} x2={coords[selected][0]} y1={top} y2={H - bottom} className="chart-cross" vectorEffect="non-scaling-stroke" />
           )}
         </svg>
+        {/* One HTML dot for both the end point and the hovered point: it never stretches with the SVG,
+            and it glides back to the last value when the cursor leaves instead of jumping. */}
+        <span className={`chart-dot ${selected === null ? "is-end" : ""}`} aria-hidden="true" style={{ left: `${(coords[selected ?? coords.length - 1][0] / W) * 100}%`, top: `${(coords[selected ?? coords.length - 1][1] / H) * 100}%` }} />
         {selected !== null && (
           <>
-            <span className="chart-dot" style={{ left: `${(coords[selected][0] / W) * 100}%`, top: `${(coords[selected][1] / H) * 100}%` }} />
             <span className="chart-tooltip" style={{ left: `${Math.min(86, Math.max(14, (coords[selected][0] / W) * 100))}%` }}>
               <small>{dateText(valid[selected].at, false)}</small>
               <strong className="num">{money(valid[selected].value)} P</strong>

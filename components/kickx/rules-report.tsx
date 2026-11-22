@@ -30,7 +30,7 @@ export default function ReportRules(){
  return <div className="rules-page">
   <header className="rules-hero"><span className="tag yellow">KICK-X</span><h1>게임 규칙</h1><p>이전 시즌의 경기력으로 초기 가격을 정하고, 각 경기의 평가 점수로 가치를 갱신합니다.</p></header>
   <section className="rules-section"><h2>자산과 선수단</h2><div className="rules-policy">
-   <div><span>최초 지급</span><strong className="num">{(data.policy?.initialPoints??1300000).toLocaleString()}</strong><small>P · 회원당 1회</small></div>
+   <div><span>최초 지급</span><strong className="num">{(data.policy?.initialPoints??1000000).toLocaleString()}</strong><small>P · 회원당 1회</small></div>
    <div><span>판매 수수료</span><strong className="num">{(data.policy?.sellFeeBps??200)/100}</strong><small>% · 매입 0%</small></div>
    <div><span>경기당 변동</span><strong className="num">±{P.maxUp*100}</strong><small>% · 확인된 미출전은 −1.5%</small></div></div>
    <ul className="rules-list"><li>주전은 최대 11명이며 같은 선수를 중복 보유할 수 없습니다.</li><li>선택한 포메이션에 따라 포지션별 정원이 정해집니다. 매입 시 빈자리에 자동 반영되며 같은 포지션끼리 배치를 바꿀 수 있습니다. 포메이션 변경 시 초과 선수만 선택해 벤치로 이동합니다. 벤치도 현재 시세로 평가되어 전체 보유 인원은 11명을 넘을 수 있습니다. 주전은 11명과 포지션별 정원을 지켜야 합니다. 7일 안에 빈 포지션으로 복귀하거나 매각할 수 있으며, 기한이 지나면 수수료 2%를 적용해 자동 매각합니다. 경기 거래 제한 중에는 해제 후 처리합니다.</li><li>5대 정규 리그 경기를 반영합니다. 경기 시작 90분 전부터 종료 확인 후 10분까지 해당 선수의 매입·매각을 제한합니다.</li><li>해당 경기의 구단 소속이 확인된 미출전 선수는 직전 가격에서 1.5% 하락합니다. 미출전에는 경기력 점수를 부여하지 않으며 통계 누락을 미출전으로 취급하지 않습니다.</li><li>{startLabel} 이전 출전도 경기력 기록에 남기며, 가격 변동은 이 시점 이후 경기 종료를 기준으로 기록합니다.</li><li>초기 포인트·지갑·기존 거래는 시즌이 바뀌어도 초기화하지 않습니다.</li></ul>

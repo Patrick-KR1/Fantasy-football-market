@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Check, ShoppingBag, Sparkles, Ticket, Wallet, ArrowUpRight } from 'lucide-react';
+import { Check, ShoppingBag, Ticket, Wallet, ArrowUpRight } from 'lucide-react';
 import { money } from '@/lib/kickx/data';
 import { type ShopItem, type ShopCategory } from '@/lib/kickx/engagement';
 import { usePlatform } from './provider';
@@ -46,7 +46,7 @@ export function ShopScreen() {
    return <article className={`shop-card ${equipped?'equipped':''}`} key={item.id}><ShopPreview item={item}/><div className="shop-card-body"><span className="shop-category">{CATEGORIES.find(c=>c.id===item.category)?.label}{equipped&&<small><Check size={12}/>장착 중</small>}</span><h3>{item.name}</h3><p>{item.description}</p><footer><strong className="num">{money(item.price)} <small>P</small></strong>{owned&&item.category!=='ticket'?<button className="button secondary small" disabled={!ready||busy} onClick={()=>void equip(item)}>{equipped?'장착 해제':'장착하기'}</button>:<button className="button small" disabled={!ready||busy} onClick={()=>open(item)}><ShoppingBag size={14}/>구매</button>}</footer>{item.category==='ticket'&&<small className="inventory-quantity">보유 {quantity}장 · <Link href="/missions">출석 복구하기</Link></small>}</div></article>;
   })}</div>
   {listed.length>PAGE_SIZE&&<div className="shop-pagination"><Pagination page={shown} total={listed.length} size={PAGE_SIZE} onPage={turn} label="상품 페이지" centered/></div>}
-  <section className="shop-note"><Sparkles size={23}/><div><strong>선수 얼굴 아이콘은 기본 제공됩니다.</strong><p>스쿼드는 선수 얼굴 아이콘으로 표시합니다. 보유한 테두리와 경기장 디자인을 장착해 나만의 스쿼드를 꾸미세요.</p></div><Link href="/squad" className="button secondary small">스쿼드로 이동</Link></section>
+  <div className="shop-squad-link"><Link href="/squad" className="button secondary small">스쿼드로 이동</Link></div>
   {ready&&state.catalog.some(i=>i.category===category||category==='all')&&<p className="fine-print">치장 상품은 포인트로 구매하며 선수 능력치나 뽑기 확률에 영향을 주지 않습니다. 출석 복구권은 1회 사용하면 소모됩니다. 장착한 네임태그는 프로필·커뮤니티·랭킹에 표시됩니다.</p>}
   {selected&&<Modal title="상품 구매" eyebrow="POINT SHOP" onClose={()=>{if(!busy)setSelected(null);}}><ShopPreview item={selected}/><div className="shop-confirm"><h3>{selected.name}</h3><p>{selected.description}</p><dl><div><dt>구매 가격</dt><dd className="num">{money(selected.price)} P</dd></div><div><dt>구매 후 포인트</dt><dd className="num">{money((data.member?.points??0)-selected.price)} P</dd></div></dl><button className="button" disabled={busy||(data.member?.points??0)<selected.price} onClick={()=>void buy()}>{busy?'구매 중…':(data.member?.points??0)<selected.price?'포인트가 부족합니다':'포인트로 구매하기'}</button></div></Modal>}
  </>;

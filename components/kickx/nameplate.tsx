@@ -50,7 +50,7 @@ function NameplateArt({theme}:{theme:string}) {
   </>)}
  </svg>;
 }
-export function MemberNameplate({userId,primaryTeam,children,full=false}:{userId?:string;primaryTeam?:string|null;children:ReactNode;full?:boolean}) {
+export function MemberNameplate({userId,primaryTeam,children,full=false,crest=true}:{userId?:string;primaryTeam?:string|null;children:ReactNode;full?:boolean;crest?:boolean}) {
  const {data}=usePlatform(),{state}=useEngagement();
  const [found,setFound]=useState<{id:string;skin:string|null}|null>(null);
  const own=userId===data.session?.userId;
@@ -60,7 +60,7 @@ export function MemberNameplate({userId,primaryTeam,children,full=false}:{userId
   const timer=setInterval(()=>{unsubscribe();unsubscribe=requestName(userId,skin=>setFound({id:userId,skin}));},65000);
   return()=>{clearInterval(timer);unsubscribe();};
  },[userId,own]);
- return <Nameplate full={full} primaryTeam={own?data.session?.profile?.primaryTeam:primaryTeam} skin={own?state.loadout.nameplate:found && found.id===userId?found.skin:null}>{children}</Nameplate>;
+ return <Nameplate full={full} primaryTeam={!crest?null:own?data.session?.profile?.primaryTeam:primaryTeam} skin={own?state.loadout.nameplate:found && found.id===userId?found.skin:null}>{children}</Nameplate>;
 }
 
 /** Ornaments for the expanded collection (viewBox 0 0 36 32, drawn just past the plate's right edge). */
