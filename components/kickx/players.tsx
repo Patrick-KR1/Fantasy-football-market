@@ -284,7 +284,8 @@ export function PlayerList({ market = false }: { market?: boolean }) {
                   <th className="numeric hide-sm"><abbr title="직전 발행 가격 대비 변화율">변동</abbr></th>
                   <th className="hide-md">30일 추이</th>
                   <th className="numeric hide-sm"><abbr title="최근 경기 1건의 저장 점수">Performance</abbr></th>
-                  <th className="numeric hide-md">거래량</th>
+                  <th className="numeric hide-sm" title="수집된 이번 시즌 정규 리그 경기의 확인된 득점 합계">골</th>
+                  <th className="numeric hide-sm" title="수집된 이번 시즌 정규 리그 경기의 확인된 도움 합계">도움</th>
                   <th className="cell-actions hide-sm">거래</th>
                 </tr>
               </thead>
@@ -299,7 +300,8 @@ export function PlayerList({ market = false }: { market?: boolean }) {
                       <td className="numeric hide-sm"><Change value={p.change} /></td>
                       <td className="hide-md"><Sparkline values={p.history.map((v) => v.value)} down={(p.change ?? 0) < 0} /></td>
                       <td className="numeric hide-sm">{score(p.performance)}</td>
-                      <td className="numeric hide-md">{money(p.volume)}</td>
+                      <td className="numeric hide-sm">{money(p.goals)}</td>
+                      <td className="numeric hide-sm">{money(p.assists)}</td>
                       <td className="cell-actions hide-sm"><TradeButton player={p} side={owned ? "sell" : "buy"} className={`button small ${owned ? "secondary" : "primary"}`} /></td>
                     </tr>
                   );
