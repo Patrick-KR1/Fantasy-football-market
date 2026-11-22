@@ -47,7 +47,7 @@ try {
    await row.waitFor();const cells=await row.locator('td').allTextContents();
    assert.equal(cells[headers.indexOf('골')],goals);assert.equal(cells[headers.indexOf('도움')],assists);
   }
-  if(width>=768){assert(await table.getByRole('columnheader',{name:'골',exact:true}).isVisible());assert(await table.getByRole('columnheader',{name:'도움',exact:true}).isVisible());}
+  if(width>=768){assert(await table.locator('th').nth(headers.indexOf('골')).isVisible());assert(await table.locator('th').nth(headers.indexOf('도움')).isVisible());}
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.screenshot({path:`${out}/list-${width}.png`,fullPage:true});
   report.flows.push({width,cardGoals:15,cardAssists:3,zeroPreserved:true,unknownPreserved:true,volumeColumnRemoved:true});

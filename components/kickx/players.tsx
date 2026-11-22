@@ -284,8 +284,8 @@ export function PlayerList({ market = false }: { market?: boolean }) {
                   <th className="numeric hide-sm"><abbr title="직전 발행 가격 대비 변화율">변동</abbr></th>
                   <th className="hide-md">30일 추이</th>
                   <th className="numeric hide-sm"><abbr title="최근 경기 1건의 저장 점수">Performance</abbr></th>
-                  <th className="numeric hide-sm"><abbr title="수집된 이번 시즌 정규 리그 경기의 확인된 득점 합계">골</abbr></th>
-                  <th className="numeric hide-sm"><abbr title="수집된 이번 시즌 정규 리그 경기의 확인된 도움 합계">도움</abbr></th>
+                  <th className="numeric hide-sm" title="수집된 이번 시즌 정규 리그 경기의 확인된 득점 합계">골</th>
+                  <th className="numeric hide-sm" title="수집된 이번 시즌 정규 리그 경기의 확인된 도움 합계">도움</th>
                   <th className="cell-actions hide-sm">거래</th>
                 </tr>
               </thead>
