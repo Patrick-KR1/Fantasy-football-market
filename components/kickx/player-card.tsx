@@ -66,8 +66,8 @@ export function PlayerCard({ player, variant = "grid", rank }: { player: Player;
         )}
         <dl className="pcard-facts">
           <div><dt>{matches != null ? "경기" : "PERF"}</dt><dd className="num">{matches != null ? money(matches) : score(player.performance)}</dd></div>
-          <div><dt>골</dt><dd className="num">{money(player.goals)}</dd></div>
-          <div><dt>도움</dt><dd className="num">{money(player.assists)}</dd></div>
+          <div title="수집된 이번 시즌 정규 리그 경기의 확인된 득점 합계"><dt>골</dt><dd className="num">{money(player.goals)}</dd></div>
+          <div title="수집된 이번 시즌 정규 리그 경기의 확인된 도움 합계"><dt>도움</dt><dd className="num">{money(player.assists)}</dd></div>
         </dl>
       </div>
     </article>
