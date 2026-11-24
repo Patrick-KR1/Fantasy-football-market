@@ -103,11 +103,12 @@
 .supported-club-fields>p { font-size:12px; color:var(--text-2); margin:0 0 6px; }
 .supported-club-field { min-width:0; display:grid; grid-template-columns:200px minmax(0,1fr); align-items:center; gap:12px; padding:8px 8px 8px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
 .supported-club-field.picked { border-color:var(--ink); }
-.supported-club-field>label { display:flex; align-items:center; gap:8px; min-width:0; font-size:13px; font-weight:800; }
+.supported-club-field>label { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:4px 8px; min-width:0; font-size:13px; font-weight:800; }
 .supported-club-field>label>span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.supported-club-field>label>small { margin-left:auto; flex-shrink:0; font-size:11px; font-weight:700; color:var(--text-3); }
+.supported-club-field>label>small { grid-column:1/-1; justify-self:start; max-width:100%; white-space:normal; font-size:11px; font-weight:700; color:var(--text-3); }
 .supported-club-field.picked>label>small { color:var(--ink); background:var(--yellow); padding:1px 6px; border-radius:4px; }
 .supported-club-fields .kx-select { width:100%; max-width:100%; }
+.supported-club-fields .kx-select-trigger { min-width:0; max-width:100%; }
 .supported-club-fields .kx-select-trigger span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .profile-supported-clubs { display:grid; gap:8px; }
 .profile-supported-clubs .profile-club { margin:0; padding:10px; font-size:13px; }
