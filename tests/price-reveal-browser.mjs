@@ -87,9 +87,9 @@ try {
     assert.equal(await page.evaluate(() => document.body.style.overflow), '');
     // Automatic opt-out and seen history must not block the explicit replay button.
     await page.evaluate(() => localStorage.setItem('kickx:price-reveal', 'off'));
-    const replay = page.locator('.squad-team').getByRole('button', { name: '가치 변동 테스트', exact: true });
+    const replay = page.locator('.squad-team').getByRole('button', { name: '마지막 변동 확인', exact: true });
     await replay.click();
-    const preview = page.getByRole('dialog', { name: /마지막 가치 변동/ });
+    const preview = page.getByRole('dialog', { name: /마지막 변동 확인/ });
     await preview.waitFor();
     assert.equal(await preview.locator('.price-reveal-card').count(), 6);
     assert.match(await preview.innerText(), /1–6 \/ 13명/);

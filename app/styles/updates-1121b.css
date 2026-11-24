@@ -403,3 +403,40 @@
 @media (max-width: 640px) { .my-hero { grid-template-columns:minmax(0,1fr); } }
 .board-author .member-name, .board-author-link>span, .community-board-table td.board-author { overflow:visible!important; }
 .board-author .member-name { padding:2px 2px 2px 1px; }
+
+/* 2026-11-24: price reveal as a plain scoreboard card. No glow, rays or particles; direction is told by
+   colour, arrow, band and movement: a rise slides up into place, a fall drops in and shakes once. */
+.price-reveal-backdrop { background:rgba(12,12,10,.74);backdrop-filter:none; }
+.price-reveal-card { --tone:#127a3d;--tone-soft:#e7f5ec;
+  background:#fff!important;color:var(--ink,#111);border:0!important;border-radius:10px;padding:0 14px 14px!important;gap:8px;
+  box-shadow:0 0 0 2px var(--tone),0 12px 28px #0006!important;animation:reveal-rise-in .45s cubic-bezier(.2,.9,.3,1) both!important; }
+.price-reveal-card.is-down { --tone:#c62828;--tone-soft:#fdecec;animation:reveal-drop-in .5s cubic-bezier(.3,1.3,.5,1) both,reveal-shake .32s ease-in-out .5s both!important; }
+.price-reveal-card.is-flat { --tone:#6b7280;--tone-soft:#f1f2f4;animation:reveal-fade .3s ease-out both!important; }
+.price-reveal-card:after, .price-reveal-rays, .price-reveal-arrows { display:none!important; }
+.price-reveal-band { display:flex;align-items:center;justify-content:space-between;gap:8px;width:calc(100% + 28px);margin:0 -14px 4px;padding:9px 14px;border-radius:10px 10px 0 0;background:var(--tone);color:#fff;transform-origin:50% 100%;animation:reveal-band .35s ease-out .15s both; }
+.is-down .price-reveal-band { transform-origin:50% 0; }
+.price-reveal-band>span { display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:900; }
+.price-reveal-band .change.lg { padding:0!important;border:0!important;background:none!important;font-size:20px;font-weight:950; }
+.price-reveal-band .change.lg, .price-reveal-band .change.lg * { color:#fff!important; }
+.price-reveal-face, .price-reveal-id, .price-reveal-club, .price-reveal-value { animation:none!important; }
+.price-reveal-id h2 { color:var(--ink,#111)!important; }
+.price-reveal-club { color:var(--text-2,#55554f)!important; }
+.price-reveal-value { border-top:1px solid var(--line,#e5e5df)!important;padding-top:8px; }
+.price-reveal-value>span { color:var(--text-2,#55554f)!important;font-size:11px;letter-spacing:0; }
+.price-reveal-value>strong { color:var(--tone)!important;text-shadow:none!important;animation:none!important; }
+.price-reveal-value>strong small { color:var(--tone)!important;opacity:.75; }
+.price-reveal-card.is-flat .price-reveal-value>strong { color:var(--ink,#111)!important; }
+@keyframes reveal-rise-in { from{transform:translateY(26px);opacity:0;} to{transform:none;opacity:1;} }
+@keyframes reveal-drop-in { from{transform:translateY(-30px);opacity:0;} to{transform:none;opacity:1;} }
+@keyframes reveal-shake { 0%,100%{transform:none;} 25%{transform:translateX(-4px);} 50%{transform:translateX(4px);} 75%{transform:translateX(-2px);} }
+@keyframes reveal-band { from{transform:scaleY(0);} to{transform:none;} }
+@media (max-width: 640px) {
+  .price-reveal-card { padding:0 10px 10px!important;gap:5px; }
+  .price-reveal-band { width:calc(100% + 20px);margin:0 -10px 2px;padding:6px 10px; }
+  .price-reveal-band>span { font-size:11px;gap:4px; }
+  .price-reveal-band .change.lg { font-size:15px; }
+}
+@media (prefers-reduced-motion: reduce) { .price-reveal-card, .price-reveal-band { animation:none!important; } }
+
+/* Header menu: no text caret when a link is clicked. */
+.main-nav a, .subnav nav a, .masthead a, .masthead button { caret-color:transparent;-webkit-user-select:none;user-select:none; }

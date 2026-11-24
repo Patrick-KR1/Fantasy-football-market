@@ -409,7 +409,7 @@ export function SquadScreen() {
                 onClick={() => setRevealReplay((request) => request + 1)}
               >
                 <Play size={13} aria-hidden="true" />
-                가치 변동 테스트
+                마지막 변동 확인
               </button>
               <span className="tag outline">자동 반영</span>
             </div>

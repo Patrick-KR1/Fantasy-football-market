@@ -121,7 +121,7 @@ export function PriceReveal({ playerIds, preview = false }: { playerIds: string[
       <div className="price-reveal-backdrop" onClick={finish} />
       <div className="price-reveal-stage" data-count={players.length}>
         <p className="price-reveal-kicker" id={titleId}>
-          {preview ? "마지막 가치 변동 · 테스트" : "가격 변동 확인"}
+          {preview ? "마지막 변동 확인" : "가격 변동 확인"}
           <span className="num">{pageIndex * PRICE_REVEAL_PAGE_SIZE + 1}–{Math.min((pageIndex + 1) * PRICE_REVEAL_PAGE_SIZE, queue.length)} / {queue.length}명</span>
         </p>
         <div className="price-reveal-grid" ref={gridRef} key={pageIndex}>
@@ -139,17 +139,17 @@ export function PriceReveal({ playerIds, preview = false }: { playerIds: string[
                 aria-label={`${player.name} 가치 변동`}
                 style={club ? { "--club": club.primary } as CSSProperties : undefined}
               >
-                <span className="price-reveal-rays" aria-hidden="true" />
-                {(up || down) && <span className="price-reveal-arrows" aria-hidden="true">
-                  {Array.from({ length: 7 }, (_, i) => <i key={i} style={{ "--i": i } as CSSProperties}>{up ? "▲" : "▼"}</i>)}
-                </span>}
+                {/* Direction first: a coloured band with the arrow and change, then the player and value. */}
+                <header className="price-reveal-band">
+                  <span>{up ? <TrendingUp size={16} /> : down ? <TrendingDown size={16} /> : <Minus size={16} />}{up ? "가치 상승" : down ? "가치 하락" : known ? "변동 없음" : "변동 정보 없음"}</span>
+                  <Change value={player.change} size="lg" />
+                </header>
                 <div className="price-reveal-face"><FramedPlayer player={player} theme={cosmeticTheme(state.playerFrames?.[player.id] ?? state.loadout?.frame)} preview /></div>
                 <div className="price-reveal-id">{player.position && <PositionBadge position={player.position} />}<h2>{player.name}</h2></div>
                 <div className="price-reveal-club">{player.team && <ClubCrest id={player.team} size="small" />}<span>{team?.name ?? "구단 정보 없음"}</span></div>
                 <div className="price-reveal-value">
-                  <span>{up ? <TrendingUp size={16} /> : down ? <TrendingDown size={16} /> : <Minus size={16} />}{up ? "가치 상승" : down ? "가치 하락" : known ? "변동 없음" : "변동 정보 없음"}</span>
+                  <span>현재 가치</span>
                   <strong className="num">{money(player.price)}<small>P</small></strong>
-                  <Change value={player.change} size="lg" />
                 </div>
               </article>
             );
