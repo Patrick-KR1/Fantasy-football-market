@@ -37,12 +37,15 @@ export function MyCosmetics() {
               return <article key={item.id} className={`my-cosmetic${on ? " equipped" : ""}`}>
                 <ShopPreview item={item} />
                 <div className="my-cosmetic-info"><strong>{item.name}</strong>{on && <small><Check size={12} />장착 중</small>}</div>
-                <button className={`button small ${on ? "secondary" : ""}`} disabled={busy} onClick={() => void equip(on ? null : item)}>{on ? "장착 해제" : "장착하기"}</button>
+                {/* Frames are equipped only on the squad page. */}
+                {slot === "frame" ? <Link href="/squad" className="button small secondary">스쿼드에서 장착</Link>
+                  : <button className={`button small ${on ? "secondary" : ""}`} disabled={busy} onClick={() => void equip(on ? null : item)}>{on ? "장착 해제" : "장착하기"}</button>}
               </article>;
             })}
           </div>
         )}
-        {ready && !!items.length && <p className="fine-print">장착을 해제하면 기본 디자인이 적용됩니다.{equippedId == null && " 지금은 기본 디자인을 사용하고 있습니다."}</p>}
+        {ready && !!items.length && slot === "frame" && <p className="fine-print">선수 테두리는 스쿼드 화면에서 장착하거나 선수별로 바꿀 수 있습니다.</p>}
+        {ready && !!items.length && slot !== "frame" && <p className="fine-print">장착을 해제하면 기본 디자인이 적용됩니다.{equippedId == null && " 지금은 기본 디자인을 사용하고 있습니다."}</p>}
       </>}
     </section>
   );

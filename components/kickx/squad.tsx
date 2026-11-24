@@ -3,7 +3,7 @@ import { useLoadout, usePlayerFrames } from "./engagement-provider";
 import { FramedPlayer } from "./player-frame";
 import { PitchScenery } from "./pitch-scenery";
 import { PriceReveal } from "./price-reveal";
-import { PlayerFrameSelect } from "./player-frame-select";
+import { PlayerFrameSelect, SquadFrameSelect } from "./player-frame-select";
 import { cosmeticTheme } from "@/lib/kickx/engagement";
 import { MatchNotificationToggle } from "./notifications";
 import { useId, useRef, useState, type CSSProperties } from "react";
@@ -391,7 +391,7 @@ export function SquadScreen() {
       )}
       <MemberNotice />
       <MatchNotificationToggle />
-      <div className="squad-appearance"><Link href="/shop">경기장·선수 테두리 꾸미기</Link></div>
+      <div className="squad-appearance"><SquadFrameSelect /><Link href="/shop">경기장·선수 테두리 꾸미기</Link></div>
       <div className="squad-layout automatic-squad">
         <section className="squad-board">
           <div className="squad-toolbar">

@@ -440,3 +440,8 @@
 
 /* Header menu: no text caret when a link is clicked. */
 .main-nav a, .subnav nav a, .masthead a, .masthead button { caret-color:transparent;-webkit-user-select:none;user-select:none; }
+
+/* Squad-wide frame select (frames are equipped only on the squad page). */
+.squad-frame-select { margin-top:0; }
+.squad-frame-select select { min-width:160px; }
+@media (max-width:720px) { .squad-frame-select { width:100%; } .squad-frame-select select { max-width:none; } }
