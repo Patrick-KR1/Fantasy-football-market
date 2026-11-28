@@ -8,15 +8,14 @@ import { emptyPredictions, predictionLabels, type PredictionChoice, type Predict
 import { usePlatform, useResource } from './provider';
 import { MemberNotice, PageHeading, TeamBadge } from './ui';
 
-const kickoffYear = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric' });
-const kickoffDay = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: '2-digit', day: '2-digit', weekday: 'short' });
+const kickoffDay = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' });
 const kickoffClock = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 function PredictionKickoff({ startsAt, status }: { startsAt: string; status: string }) {
  const date = new Date(startsAt);
  if (!Number.isFinite(date.getTime())) return <time className="prediction-kickoff">경기 일시 확인 중</time>;
- const year = kickoffYear.format(date), day = kickoffDay.format(date), time = status === 'TBD' ? '시간 미정' : kickoffClock.format(date);
- return <time className="prediction-kickoff" dateTime={startsAt} aria-label={`${year} ${day} ${time} · 한국 시간`}>
-  <span className="prediction-kickoff-date"><small><CalendarDays size={14} aria-hidden="true"/>{year} 경기 일시</small><strong>{day}</strong></span>
+ const day = kickoffDay.format(date), time = status === 'TBD' ? '시간 미정' : kickoffClock.format(date);
+ return <time className="prediction-kickoff" dateTime={startsAt} aria-label={`${day} ${time} · 한국 시간`}>
+  <span className="prediction-kickoff-date"><CalendarDays size={16} aria-hidden="true"/><strong>{day}</strong></span>
   <span className={`prediction-kickoff-time${status === 'TBD' ? ' unknown' : ''}`}><small>한국 시간</small><strong className="num">{time}</strong></span>
  </time>;
 }
