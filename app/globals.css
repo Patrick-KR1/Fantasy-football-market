@@ -17,6 +17,7 @@
 @import "./styles/engagement-refinements.css";
 @import "./styles/engagement-polish.css";
 @import "./styles/updates-1121b.css";
+@import "./styles/predictions.css";
 
 /* Primary club identity and community polls, Nov 6. */
 .member-name{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;max-width:100%;vertical-align:middle;overflow-wrap:anywhere}
