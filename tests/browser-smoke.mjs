@@ -101,6 +101,10 @@ try {
   // UI-only injected responses: these records never ship in application data or SQL seeds.
   const mock=await browser.newContext({viewport:{width:1440,height:1000}});await mock.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await mock.route(/^https:\/\//,route=>route.abort());
+  const mockEngagement=loadTs('../lib/kickx/engagement.ts').emptyEngagement();
+  // A fake signed-in dashboard also needs a private engagement response. The
+  // deliberately disconnected test server cannot authenticate this fake user.
+  await mock.route(/\/api\/kickx\/engagement(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:mockEngagement}}));
   await mock.route(/\/api\/kickx\/notifications(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:{hasUnread:false,matchNotifications:true,commentNotifications:true,replyNotifications:true,items:[],hasMore:false}}}));
   await mock.route(/\/api\/kickx\/community\/activity(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:{author:null,items:[],total:0,page:1,size:20,postCount:0,commentCount:0}}}));
   const mockPage=await mock.newPage();
@@ -116,6 +120,7 @@ try {
   for(const detail of [false,true]) {
     const concurrent=await browser.newContext();await concurrent.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
     await concurrent.route(/^https:\/\//,route=>route.abort());
+    await concurrent.route(/\/api\/kickx\/engagement(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:mockEngagement}}));
     let release;
     const gate=new Promise(resolve=>{release=resolve;});
     let released=false;
