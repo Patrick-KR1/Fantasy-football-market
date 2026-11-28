@@ -16,7 +16,11 @@ async function main(){
  const db=createClient(url,key,{global:{fetch:nameImportFetch(key)},auth:{persistSession:false,autoRefreshToken:false}});
  // This uses the policy-selected scorer: an old active policy is repaired with
  // the old rules. No provider calls, resets or forced incomplete publications.
- const stale=checked(await db.rpc('kickx_balanced_stale_players')) as string[];
+ const stalePlayers=new Set<string>();
+ for(const league of ['bsd-1','bsd-3','bsd-4','bsd-5','bsd-6']){
+  for(const id of checked(await db.rpc('kickx_balanced_stale_players',{p_league:league})) as string[])stalePlayers.add(id);
+ }
+ const stale=[...stalePlayers];
  let withheld=0;
  for(let at=0;at<stale.length;at+=3){
   await Promise.all(stale.slice(at,at+3).map(async id=>{
