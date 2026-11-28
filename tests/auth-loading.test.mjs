@@ -16,6 +16,29 @@ test('public database reads never load visitor cookies or construct an SSR auth 
  assert.deepEqual(calls[0][2].auth,{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false});
 });
 
+test('public shop uses anonymous reads and reports a disconnected database without a request or session refresh',async()=>{
+ let configured=true,calls=0,connections=0;
+ const route=loadTs('../app/api/kickx/shop/route.ts',{
+  'next/server':{connection:async()=>{connections++;}},
+  '@/server/kickx/config':{getSupabaseConfig:()=>configured?{}:null},
+  '@/lib/kickx/engagement':{emptyShop:()=>({catalog:[],poolSize:0})},
+  '@/server/kickx/supabase':{
+   createRequestClient:()=>{throw Error('Public shop touched a visitor session');},
+   createPublicClient:()=>({rpc:async name=>{calls++;assert.equal(name,'kickx_shop_catalog');return {data:{catalog:[{id:'public-item'}],poolSize:100},error:null};}}),
+  },
+  '@/server/kickx/prototype':{checkDatabase:error=>{if(error)throw error;}},
+  '@/server/kickx/http':{failure:()=>new Response(null,{status:500})},
+ });
+ const ready=await route.GET();
+ assert.equal(ready.status,200);assert.match(ready.headers.get('cache-control'),/public/);
+ assert.deepEqual(await ready.json(),{status:'ready',data:{catalog:[{id:'public-item'}],poolSize:100}});
+ configured=false;
+ const disconnected=await route.GET();
+ assert.equal(disconnected.status,200);assert.equal(disconnected.headers.get('cache-control'),'no-store');
+ assert.deepEqual(await disconnected.json(),{status:'not-configured',data:{catalog:[],poolSize:0}});
+ assert.equal(calls,1);assert.equal(connections,2);
+});
+
 test('new OAuth flows ignore old session chunks but preserve the PKCE verifier and write new cookies',async()=>{
  const cookies=[{name:'sb-test-project-auth-token',value:'expired'},{name:'sb-test-project-auth-token.0',value:'expired-chunk'},
   {name:'sb-test-project-auth-token-code-verifier',value:'valid-pkce'},{name:'kickx-auth-next',value:'/market'}];
