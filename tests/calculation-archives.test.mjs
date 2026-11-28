@@ -45,3 +45,29 @@ test('checkpoint archives preserve full payloads and acknowledge only their orig
  assert.deepEqual(JSON.parse(gunzipSync(compressed)).rows,rows);
  assert.deepEqual(order,['kickx_checkpoint_archive_batch','upload','verify','kickx_finish_checkpoint_archive']);
 });
+
+for (const kind of ['audit','rankings']) {
+ for (const corrupt of [false,true]) {
+  test(`${kind} retains every original field and acknowledges only verified bytes (corrupt=${corrupt})`,async()=>{
+   const folder=kind==='audit'?'operation-audit':'ranking-snapshots';
+   const rows=[{id:'original-row',archive_hash:'original-hash',created_at:'2026-10-01',detail:{baseline:{price:100000},lastStep:{score:12}},rows:[{userId:'member',rank:1}]}];
+   let compressed;const calls=[];
+   const db={storage:{getBucket:async()=>({data:{public:false}}),from:()=>({
+    upload:async(path,bytes)=>{assert.match(path,new RegExp(`^${folder}/[a-f0-9]{64}\\.json\\.gz$`));compressed=bytes;calls.push('upload');return {};},
+    download:async()=>{calls.push('verify');return {data:new Blob([corrupt?'corrupt':compressed])};},
+   })},rpc:async(name,args)=>{
+    assert.equal(args.p_kind,kind);calls.push(name);
+    if(name==='kickx_history_archive_batch'){assert.equal(args.p_limit,500);return {data:rows};}
+    assert.equal(name,'kickx_finish_history_archive');
+    assert.deepEqual(args.p_rows,[{id:'original-row',archive_hash:'original-hash'}]);return {data:1};
+   }};
+   if(corrupt){await assert.rejects(archiveCalculationRevisions(db,{kind,maxBatches:1}),/ARCHIVE_VERIFICATION_FAILED/);assert.ok(!calls.includes('kickx_finish_history_archive'));}
+   else {assert.equal((await archiveCalculationRevisions(db,{kind,maxBatches:1})).archived,1);assert.deepEqual(calls,['kickx_history_archive_batch','upload','verify','kickx_finish_history_archive']);}
+   assert.deepEqual(JSON.parse(gunzipSync(compressed)),{format:`kickx-${folder}-v1`,rows});
+  });
+ }
+}
+
+test('unknown archive kinds cannot silently select a different dataset',async()=>{
+ await assert.rejects(archiveCalculationRevisions({}, {kind:'unknown'}),/ARCHIVE_INVALID_KIND/);
+});

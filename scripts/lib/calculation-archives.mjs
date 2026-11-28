@@ -23,21 +23,24 @@ async function privateBucket(db) {
  * The row CAS and newest-per-player/rule check are repeated inside PostgreSQL.
  * Content-addressed names make retries safe after upload/acknowledgment failures.
  * @param {import('@supabase/supabase-js').SupabaseClient} db
- * @param {{initialBatch?: Array<Record<string, unknown>>, maxBatches?: number, deadline?: number, kind?: 'revisions'|'checkpoints'}} options
+ * @param {{initialBatch?: Array<Record<string, unknown>>, maxBatches?: number, deadline?: number, kind?: 'revisions'|'checkpoints'|'audit'|'rankings'}} options
  */
 export async function archiveCalculationRevisions(db, { initialBatch, maxBatches = 8, deadline = Date.now() + 40000, kind = 'revisions' } = {}) {
   const checkpoint = kind === 'checkpoints';
-  const batchRpc = checkpoint ? 'kickx_checkpoint_archive_batch' : 'kickx_revision_archive_batch';
-  const finishRpc = checkpoint ? 'kickx_finish_checkpoint_archive' : 'kickx_finish_revision_archive';
-  const folder = checkpoint ? 'checkpoint-payloads' : 'calculation-revisions';
+  const history = kind === 'audit' || kind === 'rankings';
+  if (!['revisions','checkpoints','audit','rankings'].includes(kind)) throw new Error('ARCHIVE_INVALID_KIND');
+  const batchRpc = history ? 'kickx_history_archive_batch' : checkpoint ? 'kickx_checkpoint_archive_batch' : 'kickx_revision_archive_batch';
+  const finishRpc = history ? 'kickx_finish_history_archive' : checkpoint ? 'kickx_finish_checkpoint_archive' : 'kickx_finish_revision_archive';
+  const folder = history ? kind === 'audit' ? 'operation-audit' : 'ranking-snapshots' : checkpoint ? 'checkpoint-payloads' : 'calculation-revisions';
+  const format = history ? `kickx-${folder}-v1` : checkpoint ? 'kickx-checkpoint-payloads-v1' : 'kickx-calculation-revisions-v1';
   let bucket, archived = 0, bytes = 0, batches = 0;
   let rows = initialBatch;
   while (batches < maxBatches && Date.now() < deadline) {
-    rows ??= checked(await db.rpc(batchRpc, { p_limit: 50 }));
+    rows ??= checked(await db.rpc(batchRpc, { p_limit: history ? 500 : 50, ...(history ? { p_kind: kind } : {}) }));
     if (!Array.isArray(rows)) throw new Error('ARCHIVE_INVALID_BATCH');
     if (!rows.length) return { archived, bytes, batches, done: true };
     bucket ??= await privateBucket(db);
-    const payload = Buffer.from(JSON.stringify({ format: checkpoint ? 'kickx-checkpoint-payloads-v1' : 'kickx-calculation-revisions-v1', rows }));
+    const payload = Buffer.from(JSON.stringify({ format, rows }));
     if (payload.length > 20 * 1024 * 1024) throw new Error('ARCHIVE_BATCH_TOO_LARGE');
     const compressed = gzipSync(payload, { level: 9 });
     const checksum = digest(compressed);
@@ -49,6 +52,7 @@ export async function archiveCalculationRevisions(db, { initialBatch, maxBatches
     const restored = checked(await bucket.download(path));
     if (digest(Buffer.from(await restored.arrayBuffer())) !== checksum) throw new Error('ARCHIVE_VERIFICATION_FAILED');
     archived += checked(await db.rpc(finishRpc, {
+      ...(history ? { p_kind: kind } : {}),
       p_path: path, p_rows: rows.map(row => checkpoint ? { _source: row._source, day: row.day, key: row.key, archive_hash: row.archive_hash } : { id: row.id, archive_hash: row.archive_hash }),
     }));
     bytes += compressed.length; batches++; rows = undefined;
@@ -60,4 +64,16 @@ export async function archiveCalculationRevisions(db, { initialBatch, maxBatches
  * @param {{maxBatches?: number, deadline?: number}} options */
 export async function archiveCheckpointPayloads(db, options = {}) {
   return archiveCalculationRevisions(db, { ...options, kind: 'checkpoints' });
+}
+
+/** @param {import('@supabase/supabase-js').SupabaseClient} db
+ * @param {{maxBatches?: number, deadline?: number}} options */
+export async function archiveOperationAudit(db, options = {}) {
+  return archiveCalculationRevisions(db, { ...options, kind: 'audit' });
+}
+
+/** @param {import('@supabase/supabase-js').SupabaseClient} db
+ * @param {{maxBatches?: number, deadline?: number}} options */
+export async function archiveRankingSnapshots(db, options = {}) {
+  return archiveCalculationRevisions(db, { ...options, kind: 'rankings' });
 }

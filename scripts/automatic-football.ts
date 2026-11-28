@@ -7,7 +7,7 @@ import { runAutomaticFootball, errorCode } from './lib/automatic-football.mjs';
 import { nameImportFetch } from './lib/korean-catalog.mjs';
 import { mapPlayerNames } from './lib/player-names.mjs';
 import { fillMissingKoreanNames } from './lib/missing-korean-names.mjs';
-import { archiveCalculationRevisions, archiveCheckpointPayloads } from './lib/calculation-archives.mjs';
+import { archiveCalculationRevisions, archiveCheckpointPayloads, archiveOperationAudit, archiveRankingSnapshots } from './lib/calculation-archives.mjs';
 
 loadEnvConfig(process.cwd());
 async function main() {
@@ -44,7 +44,9 @@ async function main() {
     try {
       const checkpoints = await archiveCheckpointPayloads(db, { maxBatches: 200, deadline: Date.now() + 90000 });
       const revisions = await archiveCalculationRevisions(db, { maxBatches: 200, deadline: Date.now() + 120000 });
-      console.log(JSON.stringify({ stage: 'verified-archives', checkpoints, revisions }));
+      const audit = await archiveOperationAudit(db, { maxBatches: 200, deadline: Date.now() + 180000 });
+      const rankings = await archiveRankingSnapshots(db, { maxBatches: 100, deadline: Date.now() + 90000 });
+      console.log(JSON.stringify({ stage: 'verified-archives', checkpoints, revisions, audit, rankings }));
     } catch {
       console.error(JSON.stringify({ stage: 'verified-archives', error: 'ARCHIVE_RETRY' }));
       process.exitCode = 1;
