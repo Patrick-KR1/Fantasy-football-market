@@ -44,7 +44,7 @@ async function main() {
     try {
       const checkpoints = await archiveCheckpointPayloads(db, { maxBatches: 200, deadline: Date.now() + 90000 });
       const revisions = await archiveCalculationRevisions(db, { maxBatches: 200, deadline: Date.now() + 120000 });
-      const audit = await archiveOperationAudit(db, { maxBatches: 200, deadline: Date.now() + 180000 });
+      const audit = await archiveOperationAudit(db, { maxBatches: 200, deadline: Date.now() + (archivesOnly ? 600000 : 180000) });
       const rankings = await archiveRankingSnapshots(db, { maxBatches: 100, deadline: Date.now() + 90000 });
       console.log(JSON.stringify({ stage: 'verified-archives', checkpoints, revisions, audit, rankings }));
     } catch {
