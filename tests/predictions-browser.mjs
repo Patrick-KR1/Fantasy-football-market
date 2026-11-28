@@ -45,7 +45,7 @@ try{
   assert.match(await page.locator('.prediction-result.no-pick').innerText(),/미참여/);
   const upcoming=page.getByRole('region',{name:'다가오는 3경기'}),first=upcoming.locator('.prediction-card').first();
   await first.getByRole('button',{name:'승 승리'}).click();
-  await first.getByRole('button',{name:'승 승리'}).getAttribute('aria-pressed').then(value=>assert.equal(value,'true'));
+  await page.waitForFunction(()=>document.querySelector('.prediction-options button:first-child')?.getAttribute('aria-pressed')==='true');
   await first.getByRole('button',{name:'무 무승부'}).click();
   await page.waitForFunction(()=>document.querySelector('.prediction-options button:nth-child(2)')?.getAttribute('aria-pressed')==='true');
   assert.equal(posts,2);
