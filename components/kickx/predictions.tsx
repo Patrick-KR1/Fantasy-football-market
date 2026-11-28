@@ -1,22 +1,21 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { CalendarDays, Check, CheckCircle2, CircleHelp, Clock3, Gift, LockKeyhole, Minus, RefreshCw, Target, Trophy, XCircle } from 'lucide-react';
+import { CalendarDays, Check, CheckCircle2, CircleHelp, Clock3, Gift, LockKeyhole, Minus, Target, Trophy, XCircle } from 'lucide-react';
 import { apiRequest } from '@/lib/kickx/client';
 import { money } from '@/lib/kickx/data';
 import { emptyPredictions, predictionLabels, type PredictionChoice, type PredictionMatch, type Predictions } from '@/lib/kickx/predictions';
 import { usePlatform, useResource } from './provider';
 import { MemberNotice, PageHeading, TeamBadge } from './ui';
 
-const kickoffYear = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric' });
-const kickoffDay = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: '2-digit', day: '2-digit', weekday: 'short' });
+const kickoffDay = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' });
 const kickoffClock = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 function PredictionKickoff({ startsAt, status }: { startsAt: string; status: string }) {
  const date = new Date(startsAt);
  if (!Number.isFinite(date.getTime())) return <time className="prediction-kickoff">경기 일시 확인 중</time>;
- const year = kickoffYear.format(date), day = kickoffDay.format(date), time = status === 'TBD' ? '시간 미정' : kickoffClock.format(date);
- return <time className="prediction-kickoff" dateTime={startsAt} aria-label={`${year} ${day} ${time} · 한국 시간`}>
-  <span className="prediction-kickoff-date"><small><CalendarDays size={14} aria-hidden="true"/>{year} 경기 일시</small><strong>{day}</strong></span>
+ const day = kickoffDay.format(date), time = status === 'TBD' ? '시간 미정' : kickoffClock.format(date);
+ return <time className="prediction-kickoff" dateTime={startsAt} aria-label={`${day} ${time} · 한국 시간`}>
+  <span className="prediction-kickoff-date"><CalendarDays size={16} aria-hidden="true"/><strong>{day}</strong></span>
   <span className={`prediction-kickoff-time${status === 'TBD' ? ' unknown' : ''}`}><small>한국 시간</small><strong className="num">{time}</strong></span>
  </time>;
 }
@@ -89,7 +88,7 @@ export function PredictionsScreen() {
    <div className="prediction-rewards"><div className="reward-success"><Trophy size={21}/><span>예측 성공</span><strong className="num">5,000<small>P</small></strong></div><div className="reward-miss"><Gift size={21}/><span>예측 실패</span><strong className="num">1,000<small>P</small></strong></div><p>참여 비용 없이 · 예측 참여자에게 자동 지급</p></div>
   </section>
   {!profile ? <><MemberNotice/>{status === 'ready' && data.session && <div className="data-notice">프로필에서 메인 응원 구단을 먼저 설정해 주세요.<Link className="text-link" href="/mypage">프로필 설정</Link></div>}</> : !profile.primaryTeam ? <div className="data-notice">메인 응원 구단을 먼저 설정해 주세요.<Link className="text-link" href="/mypage">프로필 설정</Link></div> : mock ? <div className="data-notice">로그인 후 실제 구단 경기의 승부를 예측할 수 있습니다.</div> : !ready ? <div className="prediction-notice" role="status">{remote.status === 'loading' ? '메인 응원 구단의 경기를 불러오고 있습니다…' : remote.status === 'unauthorized' ? <Link href="/login">로그인 후 경기 예측을 이용해 주세요.</Link> : <>경기를 불러오지 못했습니다.<button className="button secondary small" onClick={remote.reload}>다시 시도</button></>}</div> : teamId && <>
-   <div className="prediction-club"><div><TeamBadge id={teamId}/><span><small>내 메인 응원 구단</small><strong>{remote.data.teamName}</strong></span></div><button type="button" className="button secondary small" onClick={remote.reload}><RefreshCw size={14}/>새로고침</button></div>
+   <div className="prediction-club"><div><TeamBadge id={teamId}/><span><small>내 메인 응원 구단</small><strong>{remote.data.teamName}</strong></span></div></div>
    <section className="prediction-section" aria-labelledby="upcoming-predictions"><header><div><span className="prediction-kicker">MAKE YOUR PICK</span><h2 id="upcoming-predictions">다가오는 3경기</h2></div><p>버튼을 누르면 저장 · 경기 시작 시 마감</p></header>
     {remote.data.upcoming.length ? <div className="prediction-grid">{remote.data.upcoming.map(match => <MatchCard key={match.id} match={match} past={false} teamId={teamId} now={now} busy={busy} onPick={pick}/>)}</div> : <div className="prediction-empty">등록된 다음 경기 일정이 없습니다. 일정이 확인되면 표시됩니다.</div>}
    </section>
