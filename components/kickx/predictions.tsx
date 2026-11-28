@@ -1,12 +1,25 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Check, CheckCircle2, CircleHelp, Clock3, Gift, LockKeyhole, Minus, RefreshCw, Target, Trophy, XCircle } from 'lucide-react';
+import { CalendarDays, Check, CheckCircle2, CircleHelp, Clock3, Gift, LockKeyhole, Minus, RefreshCw, Target, Trophy, XCircle } from 'lucide-react';
 import { apiRequest } from '@/lib/kickx/client';
-import { dateText, money } from '@/lib/kickx/data';
+import { money } from '@/lib/kickx/data';
 import { emptyPredictions, predictionLabels, type PredictionChoice, type PredictionMatch, type Predictions } from '@/lib/kickx/predictions';
 import { usePlatform, useResource } from './provider';
 import { MemberNotice, PageHeading, TeamBadge } from './ui';
+
+const kickoffYear = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric' });
+const kickoffDay = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: '2-digit', day: '2-digit', weekday: 'short' });
+const kickoffClock = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+function PredictionKickoff({ startsAt, status }: { startsAt: string; status: string }) {
+ const date = new Date(startsAt);
+ if (!Number.isFinite(date.getTime())) return <time className="prediction-kickoff">경기 일시 확인 중</time>;
+ const year = kickoffYear.format(date), day = kickoffDay.format(date), time = status === 'TBD' ? '시간 미정' : kickoffClock.format(date);
+ return <time className="prediction-kickoff" dateTime={startsAt} aria-label={`${year} ${day} ${time} · 한국 시간`}>
+  <span className="prediction-kickoff-date"><small><CalendarDays size={14} aria-hidden="true"/>{year} 경기 일시</small><strong>{day}</strong></span>
+  <span className={`prediction-kickoff-time${status === 'TBD' ? ' unknown' : ''}`}><small>한국 시간</small><strong className="num">{time}</strong></span>
+ </time>;
+}
 
 function MatchCard({ match, past, teamId, now, busy, onPick }: {
  match: PredictionMatch; past: boolean; teamId: string; now: number; busy: string | null;
@@ -22,7 +35,7 @@ function MatchCard({ match, past, teamId, now, busy, onPick }: {
  const statusLabel = past ? '경기 종료' : !open ? '예측 마감' : match.choice ? '예측 완료' : '예측 가능';
  return <article className={`prediction-card ${past ? 'past' : 'upcoming'} is-${cardState}`} id={`match-${match.id}`} aria-label={`${match.homeName} 대 ${match.awayName}`}>
   <header><span>{match.leagueName ?? '구단 경기'}</span><span className={`prediction-status ${cardState}`}><StatusIcon size={12} aria-hidden="true"/>{statusLabel}</span></header>
-  <time dateTime={match.startsAt}>{dateText(match.startsAt)}</time>
+  <PredictionKickoff startsAt={match.startsAt} status={match.status}/>
   <div className="prediction-teams">
    <div className={match.homeId === teamId ? 'my-team' : ''}><TeamBadge id={match.homeId} size="large"/><strong>{match.homeName}</strong><small>홈{match.homeId === teamId ? ' · 내 구단' : ''}</small></div>
    <div className="prediction-score">{past && match.homeScore != null && match.awayScore != null ? <><strong className="num">{match.homeScore} : {match.awayScore}</strong>{match.status === 'PEN' && match.penaltiesHome != null && match.penaltiesAway != null && <small>승부차기 {match.penaltiesHome} : {match.penaltiesAway}</small>}</> : <strong>VS</strong>}</div>
