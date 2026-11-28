@@ -605,6 +605,7 @@ try {
   await mock.close();
   const marketContext=await browser.newContext();await marketContext.addInitScript(()=>{try{localStorage.setItem('kickx:price-reveal','off')}catch{}});
   await marketContext.route(/^https:\/\//,route=>route.abort());
+  await marketContext.route(/\/api\/kickx\/engagement(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:mockEngagement}}));
   await marketContext.route(/\/api\/kickx\/notifications(?:\?.*)?$/,route=>route.fulfill({json:{status:'ready',data:{hasUnread:false,matchNotifications:true,commentNotifications:true,replyNotifications:true,items:[],hasMore:false}}}));
   const marketPage=await marketContext.newPage();marketPage.on('pageerror',error=>errors.push(error.message));
   const marketPlayer={...state.players[0],team:'market-scope-team'};
