@@ -18,7 +18,6 @@
 .prediction-club span { display:grid; gap:4px; min-width:0; }
 .prediction-club small { font-size:11px; color:var(--muted); }
 .prediction-club strong { overflow-wrap:anywhere; }
-.prediction-club>button { flex-shrink:0; }
 .prediction-section { margin:32px 0; }
 .prediction-section>header { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:15px; }
 .prediction-section h2 { font-size:23px; margin-top:5px; }
@@ -136,6 +135,5 @@
  .prediction-rules { padding:18px; }
  .prediction-club { padding:14px 12px; }
  .prediction-club strong { font-size:14px; }
- .prediction-club>button { font-size:10px; padding:8px; }
  .prediction-notice { align-items:start; flex-direction:column; }
 }

@@ -43,6 +43,7 @@ try{
   assert.match(await page.locator('.prediction-result.success').innerText(),/예측 성공[\s\S]*5,000 P 지급 완료/);
   assert.match(await page.locator('.prediction-result.miss').innerText(),/예측 실패[\s\S]*1,000 P 지급 완료/);
   assert.match(await page.locator('.prediction-result.no-pick').innerText(),/미참여/);
+  assert.equal(await page.getByRole('button',{name:'새로고침',exact:true}).count(),0);
   const upcoming=page.getByRole('region',{name:'다가오는 3경기'}),first=upcoming.locator('.prediction-card').first();
   await first.getByRole('button',{name:'승 승리'}).click();
   await page.waitForFunction(()=>document.querySelector('.prediction-options button:first-child')?.getAttribute('aria-pressed')==='true');
@@ -50,8 +51,10 @@ try{
   await page.waitForFunction(()=>document.querySelector('.prediction-options button:nth-child(2)')?.getAttribute('aria-pressed')==='true');
   assert.equal(posts,2);
   deny=true;await first.getByRole('button',{name:'패 패배'}).click();await page.getByText('경기가 시작되어 예측이 마감되었습니다.',{exact:true}).waitFor();
+  await page.waitForLoadState('networkidle');
   predictions.upcoming[1]={...predictions.upcoming[1],canPredict:false,startsAt:new Date(Date.now()-60000).toISOString()};
-  await page.getByRole('button',{name:'새로고침',exact:true}).click();
+  // Returning to a visible tab refreshes automatically, without a manual refresh control.
+  await page.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));
   await page.waitForFunction(()=>document.querySelectorAll('.prediction-options')[1]?.querySelector('button')?.disabled);
   assert.equal(await upcoming.locator('.prediction-card').nth(1).getByRole('button',{name:'승 승리'}).isDisabled(),true);
   await page.getByRole('button',{name:/알림함 ·/}).click();
