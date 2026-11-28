@@ -21,6 +21,11 @@ select m.player_id,m.fixture_id,case when m.fixture_id='add-after-2'then null el
 case when m.fixture_id='add-after-2'then '[]'::jsonb else jsonb_build_array(jsonb_build_object('metric','goals','value',case when m.fixture_id='add-after-0'then 3 else 0 end,'points',0))||'[{"metric":"minutes","value":90,"points":6,"evidence":"old"}]'::jsonb||case when p.position<>'FW'then jsonb_build_array(jsonb_build_object('metric','clean_sheet','value',1,'points',1))else '[]'::jsonb end||'[{"metric":"score_range","value":20,"points":-10}]'::jsonb end,'[]'
 from public.football_match_stats m join public.players p on p.id=m.player_id where p.id like 'add-%';
 insert into public.player_match_records(player_id,fixture_id,played_at,opponent,minutes,performance,rule_version)select m.player_id,m.fixture_id,f.starts_at,'Add away',(m.stats->>'minutes_played')::integer,r.score,'report-v3'from public.football_match_stats m join public.fixtures f on f.id=m.fixture_id join public.performance_results r using(player_id,fixture_id)where m.player_id like 'add-%';
+-- A roster-only player can have a frozen initial price and an empty revision.
+insert into public.players(id,name,position,team_id,provider)values('idle-balanced','No appearances','FW','add-home','bsd');
+insert into public.player_initial_values(player_id,rule_version,detail,input_hash)values('idle-balanced','report-v3','{"season":2025,"price":100000,"seedScore":6,"lower":-10,"upper":30,"referenceHash":"frozen","fixtures":[]}','idle');
+insert into public.player_market_snapshots(id,price,pricing_status,pricing_rule_version)values('idle-balanced',100000,'ready','report-v3');
+insert into public.calculation_revisions(player_id,input_hash,rule_version,results,new_price)values('idle-balanced','idle','report-v3','[]',100000);
 do $$declare answer jsonb;state jsonb;integrity jsonb:=public.kickx_valuation_integrity();old_price numeric;path text:='performance-rebalance/report-balanced-20261128/'||repeat('a',64)||'.json.gz';begin
  perform kickx_private.apply_additive_assessments(integrity);
  update public.kickx_policy set report_parameters=report_parameters||'{"pricingModel":"position-points","priceUnit":100000}';
@@ -32,6 +37,7 @@ do $$declare answer jsonb;state jsonb;integrity jsonb:=public.kickx_valuation_in
  begin perform kickx_private.apply_balanced_assessments(state,path);raise exception 'Missing backup guard';exception when others then if sqlerrm<>'BALANCED_VERIFIED_BACKUP_REQUIRED'then raise;end if;end;
  insert into storage.objects(bucket_id,name)values('kickx-calculation-archives',path);
  answer:=kickx_private.apply_balanced_assessments(state,path);
+ if (select results from public.calculation_revisions where player_id='idle-balanced')is distinct from'[]'::jsonb then raise exception 'Empty results changed';end if;
  if answer->>'scores'<>'127'then raise exception 'Balanced replay count %',answer;end if;
  if answer#>>'{positionBenchmarks,FW}'<>'7.000000'then raise exception 'Balanced fixed benchmark %',answer;end if;
  if (select report_parameters->>'pricingModel'from public.kickx_policy)<>'position-points'then raise exception 'Pricing algorithm changed';end if;
