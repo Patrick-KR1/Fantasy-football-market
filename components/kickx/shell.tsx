@@ -24,6 +24,7 @@ const links = [
 const utility = [
   { href: "/missions", label: "미션" },
   { href: "/fixtures", label: "경기 일정" },
+  { href: "/predictions", label: "경기 예측" },
   { href: "/portfolio", label: "내 자산" },
   { href: "/transactions", label: "거래 내역" },
   { href: "/mypage", label: "마이페이지" },

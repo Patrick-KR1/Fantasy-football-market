@@ -71,14 +71,22 @@ jobs:
         run: node tests/formations-browser.mjs
       - name: Desktop and mobile smoke tests
         run: node tests/browser-smoke.mjs
-      - name: Community, notification and profile regression tests
+      - name: Community, notification, profile and prediction regression tests
         run: |
-          node tests/community-activity-browser.mjs
-          node tests/notifications-browser.mjs
-          node tests/profile-report-browser.mjs
-          node tests/browser-ui-errors.mjs
-          node tests/squad-market-community-browser.mjs
-          node tests/primary-polls-browser.mjs
+          for kickx_check in tests/community-activity-browser.mjs tests/notifications-browser.mjs tests/profile-report-browser.mjs tests/browser-ui-errors.mjs tests/squad-market-community-browser.mjs tests/primary-polls-browser.mjs tests/predictions-browser.mjs; do
+            echo "Checking $kickx_check"
+            if node "$kickx_check" > /tmp/kickx-browser-check.log 2>&1; then
+              cat /tmp/kickx-browser-check.log
+            else
+              cat /tmp/kickx-browser-check.log
+              kickx_failure=$(tail -n 35 /tmp/kickx-browser-check.log)
+              kickx_failure=${kickx_failure//'%'/'%25'}
+              kickx_failure=${kickx_failure//$'\n'/'%0A'}
+              kickx_failure=${kickx_failure//$'\r'/'%0D'}
+              printf '::error file=%s::%s\n' "$kickx_check" "$kickx_failure"
+              exit 1
+            fi
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:

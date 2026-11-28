@@ -50,7 +50,7 @@ try {
   await context.route(/^https:\/\//,route=>route.abort());
   const page=await context.newPage();
   page.on("pageerror",error=>errors.push(error.message));
-  const routes=["/","/login","/onboarding","/players","/players/missing","/market","/portfolio","/transactions","/squad","/ranking","/community","/community/clubs","/community/players","/community/clubs/missing","/community/players/missing","/community/posts/missing","/community/write","/mypage","/admin","/admin/data","/admin/users","/admin/trades","/admin/community","/fixtures","/teams/missing","/rules"];
+  const routes=["/","/login","/onboarding","/players","/players/missing","/market","/portfolio","/transactions","/squad","/ranking","/community","/community/clubs","/community/players","/community/clubs/missing","/community/players/missing","/community/posts/missing","/community/write","/mypage","/admin","/admin/data","/admin/users","/admin/trades","/admin/community","/fixtures","/predictions","/teams/missing","/rules"];
   for(const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
     await page.setViewportSize(viewport);
     for(const path of routes) {
