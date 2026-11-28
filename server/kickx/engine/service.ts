@@ -27,12 +27,15 @@ export async function calculatePlayer(db: SupabaseClient, playerId: string, acto
    const records=input.data.records as CalculationRecord[];
    const clubs=input.data.policy.club_competitions_enabled===true;
    const report=input.data.policy.version===REPORT_VERSION;
-   const calculator=report?calculateReport:calculatePerformance;
+   // Read the active revision from the same policy snapshot as the input token.
+   // A rolling deployment keeps the previous scorer until the atomic cutover.
+   const revision=input.data.policy.report_parameters?.scoringRevision??SCORING_REVISION;
+   const calculator=report?(input:Parameters<typeof calculateReport>[0])=>calculateReport(input,revision):calculatePerformance;
    const results=records.map(m=>({...((report && !["bsd-1","bsd-3","bsd-4","bsd-5","bsd-6"].includes(m.fixtures.league_id??"")) ? {fixtureId:m.fixture_id,position:null,minutes:null,score:null,status:"blocked",breakdown:[],warnings:["OUTSIDE_COMPETITION_SCOPE"]} : calculator({fixtureId:m.fixture_id,playerId,teamId:m.team_id,
     status:m.fixtures.status,homeTeam:m.fixtures.home_team_id,awayTeam:m.fixtures.away_team_id,
     homeScore:m.fixtures.home_score,awayScore:m.fixtures.away_score,stats:m.stats,legacy:m.legacy_stats,
     source:m.fixtures.football_event_sources??{},clubCompetitions:clubs,durationMinutes:m.fixtures.durationMinutes,...(report?{regularSeasonOnly:true}:{})})),ruleVersion:report?REPORT_VERSION:RULE_VERSION,
-    ...(report?{scoringRevision:SCORING_REVISION}:clubs?{scoringRevision:'club-competitions-v1'}:{})}));
+    ...(report?{scoringRevision:revision}:clubs?{scoringRevision:'club-competitions-v1'}:{})}));
    const saved=await db.rpc("kickx_publish_calculation_delta",{p_actor:actor,p_player:playerId,
     p_token:input.data.token,p_results:results});
    checkDatabase(saved.error);

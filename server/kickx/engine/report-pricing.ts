@@ -1,4 +1,4 @@
-import { REPORT_PARAMETERS, RULE_VERSION, SCORING_REVISION } from './report-policy';
+import { REPORT_PARAMETERS, RULE_VERSION, SCORING_REVISION, PREVIOUS_SCORING_REVISION } from './report-policy';
 import type { PricingMatch } from './pricing';
 
 export type ReportParameters = { [K in keyof typeof REPORT_PARAMETERS]: number } & {
@@ -12,7 +12,7 @@ export type ReportBaseline = {
 const clamp=(n:number,lo:number,hi:number)=>Math.max(lo,Math.min(hi,n));
 const rounded=(n:number,p=6)=>Math.round(n*10**p)/10**p;
 export function validateReportParameters(p:ReportParameters) {
- if(Object.entries(p).some(([key,x])=>!['scoringRevision','pricingModel','positionBenchmarks','benchmarkCounts'].includes(key)&&!Number.isFinite(x)) || (p.scoringRevision!=null&&p.scoringRevision!==SCORING_REVISION) || p.lambda<=0 || p.kappa<=0 || p.beta<=0 || p.s<=0 || p.deviationLimit<=0 ||
+ if(Object.entries(p).some(([key,x])=>!['scoringRevision','pricingModel','positionBenchmarks','benchmarkCounts'].includes(key)&&!Number.isFinite(x)) || (p.scoringRevision!=null&&![SCORING_REVISION,PREVIOUS_SCORING_REVISION].includes(p.scoringRevision)) || p.lambda<=0 || p.kappa<=0 || p.beta<=0 || p.s<=0 || p.deviationLimit<=0 ||
   !Number.isSafeInteger(p.minPrice)||!Number.isSafeInteger(p.maxPrice)||!Number.isSafeInteger(p.initialMin)||!Number.isSafeInteger(p.initialMax)||
   p.minPrice<=0 || p.minPrice>p.initialMin || p.initialMin>p.initialMax || p.initialMax>p.maxPrice || p.maxPrice>Number.MAX_SAFE_INTEGER ||
   p.maxUp<0 || p.maxUp>=1 || p.maxDown<0 || p.maxDown>=1 || p.priceSensitivity<=0 || p.priceSensitivity>1 || !Number.isSafeInteger(p.priceUnit) || p.priceUnit<=0 || (p.nonParticipationRate??.015)<0 || (p.nonParticipationRate??.015)>=1 || (p.valuationStartMs!=null&&(!Number.isSafeInteger(p.valuationStartMs)||p.valuationStartMs<0)) || p.lowerQuantile<0 || p.upperQuantile>1 || p.lowerQuantile>=p.upperQuantile)

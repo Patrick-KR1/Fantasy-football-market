@@ -34,7 +34,7 @@ test('settled card checks do not block verified final cards; an accepted upgrade
 });
 test('report counts DF defensive groups and MF individual actions, pass success above zero attempts',()=>{
  const m=match();Object.assign(m.stats,{won_tackle:4,interception:3,total_pass:10,accurate_pass:9});
- assert.equal(points(calc(m),'defensive_actions'),2);assert.equal(points(calc(m),'pass_accuracy'),1);
+ assert.equal(points(calc(m),'defensive_actions'),2);assert.equal(points(calc(m),'pass_accuracy'),.5);
  m.source.lineups.lineups.home.players[1].position='M';assert.equal(points(calc(m),'defensive_actions'),3.5);
 });
 test('explicitly rejected reviews do not block finished matches but unresolved or accepted reviews still do',()=>{

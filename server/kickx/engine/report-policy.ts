@@ -1,11 +1,15 @@
 /** Report sections 6 and 7. Explicit defaults; references are frozen before activation. */
 export const RULE_VERSION = "report-v3";
-export const SCORING_REVISION = "report-additive-20261106";
+export const PREVIOUS_SCORING_REVISION = "report-additive-20261106";
+export const SCORING_REVISION = "report-balanced-20261128";
 export const PRICING_REVISION = "position-points-20261106";
 export const SCORING = {
  goals:{GK:10,DF:6,MF:5,FW:4}, assist:{GK:5,DF:4,MF:3,FW:3},
  shotOnTarget:{MF:.5,FW:1}, keyPass:{DF:.5,MF:1,FW:.5}, cross:.5,
  passThreshold:1,passAccuracy:.85,passBonus:1,
+ passQuality:{baseline:.8,multiplier:10,limit:2,fullSample:20},
+ deductions:{expectedGoals:-2,bigChanceMissed:-1,errorGoal:-3,errorShot:-1,dispossessed:-.2,possessionLost:-.05,unsuccessfulTouch:-.1,duelLost:-.1,aerialLost:-.1,fouls:-.25},
+ goalsPrevented:1,
  cleanSheet:{GK:4,DF:4,MF:1,FW:0},save:1,penaltySave:5,
  yellow:-1,red:-3,ownGoal:-2,
  completedPasses:.5,ballRecovery:.5,clearance:.25,dribble:.5,shotBlock:.5,foulWon:.25,highClaim:.5,keeperSweeper:.5,

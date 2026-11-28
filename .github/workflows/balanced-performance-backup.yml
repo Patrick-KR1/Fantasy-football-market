@@ -1,0 +1,36 @@
+name: Balanced performance backup
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/balanced-performance-backup.yml'
+      - 'scripts/backup-balanced-performance.ts'
+      - 'supabase/migrations/*_balanced_performance_adjustments.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: football-automatic-production
+  cancel-in-progress: false
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Repair stale evidence and verify a private before-image
+        run: node --conditions=react-server --import tsx scripts/backup-balanced-performance.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: balanced-performance-backup
+          path: test-artifacts/balanced-performance-backup.json
+          retention-days: 30

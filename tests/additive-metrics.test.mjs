@@ -3,7 +3,8 @@ const policy=loadTs('../server/kickx/engine/report-policy.ts');const{calculatePe
 function match(position='M'){return{fixtureId:'bsd-1',playerId:'bsd-2',teamId:'bsd-1',status:'FT',homeTeam:'bsd-1',awayTeam:'bsd-2',homeScore:0,awayScore:0,stats:{minutes_played:90},legacy:null,source:{lineups:{lineup_status:'confirmed',lineups:{home:{team_id:1,players:Array.from({length:11},(_,i)=>({id:i+1,position:i===1?position:'D'})),substitutes:[]},away:{team_id:2,players:Array.from({length:11},(_,i)=>({id:i+12,position:'D'})),substitutes:[]}}},incidents:{incidents:[]}}};}
 test('routine verified actions accumulate on the report scale without fabricated activity or duplicated totals',()=>{
  const m=match();Object.assign(m.stats,{total_pass:50,accurate_pass:40,ball_recovery:4,total_clearance:4,won_contest:2,outfielder_block:1,was_fouled:2,touches:100,total_contest:20,duel_won:15,rating:10});
- const r=calc(m);assert.equal(r.score,10);assert.equal(r.breakdown.reduce((n,b)=>n+b.points,0),10);assert.deepEqual(r.breakdown.filter(b=>['passes_completed','ball_recoveries','clearances','dribbles_completed','shots_blocked','fouls_won'].includes(b.metric)).map(b=>b.points),[2,2,1,1,.5,.5]);
+ const r=calc(m);assert.equal(r.score,8);assert.equal(r.breakdown.reduce((n,b)=>n+b.points,0),8);assert.deepEqual(r.breakdown.filter(b=>['passes_completed','ball_recoveries','clearances','dribbles_completed','shots_blocked','fouls_won'].includes(b.metric)).map(b=>b.points),[2,1,1,.5,.5]);
+ assert.equal(r.breakdown.some(b=>b.metric==='passes_completed'),false);assert.equal(r.breakdown.find(b=>b.metric==='pass_accuracy').points,0);
  delete m.stats.duel_won;delete m.stats.rating;delete m.stats.touches;delete m.stats.total_contest;assert.equal(calc(m).score,r.score);
 });
 test('goalkeeper-specific extra actions do not award an outfield player',()=>{

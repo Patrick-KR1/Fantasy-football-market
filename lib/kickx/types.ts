@@ -194,7 +194,7 @@ export type PublicData = {
   policy?: {
     version:string;initialPoints:number;initialPrice:number;sellFeeBps:number;quoteSeconds:number;clubCompetitionsEnabled?:boolean;
     pricingReferenceAt?:string|null;
-    reportParameters?:Partial<Record<'initialMin'|'initialMax'|'minPrice'|'maxPrice'|'valuationStartMs'|'priceSensitivity'|'priceUnit',number>> & {positionBenchmarks?:Partial<Record<'GK'|'DF'|'MF'|'FW',number>>};
+    reportParameters?:Partial<Record<'initialMin'|'initialMax'|'minPrice'|'maxPrice'|'valuationStartMs'|'priceSensitivity'|'priceUnit',number>> & {scoringRevision?:string;positionBenchmarks?:Partial<Record<'GK'|'DF'|'MF'|'FW',number>>};
   } | null;
   /** Total DB catalog count; players below are bounded previews. */
   playerTotal?: number;

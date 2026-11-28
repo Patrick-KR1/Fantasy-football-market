@@ -1,5 +1,5 @@
 /** Pure match scoring. Raw BSD JSON and unverified zeros are never rewritten. */
-import { SCORING } from "./report-policy";
+import { SCORING, SCORING_REVISION, PREVIOUS_SCORING_REVISION } from "./report-policy";
 export { RULE_VERSION } from "./report-policy";
 type Json = Record<string, unknown>;
 export type ScoreInput = { fixtureId: string; playerId: string; teamId: string; status: string; homeTeam: string; awayTeam: string; homeScore: number | null; awayScore: number | null; stats: Json; legacy: Json | null; source: { detail?: Json | null; lineups?: Json | null; incidents?: Json | null }; clubCompetitions?: boolean; durationMinutes?: number; regularSeasonOnly?:boolean };
@@ -18,9 +18,49 @@ export function regularSeasonScope(detail:Json):boolean|null {
  if(!stage&&/^(league phase|regular season)\b/i.test(String(detail.round_label??'')))return true;
  return null;
 }
-export function calculatePerformance(input: ScoreInput): ScoreResult {
+const rounded=(value:number,places=2)=>{
+ const scale=10**places,valueRounded=Math.floor(value*scale+.500000001)/scale;
+ return valueRounded===0?0:valueRounded;
+};
+/** Only provided, valid counters contribute. Broad possession losses have a
+ * deliberately small weight because they can overlap more specific mistakes. */
+export function calculateAdjustments(stats:Json,scored:number,position:string) {
+ const breakdown:ScoreResult['breakdown']=[],warnings:string[]=[];
+ const add=(metric:string,value:number,points:number,evidence:string)=>breakdown.push({metric,value:rounded(value,6),points:rounded(points),evidence});
+ const optional=(field:string)=>{
+  const n=count(stats[field]);
+  if(n==null)warnings.push(`${field}:UNVERIFIED_OR_MISSING_EXCLUDED`);
+  return n;
+ };
+ const attempts=count(stats.total_pass),completed=count(stats.accurate_pass);
+ if(attempts!=null&&completed!=null&&completed>attempts)return {breakdown,warnings,invalidPass:true};
+ if(attempts!=null&&attempts>0&&completed!=null){
+  const q=SCORING.passQuality,rate=completed/attempts;
+  const points=Math.max(-q.limit,Math.min(q.limit,(rate-q.baseline)*q.multiplier))*Math.min(attempts/q.fullSample,1);
+  add('pass_accuracy',rate*100,points,`accurate_pass / total_pass (${completed}/${attempts}); baseline=80%; full sample=20; cap=2`);
+ }else warnings.push('pass_accuracy:UNVERIFIED_OR_THRESHOLD_NOT_MET');
+ const xg=typeof stats.expected_goals==='number'&&Number.isFinite(stats.expected_goals)&&stats.expected_goals>=0&&stats.expected_goals<=Number.MAX_SAFE_INTEGER?stats.expected_goals:null;
+ if(xg==null)warnings.push('xg_underperformance:UNVERIFIED_OR_MISSING_EXCLUDED');
+ else if(xg>0){const deficit=Math.max(0,xg-scored);add('xg_underperformance',deficit,deficit*SCORING.deductions.expectedGoals,'max(expected_goals - verified goals, 0)');}
+ const weights:[string,number][]=[
+  ['big_chance_missed',SCORING.deductions.bigChanceMissed],['error_lead_to_a_goal',SCORING.deductions.errorGoal],
+  ['error_lead_to_a_shot',SCORING.deductions.errorShot],['dispossessed',SCORING.deductions.dispossessed],
+  ['possession_lost',SCORING.deductions.possessionLost],['unsuccessful_touch',SCORING.deductions.unsuccessfulTouch],
+  ['duel_lost',SCORING.deductions.duelLost],['aerial_lost',SCORING.deductions.aerialLost],['fouls',SCORING.deductions.fouls],
+ ];
+ for(const [field,weight]of weights){const n=optional(field);if(n!=null&&n>0)add(field,n,n*weight,field);}
+ if(position==='GK'){
+  const prevented=typeof stats.goals_prevented==='number'&&Number.isFinite(stats.goals_prevented)&&Math.abs(stats.goals_prevented)<=Number.MAX_SAFE_INTEGER?stats.goals_prevented:null;
+  if(prevented==null)warnings.push('goals_prevented:UNVERIFIED_OR_MISSING_EXCLUDED');
+  else if(prevented!==0)add('goals_prevented',prevented,prevented*SCORING.goalsPrevented,'goals_prevented; signed goalkeeper contribution');
+ }
+ return {breakdown,warnings,invalidPass:false};
+}
+export function calculatePerformance(input: ScoreInput,revision:string=SCORING_REVISION): ScoreResult {
  const result: ScoreResult = { fixtureId: input.fixtureId, position: null, minutes: null, score: null, status: "blocked", breakdown: [], warnings: [] };
  const stop = (why: string) => { result.warnings.push(why); return result; };
+ if(revision!==SCORING_REVISION&&revision!==PREVIOUS_SCORING_REVISION)return stop('SCORING_REVISION_UNSUPPORTED');
+ const balanced=revision===SCORING_REVISION;
  if (!["FT", "AET", "PEN"].includes(input.status)) return stop("MATCH_NOT_FINISHED");
  if (input.status !== "FT" && !input.clubCompetitions) return stop("EXTRA_TIME_REQUIRES_REVIEW");
  const detail=object(input.source.detail),extra=object(detail.extra_time_score),shootout=object(detail.penalty_shootout);
@@ -143,8 +183,10 @@ export function calculatePerformance(input: ScoreInput): ScoreResult {
   positive("key_pass","key_passes",SCORING.keyPass[position]);positive("accurate_cross","crosses_completed",SCORING.cross);
   const attempts=count(input.stats.total_pass),completed=count(input.stats.accurate_pass);
   if (attempts != null && completed != null && completed>attempts) return stop("INVALID_PASS_TOTALS");
-  if((position === "DF" || position === "MF") && attempts!=null && attempts>=SCORING.passThreshold && completed!=null && completed>0) add("pass_accuracy",completed/attempts*100,completed/attempts>=SCORING.passAccuracy ? SCORING.passBonus : 0,"accurate_pass / total_pass; attempts > 0");
-  else result.warnings.push("pass_accuracy:UNVERIFIED_OR_THRESHOLD_NOT_MET");
+  if(!balanced){
+   if((position === "DF" || position === "MF") && attempts!=null && attempts>=SCORING.passThreshold && completed!=null && completed>0) add("pass_accuracy",completed/attempts*100,completed/attempts>=SCORING.passAccuracy ? SCORING.passBonus : 0,"accurate_pass / total_pass; attempts > 0");
+   else result.warnings.push("pass_accuracy:UNVERIFIED_OR_THRESHOLD_NOT_MET");
+  }
   if (position === "DF" || position === "MF") {
    const tackles=count(input.stats.won_tackle), interceptions=count(input.stats.interception);
    const actions=(tackles ?? 0)+(interceptions ?? 0);
@@ -158,7 +200,7 @@ export function calculatePerformance(input: ScoreInput): ScoreResult {
  if(position==='GK'){positive("saves","saves",SCORING.save,3);if(input.status!=='PEN')positive("penalty_save","penalty_saves",SCORING.penaltySave,1,input.legacy ?? {});else result.warnings.push('SHOOTOUT_PENALTY_SAVE_COUNTER_UNVERIFIED_EXCLUDED');}
  // Separate observed actions; do not also award total touches, attempted passes,
  // all duels or provider ratings, which would duplicate these contributions.
- positive('accurate_pass','passes_completed',SCORING.completedPasses,10);
+ if(!balanced)positive('accurate_pass','passes_completed',SCORING.completedPasses,10);
  positive('ball_recovery','ball_recoveries',SCORING.ballRecovery);
  positive('total_clearance','clearances',SCORING.clearance);
  positive('won_contest','dribbles_completed',SCORING.dribble);
@@ -167,6 +209,11 @@ export function calculatePerformance(input: ScoreInput): ScoreResult {
  if(position==='GK'){
   positive('good_high_claim','high_claims',SCORING.highClaim);
   positive('accurate_keeper_sweeper','keeper_sweeper_success',SCORING.keeperSweeper);
+ }
+ if(balanced){
+  const adjustments=calculateAdjustments(input.stats,scored,position);
+  if(adjustments.invalidPass)return stop('INVALID_PASS_TOTALS');
+  result.breakdown.push(...adjustments.breakdown);result.warnings.push(...adjustments.warnings);
  }
  // Round each displayed contribution so its visible sum equals the stored total.
  result.breakdown = result.breakdown.map(b => ({...b,points:Math.round(b.points * 100) / 100}));

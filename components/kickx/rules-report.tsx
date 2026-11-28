@@ -1,8 +1,8 @@
 "use client";
 import { usePlatform } from './provider';
-import { REPORT_PARAMETERS as P } from '@/server/kickx/engine/report-policy';
+import { REPORT_PARAMETERS as P,SCORING_REVISION,PREVIOUS_SCORING_REVISION } from '@/server/kickx/engine/report-policy';
 import { dateText } from '@/lib/kickx/data';
-const rows=[
+const previousRows=[
  ['출전 60분 이상 / 미만','2 / 1','2 / 1','2 / 1','2 / 1'],
  ['득점','10','6','5','4'],['도움','5','4','3','3'],['유효 슈팅','—','—','0.5','1'],
  ['키패스','—','0.5','1','0.5'],['성공 크로스','—','0.5','0.5','0.5'],
@@ -16,8 +16,23 @@ const rows=[
  ['슈팅 차단 1회','0.5','0.5','0.5','0.5'],['피파울 1회','0.25','0.25','0.25','0.25'],
  ['공중볼 처리 / 스위퍼 성공 1회','0.5 / 0.5','—','—','—'],
 ];
+const balancedRows=previousRows.filter(r=>!r[0].startsWith('패스 성공률')&&!r[0].startsWith('패스 성공 10회')).concat([
+ ['패스 성공률 · 80% 기준','−2~+2','−2~+2','−2~+2','−2~+2'],
+ ['기대득점 미달 1.0 xG당','−2','−2','−2','−2'],
+ ['빅찬스 실패 1회','−1','−1','−1','−1'],
+ ['실점으로 이어진 실수 1회','−3','−3','−3','−3'],
+ ['슈팅으로 이어진 실수 1회','−1','−1','−1','−1'],
+ ['공을 빼앗김 1회','−0.2','−0.2','−0.2','−0.2'],
+ ['소유권 상실 1회','−0.05','−0.05','−0.05','−0.05'],
+ ['불안정한 터치 1회','−0.1','−0.1','−0.1','−0.1'],
+ ['지상 / 공중 경합 패배 1회','−0.1 / −0.1','−0.1 / −0.1','−0.1 / −0.1','−0.1 / −0.1'],
+ ['파울 1회','−0.25','−0.25','−0.25','−0.25'],
+ ['실점 방지 기여 1.0당','±1','—','—','—'],
+]);
 export default function ReportRules(){
  const {data}=usePlatform();
+ const balanced=(data.policy?.reportParameters?.scoringRevision??SCORING_REVISION)!==PREVIOUS_SCORING_REVISION;
+ const rows=balanced?balancedRows:previousRows;
  const parameters={
   initialMin:data.policy?.reportParameters?.initialMin??P.initialMin,
   initialMax:data.policy?.reportParameters?.initialMax??P.initialMax,
@@ -37,8 +52,9 @@ export default function ReportRules(){
   </section>
   <section className="rules-section"><h2>이적·포지션 변경 선수</h2><p>현재 선수단 정보에서 소속 구단이나 포지션 변경이 확인되면 기존 보유 선수를 벤치로 이동합니다. 벤치도 현재 공개 시세로 평가합니다. 주전 11명·포지션별 정원에서는 제외하여 새 선수를 영입할 수 있으므로, 벤치를 합한 전체 보유 인원은 11명을 넘을 수 있습니다. 같은 선수의 중복 보유는 허용하지 않습니다.</p><p>이동 후 7일 안에는 현재 소속과 포지션이 유효하고 해당 포지션에 빈자리가 있으면 주전으로 무료 복귀할 수 있습니다. 매입 원가와 보유 포인트는 그대로 유지됩니다. 직접 매각하거나 기한 이후 자동 매각할 때는 현재 시세에서 수수료 2%를 차감하며 경기 거래 제한을 적용합니다. 기한 만료 시 경기 제한 중이면 제한 해제 후 자동 처리합니다. 계속 벤치인 선수의 시작 시각과 기한은 추가 변경으로 연장되지 않습니다.</p></section>
   <section className="rules-section"><h2>경기 점수표</h2><div className="table-scroll"><table className="rules-table"><thead><tr><th>항목</th>{['GK','DF','MF','FW'].map(p=><th key={p}>{p}</th>)}</tr></thead><tbody>{rows.map(([name,...values])=><tr key={name}><td>{name}</td>{values.map((v,i)=><td className="numeric num" key={i}>{v}</td>)}</tr>)}</tbody></table></div><p>경기별 확정 라인업 포지션을 사용합니다. 추가시간을 포함한 실제 출전 기록을 검증하며, 미출전과 통계 미확인을 구분합니다. 경고 누적 퇴장은 앞선 경고와 퇴장을 반영합니다.</p></section>
+  {balanced&&<section className="rules-section"><h2>패스 성공률과 감점</h2><p>모든 포지션에 패스 성공률 80%를 공통 기준으로 적용합니다. 5%p당 0.5점씩 가감하며 최대 ±2점입니다. 패스 시도 20회 미만은 시도 수에 비례해 줄입니다. 시도 0회 또는 통계 미확인은 제외합니다. 기존 성공 패스 10회 보너스와 수비수·미드필더의 별도 85% 보너스는 사용하지 않습니다.</p><p>20회 이상 시도한 경우 성공률 90%는 +1점, 80%는 0점, 70%는 −1점, 60% 이하는 −2점입니다. 1회 시도·1회 성공은 +0.1점입니다.</p><p>기대득점 감점은 max(xG − 실제 득점, 0) × −2입니다. 예를 들어 xG 1.4에서 1골을 넣으면 −0.8점이며 기존 득점 점수는 별도로 반영합니다. 빅찬스 실패와 실수·경합·파울 감점도 각각 누적합니다. 소유권 상실은 여러 행동과 겹칠 수 있어 회당 −0.05점으로 작게 반영합니다.</p><p>골키퍼 실점 방지 기여는 제공된 부호를 유지해 1.0당 1점씩 반영합니다. 기대보다 더 실점한 음수 기록은 감점입니다. 전체 슈팅 수와 유효슈팅 기대득점(xGOT)은 감점 계산에 사용하지 않습니다. 제공되지 않은 수치를 실패로 간주하지 않습니다.</p></section>}
   <section className="rules-section"><h2>초기 가격</h2><div className="rules-formula"><code>B = (이전 시즌 점수 합계 + λ × 포지션 평균) / (이전 시즌 출전 수 + λ)</code><code>초기 가격 = 최저 초기 가격 + (최고 초기 가격 − 최저 초기 가격) × 포지션 내 백분위</code></div><p>이전 시즌 모집단은 고정하며, 동점에는 중간 백분위를 적용합니다. 개인 기록이 없으면 검증된 이전 시즌 포지션 기준을 사용합니다. 포지션 기준도 없으면 가격 산정을 보류합니다.</p></section>
-  <section className="rules-section"><h2>경기별 가치 변동</h2><div className="rules-formula"><code>경기 점수 = 보고서 항목 점수 + 확인된 세부 지표 점수 (상한 없음)</code><code>증감 포인트 = 100,000P × (경기 점수 − 포지션 기준) / max(|포지션 기준|, 1) × 10% × min(출전 분 / 60, 1)</code><code>직전 가격에 증감 포인트를 더하되 경기당 ±10% 제한 · 정수 포인트 반올림</code></div><p>포지션별 기준은 10월 15일 이전의 유효 출전 자료로 정한 고정 평균입니다. 이후 경기가 이 기준을 바꾸지 않습니다. 예를 들어 기준이 8점이면 60분 이상 출전한 경기의 12점은 +5,000P, 4점은 −5,000P이며 현재 가격에 비례해 증감 포인트가 커지지 않습니다. 실제 적용은 직전 가격의 ±10% 이내로 제한합니다. 이는 설명용 예시이며 실제 기준은 포지션마다 다릅니다. 짧은 교체 출전은 변동폭을 줄이며, 확인된 미출전은 −1.5%입니다.</p><p>점수는 20~30점 이상도 가능하고 음수도 보존합니다. 기록 정정은 같은 초기 가격에서 다시 계산하며 지갑·체결 거래·매입 원가는 유지합니다. 운영 시작 전 경기는 가격 변동으로 발행하지 않습니다.</p><p className="fine-print">초기 가격 범위 {parameters.initialMin.toLocaleString()}~{parameters.initialMax.toLocaleString()}P. 최소 가격 {parameters.minPrice.toLocaleString()}P이며 고정된 최고 가격은 없습니다. 같은 활약을 반복해도 증가분이 복리로 커지지 않습니다. 미제공 통계는 임의로 채우지 않습니다.</p></section>
+  <section className="rules-section"><h2>경기별 가치 변동</h2><div className="rules-formula"><code>경기 점수 = 확인된 가점 + 패스 성공률 보정 − 감점 (총점 상하한 없음)</code><code>증감 포인트 = 100,000P × (경기 점수 − 포지션 기준) / max(|포지션 기준|, 1) × 10% × min(출전 분 / 60, 1)</code><code>직전 가격에 증감 포인트를 더하되 경기당 ±10% 제한 · 정수 포인트 반올림</code></div><p>포지션별 기준은 10월 15일 이전의 유효 출전 자료로 정한 고정 평균입니다. 이후 경기가 이 기준을 바꾸지 않습니다. 예를 들어 기준이 8점이면 60분 이상 출전한 경기의 12점은 +5,000P, 4점은 −5,000P이며 현재 가격에 비례해 증감 포인트가 커지지 않습니다. 실제 적용은 직전 가격의 ±10% 이내로 제한합니다. 이는 설명용 예시이며 실제 기준은 포지션마다 다릅니다. 짧은 교체 출전은 변동폭을 줄이며, 확인된 미출전은 −1.5%입니다.</p><p>점수는 20~30점 이상도 가능하고 음수도 보존합니다. 기록 정정은 같은 초기 가격에서 다시 계산하며 지갑·체결 거래·매입 원가는 유지합니다. 운영 시작 전 경기는 가격 변동으로 발행하지 않습니다.</p><p className="fine-print">초기 가격 범위 {parameters.initialMin.toLocaleString()}~{parameters.initialMax.toLocaleString()}P. 최소 가격 {parameters.minPrice.toLocaleString()}P이며 고정된 최고 가격은 없습니다. 같은 활약을 반복해도 증가분이 복리로 커지지 않습니다. 미제공 통계는 임의로 채우지 않습니다.</p></section>
   <section className="rules-section"><h2>메인 응원 구단·서브팀과 커뮤니티</h2><p>메인 응원 구단 1개는 경고 안내를 확인한 뒤 영구 고정하며 닉네임 앞에 공식 엠블럼을 표시합니다. 메인 응원 구단을 설정하면 메인 응원 구단과 서브팀 모두에서 게시글·댓글·투표에 참여할 수 있습니다. 다른 구단 게시판은 읽을 수 있습니다. 메인 응원 구단을 포함해 리그별 1개, 최대 5개 구단을 응원할 수 있습니다.</p><p>서브팀은 가입 후 1시간 동안 변경할 수 있습니다. 이후에는 매년 2월·9월 1~7일(한국 시간)에 리그별 한 번씩 변경할 수 있습니다. 모든 선수 게시판에는 글을 쓸 수 있고, 해당 선수를 현재 보유한 회원에게 보유 인증을 표시합니다. 투표는 1인 1표이며 마감 전 변경할 수 있습니다.</p></section>
  </div>;
 }
